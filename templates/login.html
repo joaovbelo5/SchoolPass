@@ -1,0 +1,30 @@
+
+{% extends 'base.html' %}
+{% block title %}Login - Painel Administrativo{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow border-0">
+      <div class="card-header bg-success text-white text-center">
+        <h3 class="mb-0">Acesso Restrito</h3>
+      </div>
+      <div class="card-body bg-light">
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        <form method="POST">
+          <div class="mb-3">
+            <label for="username" class="form-label">Usuário</label>
+            <input type="text" class="form-control" id="username" name="username" required autofocus>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Senha</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100">Entrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

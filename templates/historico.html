@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico de Registros{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <h2 class="mb-3" style="color: #14532d;">Histórico de Registros</h2>
+                <form method="POST" class="row g-2 align-items-end mb-3">
+                    <div class="col-auto">
+                        <label for="data" class="form-label">Selecione a data:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select name="data" id="data" class="form-select">
+                            {% for arquivo in arquivos %}
+                                <option value="{{ arquivo.split('.')[0] }}" {% if data_selecionada == arquivo.split('.')[0] %}selected{% endif %}>{{ arquivo.split('.')[0] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-success">Ver Histórico</button>
+                    </div>
+                </form>
+                {% if registros %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-success">
+                            <tr>
+                                <th>Código</th>
+                                <th>Nome</th>
+                                <th>Turma</th>
+                                <th>Turno</th>
+                                <th>Data/Hora</th>
+                                <th>Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros %}
+                            <tr>
+                                <td>{{ registro['codigo'] }}</td>
+                                <td>{{ registro['nome'] }}</td>
+                                <td>{{ registro['turma'] }}</td>
+                                <td>{{ registro['turno'] }}</td>
+                                <td>{{ registro['data/hora'] }}</td>
+                                <td>{{ registro['tipo'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% elif data_selecionada %}
+                <div class="alert alert-warning text-center">Nenhum registro encontrado para a data selecionada.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Cadastro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">Registro</a>
+            <a href="/consulta">Consulta</a>
+            <a href="/cadastro">Cadastro</a>
+            <a href="/emissao">Emissão de Carteirinhas</a>
+            <a href="/historico">Histórico</a>
+            <a href="/carometro">Carômetro</a>
+            <a href="/logout" class="logout">Logout</a>
+        </nav>
+    </header>
+    <div class="container">
+{% extends 'base.html' %}
+{% block title %}Editar Aluno{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-xl-6">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <h2 class="mb-3" style="color: #14532d;">Editar Aluno</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Código</label>
+                        <input type="text" class="form-control" value="{{ aluno.Codigo }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="nome" value="{{ aluno.Nome }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Turma</label>
+                        <input type="text" class="form-control" name="turma" value="{{ aluno.Turma }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Turno</label>
+                        <select class="form-select" name="turno">
+                            <option value="Manhã" {% if aluno.Turno == 'Manhã' %}selected{% endif %}>Manhã</option>
+                            <option value="Tarde" {% if aluno.Turno == 'Tarde' %}selected{% endif %}>Tarde</option>
+                            <option value="Noite" {% if aluno.Turno == 'Noite' %}selected{% endif %}>Noite</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Permissão</label>
+                        <select class="form-select" name="permissao">
+                            <option value="Sim" {% if aluno.Permissao == 'Sim' %}selected{% endif %}>Permitido</option>
+                            <option value="Não" {% if aluno.Permissao == 'Não' %}selected{% endif %}>Negado</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ID Telegram</label>
+                        <input type="text" class="form-control" name="telegramid" value="{{ aluno.TelegramID }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Foto Atual</label><br>
+                        <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" class="img-thumbnail" style="max-width: 150px;">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nova Foto</label>
+                        <input type="file" class="form-control" name="foto" accept="image/*">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">Salvar</button>
+                        <a href="{{ url_for('cadastro') }}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+    </div>
+</body>
+</html>

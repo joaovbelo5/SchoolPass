@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Consulta{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Consulta</h1>
+    <form method="POST" class="form-group">
+        <input type="text" name="termo" placeholder="Digite o nome, código ou turma" value="{{ termo }}" class="form-control">
+        <button type="submit" class="btn salvar">Pesquisar</button>
+    </form>
+
+    {% if mensagem %}
+    <div class="mensagem {% if alerta %}erro{% elif erro %}erro{% else %}sucesso{% endif %}">
+        {{ mensagem }}
+        <button class="btn voltar" onclick="window.history.back()" style="margin-top: 10px;">Voltar</button>
+    </div>
+    {% endif %}
+
+    <div class="resultados-consulta">
+        {% for aluno in resultados %}
+        <div class="cartao-aluno">
+            <img src="{{ url_for('static', filename='fotos/' ~ aluno['Foto']) }}" alt="Foto do Aluno" class="foto-consulta">
+            <div class="info-aluno">
+                <h3>{{ aluno['Nome'] }}</h3>
+                <p><strong>Turma:</strong> {{ aluno['Turma'] }}</p>
+                <p><strong>Código:</strong> {{ aluno['Codigo'] }}</p>
+                <a href="{{ url_for('registros_files', filename=aluno['Turma'] ~ '/' ~ aluno['Codigo'] ~ '.txt') }}" class="btn link-historico">Ver Registro</a>
+                <form method="POST" style="margin-top: 10px;">
+                    <input type="hidden" name="registrar_codigo" value="{{ aluno['Codigo'] }}">
+                    <button type="submit" class="btn salvar">Registrar Acesso</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

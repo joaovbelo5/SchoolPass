@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% extends 'base.html' %}
+{% block title %}Emissão de Carteirinhas{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <h2 class="mb-3" style="color: #14532d;">Emissão de Carteirinhas</h2>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card border-success h-100">
+                            <div class="card-header bg-success text-white">Emissão Unitária</div>
+                            <div class="card-body">
+                                <form action="/emitir" method="POST">
+                                    <input type="hidden" name="tipo_emissao" value="unitaria">
+                                    <div class="mb-3">
+                                        <input type="text" name="codigo" class="form-control" placeholder="Código da Carteirinha" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">Emitir</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-success h-100">
+                            <div class="card-header bg-success text-white">Emissão por Turma</div>
+                            <div class="card-body">
+                                <form action="/emitir" method="POST">
+                                    <input type="hidden" name="tipo_emissao" value="turma">
+                                    <div class="mb-3">
+                                        <select name="turma" class="form-select" required>
+                                            <option value="">Selecione a Turma</option>
+                                            {% for turma in turmas %}
+                                                <option value="{{ turma }}">{{ turma }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">Emitir Turma</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">Registro</a>
+            <a href="/consulta">Consulta</a>
+            <a href="/cadastro">Cadastro</a>
+            <a href="/emissao">Emissão de Carteirinhas</a>
+            <a href="/historico">Histórico</a>
+            <a href="/carometro">Carômetro</a>
+            <a href="/logout" class="logout">Logout</a>
+        </nav>
+    </header>
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 20px;">
+        </div>
+        <h1>Emissão de Carteirinhas</h1>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>Emissão Unitária</h2>
+                <form action="/emitir" method="POST">
+                    <input type="hidden" name="tipo_emissao" value="unitaria">
+                    <div class="form-group">
+                        <input type="text" name="codigo" placeholder="Código da Carteirinha" required>
+                    </div>
+                    <button type="submit" class="btn primary">Emitir</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Emissão por Turma</h2>
+                <form action="/emitir" method="POST">
+                    <input type="hidden" name="tipo_emissao" value="turma">
+                    <div class="form-group">
+                        <select name="turma" required>
+                            <option value="">Selecione a Turma</option>
+                            {% for turma in turmas %}
+                            <option value="{{ turma }}">{{ turma }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn primary">Emitir Turma</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

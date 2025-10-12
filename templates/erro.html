@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Erro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .error-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #ff4444;
+            border-radius: 8px;
+            background-color: #ffebee;
+        }
+        
+        .error-message {
+            color: #cc0000;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #ff4444;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+{% extends 'base.html' %}
+{% block title %}Erro{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-md-7 col-lg-6">
+        <div class="alert alert-danger text-center shadow-lg p-4">
+            <h2 class="mb-3"><i class="bi bi-exclamation-triangle-fill"></i> Ocorreu um Erro</h2>
+            <div class="fs-5">{{ mensagem }}</div>
+            <a href="javascript:history.back()" class="btn btn-success mt-3">Voltar</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+</body>
+</html>

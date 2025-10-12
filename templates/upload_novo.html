@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Novo Cadastro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Novo Cadastro</h1>
+        
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Código:</label>
+                <input type="text" name="codigo" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Nome:</label>
+                <input type="text" name="nome" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Turma:</label>
+                <input type="text" name="turma" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Turno:</label>
+                <select name="turno">
+                    <option value="Manhã">Manhã</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Noite">Noite</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Permissão:</label>
+                <select name="permissao">
+                    <option value="Sim">Permitido</option>
+                    <option value="Não">Negado</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>ID Telegram:</label>
+                <input type="text" name="telegramid">
+            </div>
+            
+            <div class="form-group">
+                <label>Foto:</label>
+                <input type="file" name="foto" accept="image/*">
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn salvar">Salvar</button>
+                <a href="{{ url_for('cadastro') }}" class="btn cancelar">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Gerenciar Cadastros{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="mb-0" style="color: #14532d;">Gerenciamento de Alunos</h2>
+                    <a href="{{ url_for('novo') }}" class="btn btn-success">Novo Cadastro</a>
+                </div>
+                <form method="GET" action="{{ url_for('pesquisar') }}" class="row g-2 mb-3">
+                    <div class="col-9">
+                        <input type="text" name="query" class="form-control" placeholder="Pesquisar por nome ou turma..." required>
+                    </div>
+                    <div class="col-3 d-grid">
+                        <button type="submit" class="btn btn-success">Pesquisar</button>
+                    </div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-success">
+                            <tr>
+                                <th>Código</th>
+                                <th>Nome</th>
+                                <th>Turma</th>
+                                <th>Permissão</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for aluno in alunos %}
+                            <tr>
+                                <td>{{ aluno.Codigo }}</td>
+                                <td>{{ aluno.Nome }}</td>
+                                <td>{{ aluno.Turma }}</td>
+                                <td>
+                                    <span class="badge {% if aluno.Permissao == 'Sim' %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ aluno.Permissao }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('editar', codigo=aluno.Codigo) }}" class="btn btn-outline-primary btn-sm">Editar</a>
+                                    <a href="{{ url_for('excluir', codigo=aluno.Codigo) }}" class="btn btn-outline-danger btn-sm">Excluir</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
