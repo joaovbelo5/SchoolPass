@@ -30,6 +30,7 @@ Repositório oficial: [github.com/joaovbelo5/schoolpass](https://github.com/joao
 ├── usuarios.csv
 ├── registros/
 ├── registros_diarios/
+├── ocorrencias/
 ├── static/
 │   ├── alert.mp3
 │   ├── assinatura.png
