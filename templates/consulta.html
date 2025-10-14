@@ -30,10 +30,10 @@
                     <span class="badge bg-light text-dark px-2 py-1 shadow-sm me-2">Turma: <strong>{{ aluno['Turma'] }}</strong></span>
                     <span class="badge bg-light text-dark px-2 py-1 shadow-sm">Código: <strong>{{ aluno['Codigo'] }}</strong></span>
                 </div>
-                <div class="d-flex flex-column gap-2" style="min-width:180px;">
-                    <a href="{{ url_for('registros_files', filename=aluno['Turma'] ~ '/' ~ aluno['Codigo'] ~ '.txt') }}" class="btn btn-success rounded-4 fw-bold px-3 py-2" style="font-size:1em;">Ver Registro</a>
-                    <a href="{{ url_for('ocorrencias_aluno', codigo=aluno['Codigo']) }}" class="btn btn-warning rounded-4 fw-bold px-3 py-2 text-dark" style="font-size:1em;">Ver Ocorrências</a>
-                    <form method="POST">
+                <div class="d-flex flex-column gap-2 botao-mobile-group" style="min-width:180px;">
+                    <a href="{{ url_for('registros_files', filename=aluno['Turma'] ~ '/' ~ aluno['Codigo'] ~ '.txt') }}" class="btn btn-success rounded-4 fw-bold px-3 py-2 w-100" style="font-size:1em;">Ver Registro</a>
+                    <a href="{{ url_for('ocorrencias_aluno', codigo=aluno['Codigo']) }}" class="btn btn-warning rounded-4 fw-bold px-3 py-2 text-dark w-100" style="font-size:1em;">Ver Ocorrências</a>
+                    <form method="POST" class="w-100">
                         <input type="hidden" name="registrar_codigo" value="{{ aluno['Codigo'] }}">
                         <button type="submit" class="btn btn-primary rounded-4 fw-bold px-3 py-2 w-100" style="font-size:1em;">Registrar Acesso</button>
                     </form>
@@ -43,7 +43,26 @@
         {% endfor %}
     </div>
 </div>
-
-
-
+<style>
+@media (max-width: 700px) {
+    .botao-mobile-group {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    .botao-mobile-group .btn, .botao-mobile-group form {
+        width: 100% !important;
+        min-width: 0 !important;
+        display: block !important;
+    }
+    .botao-mobile-group .btn {
+        font-size: 1em !important;
+        padding-left: 0.5em !important;
+        padding-right: 0.5em !important;
+        margin-bottom: 8px !important;
+    }
+    .botao-mobile-group form {
+        margin-bottom: 8px !important;
+    }
+}
+</style>
 {% endblock %}
