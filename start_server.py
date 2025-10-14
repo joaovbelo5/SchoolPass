@@ -536,14 +536,15 @@ def emitir():
             if not turma:
                 return render_template('erro.html', mensagem="Turma não informada!")
 
+            apenas_com_foto = request.form.get('apenas_com_foto') == '1'
             alunos = buscar_turma(turma)
             if not alunos:
                 return render_template('erro.html', mensagem=f"Turma {turma} não encontrada!")
 
-            # Filtrar apenas alunos com foto se checkbox estiver marcado
-            apenas_com_foto = request.form.get('apenas_com_foto')
             if apenas_com_foto:
-                alunos = [a for a in alunos if a.get('Foto') and a['Foto'].strip() and a['Foto'].lower() != 'semfoto.jpg']
+                alunos = [aluno for aluno in alunos if aluno.get('Foto') and aluno['Foto'].lower() != 'semfoto.jpg']
+                if not alunos:
+                    return render_template('erro.html', mensagem="Nenhum aluno com foto nesta turma!")
 
             for aluno in alunos:
                 barcode_path = gerar_codigo_barras(aluno['Codigo'])
@@ -643,6 +644,68 @@ def carometro():
     turmas = sorted(set(aluno['Turma'] for aluno in alunos))  # Lista de turmas únicas
     return render_template('carometro.html', alunos=alunos_filtrados, turmas=turmas, turma_selecionada=turma_selecionada)
 
+
+# --- ROTAS DE OCORRÊNCIAS ---
+import json
+
+def ocorrencias_path(codigo):
+    return os.path.join('ocorrencias', f'{codigo}.json')
+
+@app.route('/ocorrencias/<codigo>')
+@login_required
+def ocorrencias_aluno(codigo):
+    aluno = buscar_aluno(codigo)
+    ocorrencias = []
+    path = ocorrencias_path(codigo)
+    if os.path.exists(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            ocorrencias = json.load(f)
+    return render_template('ocorrencias_aluno.html', aluno=aluno, ocorrencias=ocorrencias)
+
+
+@app.route('/ocorrencias/<codigo>/nova', methods=['GET', 'POST'])
+@login_required
+def nova_ocorrencia(codigo):
+    aluno = buscar_aluno(codigo)
+    if request.method == 'POST':
+        texto = request.form.get('texto', '').strip()
+        medida = request.form.get('medida', '').strip()
+        registrado_por = request.form.get('registrado_por', '').strip()
+        data = datetime.now().strftime('%d/%m/%Y %H:%M')
+        ocorrencia = {
+            'texto': texto,
+            'medida': medida,
+            'registrado_por': registrado_por,
+            'data': data
+        }
+        path = ocorrencias_path(codigo)
+        if os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f:
+                ocorrencias = json.load(f)
+        else:
+            ocorrencias = []
+        ocorrencias.append(ocorrencia)
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(ocorrencias, f, ensure_ascii=False, indent=2)
+        return redirect(url_for('ocorrencias_aluno', codigo=codigo))
+    return render_template('ocorrencia_nova.html', aluno=aluno)
+
+# ROTA PARA EXCLUIR OCORRÊNCIA
+@app.route('/ocorrencias/<codigo>/excluir', methods=['POST'])
+@login_required
+def excluir_ocorrencia(codigo):
+    indice = request.form.get('indice', type=int)
+    path = ocorrencias_path(codigo)
+    if os.path.exists(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            ocorrencias = json.load(f)
+        if 0 <= indice < len(ocorrencias):
+            ocorrencias.pop(indice)
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(ocorrencias, f, ensure_ascii=False, indent=2)
+    return redirect(url_for('ocorrencias_aluno', codigo=codigo))
+
 if __name__ == '__main__':
     os.makedirs(os.path.join(app.config['STATIC_FOLDER'], 'barcodes'), exist_ok=True)
+    os.makedirs('ocorrencias', exist_ok=True)
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,63 +1,60 @@
+
 {% extends 'base.html' %}
-{% block title %}Editar Cadastro{% endblock %}
+{% block title %}Editar Aluno{% endblock %}
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-7 col-xl-6">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body">
-                    <h2 class="mb-4 fw-bold text-success"><i class="bi bi-pencil-square"></i> Editar Aluno</h2>
-                    <form method="POST" enctype="multipart/form-data">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Código</label>
-                                <input type="text" class="form-control" value="{{ aluno.Codigo }}" disabled>
-                            </div>
-                            <div class="col-md-8">
-                                <label class="form-label">Nome</label>
-                                <input type="text" class="form-control" name="nome" value="{{ aluno.Nome }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Turma</label>
-                                <input type="text" class="form-control" name="turma" value="{{ aluno.Turma }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Turno</label>
-                                <select class="form-select" name="turno">
-                                    <option value="Manhã" {% if aluno.Turno == 'Manhã' %}selected{% endif %}>Manhã</option>
-                                    <option value="Tarde" {% if aluno.Turno == 'Tarde' %}selected{% endif %}>Tarde</option>
-                                    <option value="Noite" {% if aluno.Turno == 'Noite' %}selected{% endif %}>Noite</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Permissão</label>
-                                <select class="form-select" name="permissao">
-                                    <option value="Sim" {% if aluno.Permissao == 'Sim' %}selected{% endif %}>Permitido</option>
-                                    <option value="Não" {% if aluno.Permissao == 'Não' %}selected{% endif %}>Negado</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">ID Telegram</label>
-                                <input type="text" class="form-control" name="telegramid" value="{{ aluno.TelegramID }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Foto Atual</label><br>
-                                <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" class="img-thumbnail" style="max-width: 120px;">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Nova Foto</label>
-                                <input type="file" class="form-control" name="foto" accept="image/*">
-                            </div>
-                        </div>
-                        <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn salvar"><i class="bi bi-save"></i> Salvar</button>
-                            <a href="{{ url_for('cadastro') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancelar</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+<div class="container-fluid py-4" style="max-width:480px; width:100%; margin:auto;">
+    <div class="text-center mb-3">
+        <h2 class="fw-bold mb-1" style="color: #14532d; letter-spacing: 1px;">
+            <i class="bi bi-person-lines-fill me-2"></i>Editar Aluno
+        </h2>
+        <div class="text-muted" style="font-size:0.98em;">Atualize as informações do aluno abaixo</div>
     </div>
+    <form method="POST" enctype="multipart/form-data" class="bg-white p-4 rounded-4 shadow-sm border border-1">
+        <div class="mb-3">
+            <label class="form-label small">Código</label>
+            <input type="text" class="form-control form-control-sm bg-light" value="{{ aluno.Codigo }}" disabled>
+        </div>
+        <div class="mb-3">
+            <label class="form-label small">Nome</label>
+            <input type="text" class="form-control form-control-sm shadow-none" name="nome" value="{{ aluno.Nome }}" required style="border-radius:8px;">
+        </div>
+        <div class="mb-3">
+            <label class="form-label small">Turma</label>
+            <input type="text" class="form-control form-control-sm shadow-none" name="turma" value="{{ aluno.Turma }}" required style="border-radius:8px;">
+        </div>
+        <div class="mb-3">
+            <label class="form-label small">Turno</label>
+            <select class="form-select form-select-sm shadow-none" name="turno" style="border-radius:8px;">
+                <option value="Manhã" {% if aluno.Turno == 'Manhã' %}selected{% endif %}>Manhã</option>
+                <option value="Tarde" {% if aluno.Turno == 'Tarde' %}selected{% endif %}>Tarde</option>
+                <option value="Noite" {% if aluno.Turno == 'Noite' %}selected{% endif %}>Noite</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label small">Permissão</label>
+            <select class="form-select form-select-sm shadow-none" name="permissao" style="border-radius:8px;">
+                <option value="Sim" {% if aluno.Permissao == 'Sim' %}selected{% endif %}>Permitido</option>
+                <option value="Não" {% if aluno.Permissao == 'Não' %}selected{% endif %}>Negado</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label small">ID Telegram</label>
+            <input type="text" class="form-control form-control-sm shadow-none" name="telegramid" value="{{ aluno.TelegramID }}" style="border-radius:8px;">
+        </div>
+        <div class="mb-4 text-center">
+            <label class="form-label small d-block mb-2">Foto Atual</label>
+            <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" class="shadow-sm mb-2 border border-2" style="width: 110px; height:110px; object-fit:cover; border-radius:50%; background:#f6f6f6;">
+        </div>
+        <div class="mb-3">
+            <label class="form-label small">Nova Foto</label>
+            <input type="file" class="form-control form-control-sm shadow-none" name="foto" accept="image/*" style="border-radius:8px;">
+        </div>
+        <div class="d-flex gap-2 justify-content-end mt-4">
+            <button type="submit" class="btn btn-success px-4" title="Salvar"><i class="bi bi-check-lg me-1"></i>Salvar</button>
+            <a href="{{ url_for('cadastro') }}" class="btn btn-outline-secondary" title="Cancelar"><i class="bi bi-x-lg me-1"></i>Cancelar</a>
+        </div>
+    </form>
 </div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
 {% endblock %}

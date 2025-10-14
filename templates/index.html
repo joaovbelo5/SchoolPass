@@ -1,68 +1,57 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex flex-column align-items-center" style="max-width: 800px; margin: 0 auto; margin-top: 24px;">
-    <div class="card shadow-sm border-0 w-100" style="max-width: 500px;">
-        <div class="card-body p-2">
-            <form method="POST" class="d-flex flex-row gap-2 align-items-center mb-0" style="width:100%;">
-                <input type="text" name="codigo" class="form-control text-center" placeholder="Digite ou escaneie o código" autofocus required style="font-size:0.7em; width:140px; min-width:0;">
-                <button type="submit" class="btn btn-success px-3" style="font-size:1.1em; height:40px; min-width:140px;">Registrar</button>
-            </form>
-            {% if mensagem %}
-                <div class="mt-1">
-                    <div class="alert {% if 'Negado' in mensagem or 'não encontrado' in mensagem %}alert-danger{% else %}alert-success{% endif %} text-center p-1" style="font-size:0.95em;">
-                        {{ mensagem }}
-                    </div>
-                </div>
-            {% endif %}
-            {% if aluno %}
-            <div class="d-flex flex-row align-items-center mt-3 gap-3" style="min-height: 120px;">
-                <div class="text-center">
-                    <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" alt="Foto do Aluno" class="rounded shadow" style="width: 240px; height: 240px; object-fit: cover;">
-                </div>
-                <div class="d-flex flex-column justify-content-center" style="min-width: 0;">
-                    <div class="mb-0" style="color: #14532d; word-break: break-word; font-size:2em; font-weight:700; line-height:1.1;">{{ aluno.Nome }}</div>
-                    <div style="font-size:1.2em;">
-                        <span><strong>Turma:</strong> {{ aluno.Turma }}</span> |
-                        <span><strong>Turno:</strong> {{ aluno.Turno }}</span><br>
-                        <span><strong>Status:</strong>
-                            <span class="badge {% if aluno.Permissao == 'Sim' %}bg-success{% else %}bg-danger{% endif %}" style="font-size:1.1em;">
-                                {{ 'PERMITIDO' if aluno.Permissao == 'Sim' else 'PROIBIDO' }}
-                            </span>
-                        </span>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
+<div class="container-fluid py-2" style="max-width:600px; width:100%; margin:auto;">
+    <form method="POST" class="p-2 rounded-4 shadow-sm bg-white d-flex flex-row align-items-center gap-2 mb-2" style="min-height:unset;">
+        <input type="text" name="codigo" class="form-control form-control-sm border-2" placeholder="Digite ou escaneie o código da carteirinha" autofocus required style="font-size:0.95em; min-width:0;">
+        <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm" style="letter-spacing:0.5px; min-width:80px;">Registrar</button>
+    </form>
+
+    {% if mensagem %}
+    <div class="mensagem {% if 'Negado' in mensagem or 'não encontrado' in mensagem %}erro{% else %}sucesso{% endif %} text-center" style="font-size:0.75em;">
+        {{ mensagem }}
     </div>
-    <div class="card border-success shadow-sm w-100" style="max-width: 500px;">
-        <div class="card-body p-1">
-            <div class="row text-center g-1">
-                <div class="col-3">
-                    <div class="fw-bold text-success" style="font-size:0.85em;">Manhã</div>
-                    <div id="contador-manha" class="fs-6">0</div>
-                </div>
-                <div class="col-3">
-                    <div class="fw-bold text-success" style="font-size:0.85em;">Tarde</div>
-                    <div id="contador-tarde" class="fs-6">0</div>
-                </div>
-                <div class="col-3">
-                    <div class="fw-bold text-success" style="font-size:0.85em;">Noite</div>
-                    <div id="contador-noite" class="fs-6">0</div>
-                </div>
-                <div class="col-3">
-                    <div class="fw-bold text-success" style="font-size:0.85em;">Total</div>
-                    <div id="contador-total" class="fs-6">0</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% if alerta %}
-    <audio autoplay>
-        <source src="{{ url_for('static', filename='alert.mp3') }}" type="audio/mpeg">
-    </audio>
     {% endif %}
+
+    {% if aluno %}
+    <div class="d-flex flex-column flex-md-row align-items-center gap-3 p-3 rounded-4 shadow bg-white my-2">
+        <div class="d-flex justify-content-center align-items-center" style="min-width:160px;">
+            <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" alt="Foto do Aluno" class="shadow" style="width: 140px; height: 140px; object-fit: cover; border-radius: 50%; border: 4px solid #22ce6a; background: #f6f6f6;">
+        </div>
+        <div class="flex-grow-1 text-center text-md-start">
+            <h2 class="fw-bold mb-1" style="color: #14532d; font-size:2em; word-break: break-word;">{{ aluno.Nome }}</h2>
+            <div class="mb-1"><span class="badge bg-light text-dark px-2 py-1 shadow-sm">Turma: <strong>{{ aluno.Turma }}</strong></span></div>
+            <div class="mb-1"><span class="badge bg-light text-dark px-2 py-1 shadow-sm">Turno: <strong>{{ aluno.Turno }}</strong></span></div>
+            <div class="mb-1">
+                <span class="badge px-2 py-1 shadow-sm {% if aluno.Permissao == 'Sim' %}bg-success{% else %}bg-danger{% endif %}" style="font-size:1.1em;">
+                    {{ 'PERMITIDO' if aluno.Permissao == 'Sim' else 'PROIBIDO' }}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="counter-container mt-2 mb-2 p-2 rounded-4 shadow-sm bg-white d-flex gap-2">
+        <div class="counter-item flex-fill">
+            <h5 class="text-success mb-1" style="font-size:0.95em;">Manhã</h5>
+            <h3 id="contador-manha" class="fw-bold" style="font-size:1.2em;">0</h3>
+        </div>
+        <div class="counter-item flex-fill">
+            <h5 class="text-success mb-1" style="font-size:0.95em;">Tarde</h5>
+            <h3 id="contador-tarde" class="fw-bold" style="font-size:1.2em;">0</h3>
+        </div>
+        <div class="counter-item flex-fill">
+            <h5 class="text-success mb-1" style="font-size:0.95em;">Noite</h5>
+            <h3 id="contador-noite" class="fw-bold" style="font-size:1.2em;">0</h3>
+        </div>
+        <div class="counter-item total flex-fill">
+            <h5 class="text-success mb-1" style="font-size:0.95em;">Total</h5>
+            <h3 id="contador-total" class="fw-bold" style="font-size:1.2em;">0</h3>
+        </div>
+    </div>
 </div>
+
+
+
 <script>
 function atualizarContadores() {
     fetch('/get_contadores')
@@ -77,4 +66,10 @@ function atualizarContadores() {
 setInterval(atualizarContadores, 1000);
 atualizarContadores();
 </script>
+
+{% if alerta %}
+<audio autoplay>
+    <source src="{{ url_for('static', filename='alert.mp3') }}" type="audio/mpeg">
+</audio>
+{% endif %}
 {% endblock %}

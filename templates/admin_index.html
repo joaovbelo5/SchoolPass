@@ -3,73 +3,66 @@
 {% block title %}Administração do Sistema{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body">
-                    <h2 class="mb-4 fw-bold text-success"><i class="bi bi-gear"></i> Configurações da Carteirinha</h2>
-                    <form method="POST" action="/admin">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="CARTEIRINHA_ESCOLA" class="form-label">Escola</label>
-                                <input type="text" class="form-control" id="CARTEIRINHA_ESCOLA" name="CARTEIRINHA_ESCOLA" value="{{ config.escola }}" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="CARTEIRINHA_TELEFONE" class="form-label">Telefone</label>
-                                <input type="text" class="form-control" id="CARTEIRINHA_TELEFONE" name="CARTEIRINHA_TELEFONE" value="{{ config.telefone }}" required>
-                            </div>
-                            <div class="col-md-8">
-                                <label for="CARTEIRINHA_ENDERECO" class="form-label">Endereço</label>
-                                <input type="text" class="form-control" id="CARTEIRINHA_ENDERECO" name="CARTEIRINHA_ENDERECO" value="{{ config.endereco }}" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="CARTEIRINHA_VALIDADE" class="form-label">Validade</label>
-                                <input type="text" class="form-control" id="CARTEIRINHA_VALIDADE" name="CARTEIRINHA_VALIDADE" value="{{ config.validade }}" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn salvar w-100 mt-4"><i class="bi bi-save"></i> Salvar Configurações</button>
-                    </form>
-                </div>
+<div class="container-fluid py-4" style="max-width:700px; width:100%; margin:auto;">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold mb-1" style="color: #14532d; letter-spacing: 1px;">
+            <i class="bi bi-gear-fill me-2"></i>Administração do Sistema
+        </h2>
+        <div class="text-muted" style="font-size:0.98em;">Gerencie as configurações da carteirinha, logo, assinatura e integração</div>
+    </div>
+    <div class="bg-white p-4 rounded-4 shadow-sm border border-1 mb-4">
+        <h4 class="fw-bold mb-3" style="color: #14532d;"><i class="bi bi-card-list me-2"></i>Configurações da Carteirinha</h4>
+        <form method="POST" action="/admin" class="row g-3">
+            <div class="col-md-6">
+                <label for="CARTEIRINHA_ESCOLA" class="form-label small">Escola</label>
+                <input type="text" class="form-control form-control-sm shadow-none" id="CARTEIRINHA_ESCOLA" name="CARTEIRINHA_ESCOLA" value="{{ config.escola }}" required style="border-radius:8px;">
             </div>
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-body">
-                            <h2 class="mb-4 fw-bold text-success"><i class="bi bi-image"></i> Logo e Assinatura</h2>
-                            <div class="alert alert-info mb-4" style="font-size:0.98rem;">
-                                <ul class="mb-0 ps-3">
-                                    <li>Para a <strong>assinatura</strong> na parte traseira, o arquivo deve estar em <strong>PNG</strong>.</li>
-                                    <li>Para a <strong>logo</strong> na parte frontal, o arquivo deve estar em <strong>SVG</strong> no tamanho <strong>156x56</strong> pixels.</li>
-                                </ul>
-                            </div>
-                            <form method="POST" action="/admin" enctype="multipart/form-data">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label for="assinatura" class="form-label">Nova Assinatura (PNG)</label>
-                                        <input class="form-control" type="file" id="assinatura" name="assinatura" accept=".png">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="logo" class="form-label">Nova Logo (SVG)</label>
-                                        <input class="form-control" type="file" id="logo" name="logo" accept=".svg">
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn salvar w-100 mt-4"><i class="bi bi-upload"></i> Enviar</button>
-                            </form>
-                        </div>
-                    </div>
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h2 class="mb-4 fw-bold text-success"><i class="bi bi-telegram"></i> Token do Telegram</h2>
-                    <form method="POST" action="/admin">
-                        <div class="mb-3">
-                            <label for="TELEGRAM_TOKEN" class="form-label">Token</label>
-                            <input type="text" class="form-control" id="TELEGRAM_TOKEN" name="TELEGRAM_TOKEN" value="{{ token }}" required>
-                        </div>
-                        <button type="submit" class="btn salvar w-100"><i class="bi bi-save"></i> Salvar</button>
-                    </form>
-                </div>
+            <div class="col-md-6">
+                <label for="CARTEIRINHA_TELEFONE" class="form-label small">Telefone</label>
+                <input type="text" class="form-control form-control-sm shadow-none" id="CARTEIRINHA_TELEFONE" name="CARTEIRINHA_TELEFONE" value="{{ config.telefone }}" required style="border-radius:8px;">
             </div>
-        </div>
+            <div class="col-md-8">
+                <label for="CARTEIRINHA_ENDERECO" class="form-label small">Endereço</label>
+                <input type="text" class="form-control form-control-sm shadow-none" id="CARTEIRINHA_ENDERECO" name="CARTEIRINHA_ENDERECO" value="{{ config.endereco }}" required style="border-radius:8px;">
+            </div>
+            <div class="col-md-4">
+                <label for="CARTEIRINHA_VALIDADE" class="form-label small">Validade</label>
+                <input type="text" class="form-control form-control-sm shadow-none" id="CARTEIRINHA_VALIDADE" name="CARTEIRINHA_VALIDADE" value="{{ config.validade }}" required style="border-radius:8px;">
+            </div>
+            <div class="col-12 mt-2">
+                <button type="submit" class="btn btn-success w-100" title="Salvar"><i class="bi bi-check-lg me-1"></i>Salvar Configurações</button>
+            </div>
+        </form>
+    </div>
+    <div class="bg-white p-4 rounded-4 shadow-sm border border-1 mb-4">
+        <h4 class="fw-bold mb-3" style="color: #14532d;"><i class="bi bi-image me-2"></i>Logo e Assinatura</h4>
+        <form method="POST" action="/admin" enctype="multipart/form-data" class="row g-3">
+            <div class="col-md-6">
+                <label for="assinatura" class="form-label small">Nova Assinatura (PNG)</label>
+                <input class="form-control form-control-sm shadow-none" type="file" id="assinatura" name="assinatura" accept=".png" style="border-radius:8px;">
+            </div>
+            <div class="col-md-6">
+                <label for="logo" class="form-label small">Nova Logo (SVG)</label>
+                <input class="form-control form-control-sm shadow-none" type="file" id="logo" name="logo" accept=".svg" style="border-radius:8px;">
+            </div>
+            <div class="col-12 mt-2">
+                <button type="submit" class="btn btn-success w-100" title="Enviar"><i class="bi bi-upload me-1"></i>Enviar</button>
+            </div>
+        </form>
+    </div>
+    <div class="bg-white p-4 rounded-4 shadow-sm border border-1">
+        <h4 class="fw-bold mb-3" style="color: #14532d;"><i class="bi bi-telegram me-2"></i>Token do Telegram</h4>
+        <form method="POST" action="/admin" class="row g-3">
+            <div class="col-12">
+                <label for="TELEGRAM_TOKEN" class="form-label small">Token</label>
+                <input type="text" class="form-control form-control-sm shadow-none" id="TELEGRAM_TOKEN" name="TELEGRAM_TOKEN" value="{{ token }}" required style="border-radius:8px;">
+            </div>
+            <div class="col-12 mt-2">
+                <button type="submit" class="btn btn-success w-100" title="Salvar"><i class="bi bi-check-lg me-1"></i>Salvar</button>
+            </div>
+        </form>
     </div>
 </div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
 {% endblock %}

@@ -1,41 +1,35 @@
 {% extends 'base.html' %}
 {% block title %}Emissão de Carteirinhas{% endblock %}
 {% block content %}
-<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
-    <div class="col-md-8 col-lg-6">
-        <div class="card shadow-lg border-0">
-            <div class="card-header bg-success text-white text-center">
-                <h2 class="mb-0" style="letter-spacing:1px;">Emissão de Carteirinhas</h2>
-            </div>
-            <div class="card-body bg-light">
-                <form action="/emitir" method="POST" class="row g-3">
-                    <input type="hidden" name="tipo_emissao" value="turma">
-                    <div class="col-12">
-                        <label for="turma" class="form-label fw-bold">Selecione a Turma</label>
-                        <select name="turma" id="turma" class="form-select" required>
-                            <option value="">-- Escolha uma turma --</option>
-                            {% for turma in turmas %}
-                                <option value="{{ turma }}">{{ turma }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-12 d-flex align-items-center">
-                        <input class="form-check-input me-2" type="checkbox" name="apenas_com_foto" id="apenas_com_foto" value="1">
-                        <label class="form-check-label" for="apenas_com_foto">
-                            Gerar apenas para alunos com foto
-                        </label>
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-success w-100 py-2 fs-5">
-                            <i class="bi bi-printer me-2"></i> Emitir Carteirinhas
-                        </button>
-                    </div>
-                </form>
-                <div class="alert alert-info mt-4" role="alert">
-                    <i class="bi bi-info-circle"></i> As carteirinhas geradas estarão prontas para impressão. O filtro "apenas alunos com foto" evita gerar carteirinhas para alunos sem foto cadastrada.
-                </div>
-            </div>
-        </div>
+<div class="container-fluid py-4" style="max-width:500px; width:100%; margin:auto;">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold mb-1" style="color: #14532d; letter-spacing: 1px;">
+            <i class="bi bi-printer me-2"></i>Emissão de Carteirinhas
+        </h2>
+        <div class="text-muted" style="font-size:0.98em;">Gere carteirinhas para uma turma de alunos</div>
     </div>
+    <form action="/emitir" method="POST" class="bg-white p-4 rounded-4 shadow-sm border border-1">
+        <input type="hidden" name="tipo_emissao" value="turma">
+        <div class="mb-3">
+            <label class="form-label small">Turma</label>
+            <select name="turma" class="form-select form-select-sm shadow-none" required style="border-radius:8px;">
+                <option value="">Selecione a Turma</option>
+                {% for turma in turmas %}
+                    <option value="{{ turma }}">{{ turma }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" value="1" id="apenas_com_foto" name="apenas_com_foto">
+            <label class="form-check-label" for="apenas_com_foto">
+                Gerar apenas carteirinhas de alunos com foto
+            </label>
+        </div>
+        <div class="d-flex gap-2 justify-content-end mt-4">
+            <button type="submit" class="btn btn-success px-4" title="Emitir"><i class="bi bi-printer me-1"></i>Emitir Turma</button>
+        </div>
+    </form>
 </div>
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
 {% endblock %}

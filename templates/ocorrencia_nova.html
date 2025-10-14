@@ -1,0 +1,41 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4" style="max-width:600px;">
+    <div class="card border-0 shadow-lg rounded-4 p-4">
+        <div class="d-flex flex-column flex-md-row align-items-center gap-3 mb-3">
+            <div class="d-flex align-items-center justify-content-center" style="min-width:100px;">
+                <img src="{{ url_for('static', filename='fotos/' ~ aluno.Foto) }}" alt="Foto do Aluno" class="shadow" style="width:80px; height:80px; object-fit:cover; border-radius:50%; border:3px solid #22ce6a; background:#f6f6f6;">
+            </div>
+            <div class="flex-grow-1 text-center text-md-start">
+                <h3 class="fw-bold mb-1" style="color:#14532d; word-break:break-word;">{{ aluno.Nome }}</h3>
+                <span class="badge bg-light text-dark px-2 py-1 shadow-sm me-2">Turma: <strong>{{ aluno.Turma }}</strong></span>
+                <span class="badge bg-light text-dark px-2 py-1 shadow-sm">Código: <strong>{{ aluno.Codigo }}</strong></span>
+            </div>
+        </div>
+        <h4 class="fw-bold mb-3 text-success"><i class="bi bi-exclamation-circle"></i> Nova Ocorrência</h4>
+        <form method="POST" class="d-flex flex-column gap-3">
+            <div>
+                <label for="texto" class="form-label">Descrição da Ocorrência</label>
+                <textarea class="form-control rounded-4 border-2" id="texto" name="texto" rows="3" required style="font-size:1.05em;"></textarea>
+            </div>
+            <div>
+                <label for="medida" class="form-label">Medida Administrativa</label>
+                <select class="form-select rounded-4 border-2" id="medida" name="medida" required>
+                    <option value="Advertência Oral">Advertência Oral</option>
+                    <option value="Advertência Escrita">Advertência Escrita</option>
+                    <option value="Suspensão 1 dia">Suspensão de 1 dia</option>
+                    <option value="Suspensão 3 dias">Suspensão de 3 dias</option>
+                    <option value="Suspensão 5 dias">Suspensão de 5 dias</option>
+                    <option value="Outra">Outra</option>
+                </select>
+            </div>
+            <div>
+                <label for="registrado_por" class="form-label">Registrado por</label>
+                <input type="text" class="form-control rounded-4 border-2" id="registrado_por" name="registrado_por" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100 rounded-4 py-2 fw-bold" style="font-size:1.1em;"><i class="bi bi-save"></i> Salvar Ocorrência</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
