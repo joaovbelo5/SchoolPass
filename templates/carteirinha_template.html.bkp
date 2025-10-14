@@ -6,91 +6,75 @@
         .carteirinha {
             width: 112mm;
             height: 88mm;
-            border: 1.5px solid #14532d;
+            border: 1px solid #000;
             margin: 5mm;
             display: inline-block;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: Arial, sans-serif;
             position: relative;
-            background: linear-gradient(135deg, #f6fff6 70%, #e6f7ee 100%);
-            box-shadow: 0 2px 8px rgba(32,99,32,0.08);
-            overflow: hidden;
+            background: #ffffff;
         }
+        
 
         .frente, .verso {
             width: 50%;
             height: 100%;
-            padding: 2.5mm 2mm 2mm 2.5mm;
+            padding: 2mm;
             box-sizing: border-box;
             float: left;
         }
 
         .frente {
-            border-right: 1px dashed #22ce6a;
+            border-right: 1px dashed #000;
         }
 
         .foto-aluno {
             width: 27mm;
             height: 35mm;
             object-fit: cover;
-            border: 2px solid #22ce6a;
-            border-radius: 4mm;
-            margin: 2mm auto 1mm auto;
+            border: 1px solid #000;
+            margin: 2mm auto;
             display: block;
-            background: #e6f7ee;
         }
 
         .dados-aluno {
-            font-size: 10pt;
-            line-height: 1.35;
-            color: #14532d;
-            font-weight: 500;
-            margin-bottom: 2mm;
-            text-align: left;
+            font-size: 9pt;
+            line-height: 1.2;
         }
 
         .codigo-barras {
-            width: 38mm;
-            height: 14mm;
-            margin: 2mm auto 0 auto;
-            display: block;
+            width: 185px;
+            height: 70px;
+            margin-top: 2mm;
         }
 
         .validade {
             position: absolute;
             bottom: 2mm;
             right: 2mm;
-            font-size: 7pt;
-            color: #129b32;
-            background: #e6f7ee;
-            padding: 1mm 3mm;
-            border-radius: 3mm;
-            box-shadow: 0 1px 3px rgba(32,99,32,0.07);
+            font-size: 6pt;
         }
+
+
 
         .assinatura {
             width: 30mm;
             height: 17mm;
             object-fit: contain;
-            margin: 1mm auto 0 auto;
-            display: block;
-            border-bottom: 1px solid #14532d;
+            margin: 1mm auto;
         }
 
         .info-escola {
-            font-size: 8.5pt;
+            font-size: 8pt;
             text-align: center;
             margin-top: 1mm;
-            color: #14532d;
-            font-weight: 500;
         }
 
         .logo-escola {
-            width: 44mm;
+            width: 50mm;
             height: auto;
             display: block;
             margin: 0 auto 2mm auto;
         }
-        /* .frente .logo-escola { filter: drop-shadow(0 1px 2px #22ce6a); } Removido conforme solicitado */
     </style>
 </head>
 <body>
