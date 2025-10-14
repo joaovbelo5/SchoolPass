@@ -13,6 +13,7 @@ Repositório oficial: [github.com/joaovbelo5/schoolpass](https://github.com/joao
 - **Upload e edição de fotos** de alunos.
 - **Monitoramento em tempo real** do número de pessoas presentes por dia de acordo com o turno.
 - **Notificações no Telegram** para avisar os pais quando o filho chega ou sai da escola.
+- **Cadastro de Ocorrências** dos alunos.
 - Administração web completa: dados da instituição, token do bot, logo e assinatura, tudo via painel `/admin`.
 
 ---
