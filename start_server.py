@@ -535,11 +535,16 @@ def emitir():
             turma = request.form.get('turma', '').strip()
             if not turma:
                 return render_template('erro.html', mensagem="Turma não informada!")
-            
+
             alunos = buscar_turma(turma)
             if not alunos:
                 return render_template('erro.html', mensagem=f"Turma {turma} não encontrada!")
-            
+
+            # Filtrar apenas alunos com foto se checkbox estiver marcado
+            apenas_com_foto = request.form.get('apenas_com_foto')
+            if apenas_com_foto:
+                alunos = [a for a in alunos if a.get('Foto') and a['Foto'].strip() and a['Foto'].lower() != 'semfoto.jpg']
+
             for aluno in alunos:
                 barcode_path = gerar_codigo_barras(aluno['Codigo'])
                 aluno.update({
@@ -551,7 +556,7 @@ def emitir():
                     'CARTEIRINHA_ENDERECO': os.getenv('CARTEIRINHA_ENDERECO', ''),
                     'CARTEIRINHA_VALIDADE': os.getenv('CARTEIRINHA_VALIDADE', ''),
                 })
-            
+
             return render_template('carteirinha_template.html', alunos=alunos)
 
         else:

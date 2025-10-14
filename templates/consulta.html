@@ -1,39 +1,46 @@
+
 {% extends "base.html" %}
 
 {% block title %}Consulta{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Consulta</h1>
-    <form method="POST" class="form-group">
-        <input type="text" name="termo" placeholder="Digite o nome, código ou turma" value="{{ termo }}" class="form-control">
-        <button type="submit" class="btn salvar">Pesquisar</button>
+<div class="container consulta-container py-4">
+    <h1 class="mb-4 text-success fw-bold"><i class="bi bi-search"></i> Consulta de Alunos</h1>
+    <form method="POST" class="row g-2 align-items-center mb-3">
+        <div class="col-md-9 col-12">
+            <input type="text" name="termo" placeholder="Digite nome, código ou turma" value="{{ termo }}" class="form-control form-control-lg" autofocus>
+        </div>
+        <div class="col-md-3 col-12 d-grid">
+            <button type="submit" class="btn salvar btn-lg"><i class="bi bi-search"></i> Pesquisar</button>
+        </div>
     </form>
 
     {% if mensagem %}
-    <div class="mensagem {% if alerta %}erro{% elif erro %}erro{% else %}sucesso{% endif %}">
-        {{ mensagem }}
-        <button class="btn voltar" onclick="window.history.back()" style="margin-top: 10px;">Voltar</button>
+    <div class="mensagem {% if alerta %}erro{% elif erro %}erro{% else %}sucesso{% endif %} mb-3">
+        <span class="fw-bold">{{ mensagem }}</span>
+        <button class="btn btn-outline-secondary voltar mt-2" onclick="window.history.back()">Voltar</button>
     </div>
     {% endif %}
 
-    <div class="resultados-consulta">
+    <div class="resultados-consulta row justify-content-center">
         {% for aluno in resultados %}
-        <div class="cartao-aluno">
-            <img src="{{ url_for('static', filename='fotos/' ~ aluno['Foto']) }}" alt="Foto do Aluno" class="foto-consulta">
-            <div class="info-aluno">
-                <h3>{{ aluno['Nome'] }}</h3>
-                <p><strong>Turma:</strong> {{ aluno['Turma'] }}</p>
-                <p><strong>Código:</strong> {{ aluno['Codigo'] }}</p>
-                <a href="{{ url_for('registros_files', filename=aluno['Turma'] ~ '/' ~ aluno['Codigo'] ~ '.txt') }}" class="btn link-historico">Ver Registro</a>
-                <form method="POST" style="margin-top: 10px;">
-                    <input type="hidden" name="registrar_codigo" value="{{ aluno['Codigo'] }}">
-                    <button type="submit" class="btn salvar">Registrar Acesso</button>
-                </form>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex">
+            <div class="cartao-aluno card h-100 shadow-sm w-100">
+                <img src="{{ url_for('static', filename='fotos/' ~ aluno['Foto']) }}" alt="Foto do Aluno" class="foto-consulta card-img-top mx-auto mt-3" style="width:120px;height:120px;object-fit:cover;border-radius:10px;border:2px solid var(--cor-primaria);">
+                <div class="info-aluno card-body">
+                    <h3 class="card-title text-success">{{ aluno['Nome'] }}</h3>
+                    <p class="card-text"><strong>Turma:</strong> {{ aluno['Turma'] }}</p>
+                    <p class="card-text"><strong>Código:</strong> {{ aluno['Codigo'] }}</p>
+                    <a href="{{ url_for('registros_files', filename=aluno['Turma'] ~ '/' ~ aluno['Codigo'] ~ '.txt') }}" class="btn link-historico btn-outline-primary w-100 mb-2">Ver Registro</a>
+                    <form method="POST">
+                        <input type="hidden" name="registrar_codigo" value="{{ aluno['Codigo'] }}">
+                        <button type="submit" class="btn salvar w-100"><i class="bi bi-check2-circle"></i> Registrar Acesso</button>
+                    </form>
+                </div>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 {% endblock %}

@@ -78,13 +78,40 @@ class CadastroUsuariosTerminal:
         except Exception as e:
             print(f"Erro ao excluir usuário: {str(e)}")
 
+    def alterar_senha_usuario(self):
+        username = input("Digite o nome do usuário para alterar a senha: ").strip()
+        if not self.usuario_existe(username):
+            print("Erro: Usuário não encontrado!")
+            return
+        nova_senha = input(f"Digite a nova senha para '{username}': ").strip()
+        if not nova_senha:
+            print("Erro: A senha não pode ser vazia!")
+            return
+        try:
+            usuarios = []
+            with open(self.arquivo_usuarios, 'r') as file:
+                reader = csv.reader(file)
+                next(reader, None)
+                for row in reader:
+                    if row and row[0] == username:
+                        row[1] = generate_password_hash(nova_senha)
+                    usuarios.append(row)
+            with open(self.arquivo_usuarios, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(["username", "password_hash"])
+                writer.writerows(usuarios)
+            print("Senha alterada com sucesso!")
+        except Exception as e:
+            print(f"Erro ao alterar senha: {str(e)}")
+
     def menu_principal(self):
         while True:
             print("\n=== Menu Principal ===")
             print("1. Cadastrar Usuário")
             print("2. Listar Usuários")
             print("3. Excluir Usuário")
-            print("4. Sair")
+            print("4. Alterar Senha de Usuário")
+            print("5. Sair")
             opcao = input("Escolha uma opção: ").strip()
 
             if opcao == '1':
@@ -94,6 +121,8 @@ class CadastroUsuariosTerminal:
             elif opcao == '3':
                 self.excluir_usuario()
             elif opcao == '4':
+                self.alterar_senha_usuario()
+            elif opcao == '5':
                 print("Saindo...")
                 break
             else:

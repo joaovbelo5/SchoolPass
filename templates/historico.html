@@ -7,33 +7,33 @@
     <div class="col-lg-10 col-xl-9">
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body">
-                <h2 class="mb-3" style="color: #14532d;">Histórico de Registros</h2>
-                <form method="POST" class="row g-2 align-items-end mb-3">
+                <h2 class="mb-4 fw-bold text-success"><i class="bi bi-clock-history"></i> Histórico de Registros</h2>
+                <form method="POST" class="row g-2 align-items-end mb-4">
                     <div class="col-auto">
-                        <label for="data" class="form-label">Selecione a data:</label>
+                        <label for="data" class="form-label fw-semibold">Selecione a data:</label>
                     </div>
                     <div class="col-auto">
-                        <select name="data" id="data" class="form-select">
+                        <select name="data" id="data" class="form-select form-select-lg">
                             {% for arquivo in arquivos %}
                                 <option value="{{ arquivo.split('.')[0] }}" {% if data_selecionada == arquivo.split('.')[0] %}selected{% endif %}>{{ arquivo.split('.')[0] }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-success">Ver Histórico</button>
+                        <button type="submit" class="btn salvar btn-lg"><i class="bi bi-search"></i> Ver Histórico</button>
                     </div>
                 </form>
                 {% if registros %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped align-middle">
+                <div class="table-responsive rounded-3 border">
+                    <table class="table table-bordered table-striped align-middle mb-0">
                         <thead class="table-success">
                             <tr>
-                                <th>Código</th>
-                                <th>Nome</th>
-                                <th>Turma</th>
-                                <th>Turno</th>
-                                <th>Data/Hora</th>
-                                <th>Tipo</th>
+                                <th><i class="bi bi-person-badge"></i> Código</th>
+                                <th><i class="bi bi-person"></i> Nome</th>
+                                <th><i class="bi bi-people"></i> Turma</th>
+                                <th><i class="bi bi-brightness-high"></i> Turno</th>
+                                <th><i class="bi bi-calendar-event"></i> Data/Hora</th>
+                                <th><i class="bi bi-arrow-left-right"></i> Tipo</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -51,10 +51,11 @@
                     </table>
                 </div>
                 {% elif data_selecionada %}
-                <div class="alert alert-warning text-center">Nenhum registro encontrado para a data selecionada.</div>
+                <div class="alert alert-warning text-center mt-4"><i class="bi bi-exclamation-triangle"></i> Nenhum registro encontrado para a data selecionada.</div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 {% endblock %}

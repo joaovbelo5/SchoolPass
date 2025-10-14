@@ -1,101 +1,41 @@
-<!DOCTYPE html>
-<html>
-<head>
 {% extends 'base.html' %}
 {% block title %}Emissão de Carteirinhas{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-7">
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <h2 class="mb-3" style="color: #14532d;">Emissão de Carteirinhas</h2>
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="card border-success h-100">
-                            <div class="card-header bg-success text-white">Emissão Unitária</div>
-                            <div class="card-body">
-                                <form action="/emitir" method="POST">
-                                    <input type="hidden" name="tipo_emissao" value="unitaria">
-                                    <div class="mb-3">
-                                        <input type="text" name="codigo" class="form-control" placeholder="Código da Carteirinha" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-success w-100">Emitir</button>
-                                </form>
-                            </div>
-                        </div>
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-success text-white text-center">
+                <h2 class="mb-0" style="letter-spacing:1px;">Emissão de Carteirinhas</h2>
+            </div>
+            <div class="card-body bg-light">
+                <form action="/emitir" method="POST" class="row g-3">
+                    <input type="hidden" name="tipo_emissao" value="turma">
+                    <div class="col-12">
+                        <label for="turma" class="form-label fw-bold">Selecione a Turma</label>
+                        <select name="turma" id="turma" class="form-select" required>
+                            <option value="">-- Escolha uma turma --</option>
+                            {% for turma in turmas %}
+                                <option value="{{ turma }}">{{ turma }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card border-success h-100">
-                            <div class="card-header bg-success text-white">Emissão por Turma</div>
-                            <div class="card-body">
-                                <form action="/emitir" method="POST">
-                                    <input type="hidden" name="tipo_emissao" value="turma">
-                                    <div class="mb-3">
-                                        <select name="turma" class="form-select" required>
-                                            <option value="">Selecione a Turma</option>
-                                            {% for turma in turmas %}
-                                                <option value="{{ turma }}">{{ turma }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="btn btn-success w-100">Emitir Turma</button>
-                                </form>
-                            </div>
-                        </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <input class="form-check-input me-2" type="checkbox" name="apenas_com_foto" id="apenas_com_foto" value="1">
+                        <label class="form-check-label" for="apenas_com_foto">
+                            Gerar apenas para alunos com foto
+                        </label>
                     </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-success w-100 py-2 fs-5">
+                            <i class="bi bi-printer me-2"></i> Emitir Carteirinhas
+                        </button>
+                    </div>
+                </form>
+                <div class="alert alert-info mt-4" role="alert">
+                    <i class="bi bi-info-circle"></i> As carteirinhas geradas estarão prontas para impressão. O filtro "apenas alunos com foto" evita gerar carteirinhas para alunos sem foto cadastrada.
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <header>
-        <nav>
-            <a href="/">Registro</a>
-            <a href="/consulta">Consulta</a>
-            <a href="/cadastro">Cadastro</a>
-            <a href="/emissao">Emissão de Carteirinhas</a>
-            <a href="/historico">Histórico</a>
-            <a href="/carometro">Carômetro</a>
-            <a href="/logout" class="logout">Logout</a>
-        </nav>
-    </header>
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 20px;">
-        </div>
-        <h1>Emissão de Carteirinhas</h1>
-        
-        <div class="grid">
-            <div class="card">
-                <h2>Emissão Unitária</h2>
-                <form action="/emitir" method="POST">
-                    <input type="hidden" name="tipo_emissao" value="unitaria">
-                    <div class="form-group">
-                        <input type="text" name="codigo" placeholder="Código da Carteirinha" required>
-                    </div>
-                    <button type="submit" class="btn primary">Emitir</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <h2>Emissão por Turma</h2>
-                <form action="/emitir" method="POST">
-                    <input type="hidden" name="tipo_emissao" value="turma">
-                    <div class="form-group">
-                        <select name="turma" required>
-                            <option value="">Selecione a Turma</option>
-                            {% for turma in turmas %}
-                            <option value="{{ turma }}">{{ turma }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn primary">Emitir Turma</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
