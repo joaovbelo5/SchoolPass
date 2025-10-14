@@ -74,6 +74,11 @@ Repositório oficial: [github.com/joaovbelo5/schoolpass](https://github.com/joao
    pip install --upgrade pip
    pip install -r requirements.txt
    ```
+   ou
+   ```bash
+   pip install Flask Werkzeug python-barcode Pillow requests python-dotenv Flask-Login
+   ```
+
 
 4. **Configure o sistema:**
    - Edite o arquivo `.env` com os dados da instituição, token do Telegram, logo e assinatura.
