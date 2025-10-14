@@ -118,32 +118,46 @@ class CadastroUsuariosGUI:
             messagebox.showerror("Erro", f"Erro ao alterar senha: {str(e)}")
 
     def create_widgets(self):
-        frame = tk.Frame(self.root)
-        frame.pack(padx=10, pady=10)
+        self.root.configure(bg="#f6fff6")
+        frame = ttk.Frame(self.root, padding=18)
+        frame.pack(padx=10, pady=10, fill="both", expand=True)
 
-        tk.Label(frame, text="Nome de Usuário:").grid(row=0, column=0, sticky="e")
-        self.entry_username = tk.Entry(frame)
-        self.entry_username.grid(row=0, column=1, padx=5, pady=5)
+        title = ttk.Label(frame, text="Cadastro de Usuários", font=("Segoe UI", 16, "bold"), foreground="#14532d")
+        title.grid(row=0, column=0, columnspan=2, pady=(0,12))
 
-        tk.Label(frame, text="Senha:").grid(row=1, column=0, sticky="e")
-        self.entry_password = tk.Entry(frame, show="*")
-        self.entry_password.grid(row=1, column=1, padx=5, pady=5)
+        ttk.Label(frame, text="Nome de Usuário:").grid(row=1, column=0, sticky="e", padx=2, pady=4)
+        self.entry_username = ttk.Entry(frame)
+        self.entry_username.grid(row=1, column=1, padx=2, pady=4, sticky="ew")
 
-        btn_add = tk.Button(frame, text="Cadastrar Usuário", command=self.adicionar_usuario)
-        btn_add.grid(row=2, column=0, columnspan=2, pady=5)
+        ttk.Label(frame, text="Senha:").grid(row=2, column=0, sticky="e", padx=2, pady=4)
+        self.entry_password = ttk.Entry(frame, show="*")
+        self.entry_password.grid(row=2, column=1, padx=2, pady=4, sticky="ew")
 
-        tk.Label(frame, text="Usuários cadastrados:").grid(row=3, column=0, columnspan=2)
-        self.listbox_usuarios = tk.Listbox(frame, width=30)
-        self.listbox_usuarios.grid(row=4, column=0, columnspan=2, pady=5)
+        btn_add = ttk.Button(frame, text="Cadastrar Usuário", command=self.adicionar_usuario)
+        btn_add.grid(row=3, column=0, columnspan=2, pady=8, sticky="ew")
 
-        btn_del = tk.Button(frame, text="Excluir Usuário", command=self.excluir_usuario)
-        btn_del.grid(row=5, column=0, columnspan=2, pady=5)
+        ttk.Separator(frame).grid(row=4, column=0, columnspan=2, sticky="ew", pady=8)
 
-        btn_alterar = tk.Button(frame, text="Alterar Senha", command=self.alterar_senha)
-        btn_alterar.grid(row=6, column=0, columnspan=2, pady=5)
+        ttk.Label(frame, text="Usuários cadastrados:").grid(row=5, column=0, columnspan=2, pady=(0,4))
+        listbox_frame = ttk.Frame(frame)
+        listbox_frame.grid(row=6, column=0, columnspan=2, sticky="ew")
+        self.listbox_usuarios = tk.Listbox(listbox_frame, width=32, height=7, font=("Segoe UI", 10))
+        self.listbox_usuarios.pack(side="left", fill="both", expand=True)
+        scrollbar = ttk.Scrollbar(listbox_frame, orient="vertical", command=self.listbox_usuarios.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.listbox_usuarios.config(yscrollcommand=scrollbar.set)
 
-        btn_sair = tk.Button(frame, text="Sair", command=self.root.quit)
-        btn_sair.grid(row=7, column=0, columnspan=2, pady=5)
+        btn_del = ttk.Button(frame, text="Excluir Usuário", command=self.excluir_usuario)
+        btn_del.grid(row=7, column=0, columnspan=2, pady=6, sticky="ew")
+
+        btn_alterar = ttk.Button(frame, text="Alterar Senha", command=self.alterar_senha)
+        btn_alterar.grid(row=8, column=0, columnspan=2, pady=6, sticky="ew")
+
+        btn_sair = ttk.Button(frame, text="Sair", command=self.root.quit)
+        btn_sair.grid(row=9, column=0, columnspan=2, pady=(12,0), sticky="ew")
+
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=2)
 
 if __name__ == '__main__':
     root = tk.Tk()
