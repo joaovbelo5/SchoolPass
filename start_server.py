@@ -226,6 +226,7 @@ def registrar_acesso(codigo, nome, turma, tipo_acesso):
     
     aluno = buscar_aluno(codigo)
     if aluno:
+        registrar_chamada(aluno)  # <-- Adicionado aqui
         contadores[aluno['Turno']] += 1
         registro_diario = {
             'hora': now.strftime("%H:%M:%S"),
@@ -648,6 +649,38 @@ def carometro():
 # --- ROTAS DE OCORRÊNCIAS ---
 import json
 
+def registrar_chamada(aluno):
+    """Registra a presença do aluno no arquivo de chamada mensal da turma."""
+    now = datetime.now()
+    mes_ano = now.strftime("%m_%Y")
+    turma = aluno['Turma']
+
+    chamada_dir = 'chamadas'
+    os.makedirs(chamada_dir, exist_ok=True)
+
+    arquivo_chamada = os.path.join(chamada_dir, f"{turma}_{mes_ano}.json")
+
+    chamada_data = {}
+    if os.path.exists(arquivo_chamada):
+        with open(arquivo_chamada, 'r', encoding='utf-8') as f:
+            chamada_data = json.load(f)
+
+    # Garante que o aluno está no dicionário
+    if aluno['Codigo'] not in chamada_data:
+        chamada_data[aluno['Codigo']] = {
+            'nome': aluno['Nome'],
+            'presencas': []
+        }
+
+    # Adicionar a data de hoje (sem horas) se ainda não estiver na lista
+    data_hoje = now.strftime('%Y-%m-%d')
+    if data_hoje not in chamada_data[aluno['Codigo']]['presencas']:
+        chamada_data[aluno['Codigo']]['presencas'].append(data_hoje)
+
+    with open(arquivo_chamada, 'w', encoding='utf-8') as f:
+        json.dump(chamada_data, f, ensure_ascii=False, indent=4)
+
+
 def ocorrencias_path(codigo):
     return os.path.join('ocorrencias', f'{codigo}.json')
 
@@ -691,6 +724,29 @@ def nova_ocorrencia(codigo):
     return render_template('ocorrencia_nova.html', aluno=aluno)
 
 # ROTA PARA EXCLUIR OCORRÊNCIA
+@app.route('/chamada', methods=['GET', 'POST'])
+@login_required
+def chamada():
+    chamada_dir = 'chamadas'
+    turmas = sorted(list(set(f.split('_')[0] for f in os.listdir(chamada_dir))))
+
+    mes_selecionado = request.form.get('mes', datetime.now().strftime('%m_%Y'))
+    turma_selecionada = request.form.get('turma', turmas[0] if turmas else None)
+
+    chamada_data = {}
+    if turma_selecionada:
+        arquivo_chamada = os.path.join(chamada_dir, f"{turma_selecionada}_{mes_selecionado}.json")
+        if os.path.exists(arquivo_chamada):
+            with open(arquivo_chamada, 'r', encoding='utf-8') as f:
+                chamada_data = json.load(f)
+
+    return render_template('lista_mensal_turma.html',
+                           turmas=turmas,
+                           turma_selecionada=turma_selecionada,
+                           mes_selecionado=mes_selecionado,
+                           chamada_data=chamada_data)
+
+
 @app.route('/ocorrencias/<codigo>/excluir', methods=['POST'])
 @login_required
 def excluir_ocorrencia(codigo):
