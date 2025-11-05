@@ -6,17 +6,16 @@
 <style>
     /* Estilos para a impressão */
     @media print {
-        body * {
-            visibility: hidden;
+        .no-print {
+            display: none !important;
         }
-        #secao-impressao, #secao-impressao * {
-            visibility: visible;
+        .print-header {
+            display: block !important;
+            text-align: center;
+            margin-bottom: 20px;
         }
-        #secao-impressao {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
+        .print-header h4, .print-header h5, .print-header h6 {
+            margin: 0;
         }
         .table {
             font-size: 10pt !important;
@@ -28,19 +27,12 @@
             size: A4 landscape;
             margin: 1cm;
         }
-        .print-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .print-header h4, .print-header h5 {
-            margin: 0;
-        }
     }
 </style>
 
-<div class="container-fluid py-4" id="secao-conteudo">
+<div class="container-fluid py-4">
     <!-- Cabeçalho visível apenas para impressão -->
-    <div class="print-header d-none d-print-block">
+    <div class="print-header d-none">
         <h4>{{ escola_nome }}</h4>
         <h5>Lista de Chamada - {{ turma_selecionada }}</h5>
         <h6>{{ mes_formatado }}</h6>
@@ -76,13 +68,6 @@
     </form>
 
     <div id="secao-impressao">
-        <!-- Cabeçalho visível apenas na tela, mas parte da área de impressão -->
-        <div class="print-header d-block d-print-none text-center mb-3">
-             <h4 class="fw-bold">{{ escola_nome }}</h4>
-             <h5>Lista de Chamada - Turma: {{ turma_selecionada }}</h5>
-             <h6 class="text-muted">{{ mes_formatado }}</h6>
-        </div>
-
         {% if dados_chamada %}
         <div class="table-responsive bg-white p-3 rounded-4 shadow-sm">
             <table class="table table-bordered table-hover text-center" style="font-size: 0.9em;">
@@ -111,7 +96,7 @@
             </table>
         </div>
         {% else %}
-        <div class="alert alert-warning text-center mt-4">
+        <div class="alert alert-warning text-center mt-4 no-print">
             Nenhum aluno encontrado para a turma selecionada ou nenhum registro de presença no mês.
         </div>
         {% endif %}
