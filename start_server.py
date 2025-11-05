@@ -226,7 +226,7 @@ def registrar_acesso(codigo, nome, turma, tipo_acesso):
     
     aluno = buscar_aluno(codigo)
     if aluno:
-        registrar_chamada(aluno)  # <-- Adicionado aqui
+        registrar_chamada(aluno)
         contadores[aluno['Turno']] += 1
         registro_diario = {
             'hora': now.strftime("%H:%M:%S"),
@@ -646,8 +646,64 @@ def carometro():
     return render_template('carometro.html', alunos=alunos_filtrados, turmas=turmas, turma_selecionada=turma_selecionada)
 
 
+import calendar
+
 # --- ROTAS DE OCORRÊNCIAS ---
 import json
+
+@app.route('/chamada', methods=['GET', 'POST'])
+@login_required
+def chamada():
+    # 1. Obter todas as turmas do `database.csv`
+    turmas = sorted(list(set(aluno['Turma'] for aluno in read_database())))
+
+    # 2. Determinar a turma e o mês selecionados
+    if request.method == 'POST':
+        turma_selecionada = request.form.get('turma')
+        mes_ano_str = request.form.get('mes') # Formato: YYYY-MM
+    else:
+        turma_selecionada = turmas[0] if turmas else None
+        mes_ano_str = datetime.now().strftime('%Y-%m')
+
+    ano, mes = map(int, mes_ano_str.split('-'))
+
+    # 3. Obter a lista de todos os alunos da turma selecionada
+    alunos_da_turma = buscar_turma(turma_selecionada)
+
+    # 4. Carregar os dados de presença do arquivo JSON
+    mes_ano_arquivo = f"{str(mes).zfill(2)}_{ano}"
+    arquivo_chamada = os.path.join('chamadas', f"{turma_selecionada}_{mes_ano_arquivo}.json")
+
+    presencas_data = {}
+    if os.path.exists(arquivo_chamada):
+        with open(arquivo_chamada, 'r', encoding='utf-8') as f:
+            presencas_data = json.load(f)
+
+    # 5. Montar a estrutura de dados para o template
+    _, num_dias = calendar.monthrange(ano, mes)
+    dias_do_mes = list(range(1, num_dias + 1))
+
+    dados_chamada = []
+    for aluno in alunos_da_turma:
+        codigo_aluno = aluno['Codigo']
+        presencas_do_aluno = presencas_data.get(codigo_aluno, {}).get('presencas', [])
+
+        # Cria uma lista de booleanos para a presença de cada dia
+        dias_presente = [int(p.split('-')[2]) for p in presencas_do_aluno if p.startswith(f"{ano}-{str(mes).zfill(2)}")]
+
+        presencas_grid = [dia in dias_presente for dia in dias_do_mes]
+
+        dados_chamada.append({
+            'nome': aluno['Nome'],
+            'presencas': presencas_grid
+        })
+
+    return render_template('lista_mensal_turma.html',
+                           turmas=turmas,
+                           turma_selecionada=turma_selecionada,
+                           mes_selecionado=mes_ano_str,
+                           dias_do_mes=dias_do_mes,
+                           dados_chamada=dados_chamada)
 
 def registrar_chamada(aluno):
     """Registra a presença do aluno no arquivo de chamada mensal da turma."""
@@ -663,23 +719,26 @@ def registrar_chamada(aluno):
     chamada_data = {}
     if os.path.exists(arquivo_chamada):
         with open(arquivo_chamada, 'r', encoding='utf-8') as f:
-            chamada_data = json.load(f)
+            try:
+                chamada_data = json.load(f)
+            except json.JSONDecodeError:
+                chamada_data = {} # Inicia um novo se o arquivo estiver corrompido/vazio
 
     # Garante que o aluno está no dicionário
-    if aluno['Codigo'] not in chamada_data:
-        chamada_data[aluno['Codigo']] = {
+    codigo_aluno = aluno['Codigo']
+    if codigo_aluno not in chamada_data:
+        chamada_data[codigo_aluno] = {
             'nome': aluno['Nome'],
             'presencas': []
         }
 
     # Adicionar a data de hoje (sem horas) se ainda não estiver na lista
     data_hoje = now.strftime('%Y-%m-%d')
-    if data_hoje not in chamada_data[aluno['Codigo']]['presencas']:
-        chamada_data[aluno['Codigo']]['presencas'].append(data_hoje)
+    if data_hoje not in chamada_data[codigo_aluno]['presencas']:
+        chamada_data[codigo_aluno]['presencas'].append(data_hoje)
 
     with open(arquivo_chamada, 'w', encoding='utf-8') as f:
         json.dump(chamada_data, f, ensure_ascii=False, indent=4)
-
 
 def ocorrencias_path(codigo):
     return os.path.join('ocorrencias', f'{codigo}.json')
@@ -724,29 +783,6 @@ def nova_ocorrencia(codigo):
     return render_template('ocorrencia_nova.html', aluno=aluno)
 
 # ROTA PARA EXCLUIR OCORRÊNCIA
-@app.route('/chamada', methods=['GET', 'POST'])
-@login_required
-def chamada():
-    chamada_dir = 'chamadas'
-    turmas = sorted(list(set(f.split('_')[0] for f in os.listdir(chamada_dir))))
-
-    mes_selecionado = request.form.get('mes', datetime.now().strftime('%m_%Y'))
-    turma_selecionada = request.form.get('turma', turmas[0] if turmas else None)
-
-    chamada_data = {}
-    if turma_selecionada:
-        arquivo_chamada = os.path.join(chamada_dir, f"{turma_selecionada}_{mes_selecionado}.json")
-        if os.path.exists(arquivo_chamada):
-            with open(arquivo_chamada, 'r', encoding='utf-8') as f:
-                chamada_data = json.load(f)
-
-    return render_template('lista_mensal_turma.html',
-                           turmas=turmas,
-                           turma_selecionada=turma_selecionada,
-                           mes_selecionado=mes_selecionado,
-                           chamada_data=chamada_data)
-
-
 @app.route('/ocorrencias/<codigo>/excluir', methods=['POST'])
 @login_required
 def excluir_ocorrencia(codigo):

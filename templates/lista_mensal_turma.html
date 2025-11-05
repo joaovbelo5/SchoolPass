@@ -3,68 +3,63 @@
 {% block title %}Lista de Chamada Mensal{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4" style="max-width:900px; width:100%; margin:auto;">
+<div class="container-fluid py-4">
     <div class="text-center mb-4">
         <h2 class="fw-bold mb-1" style="color: #14532d; letter-spacing: 1px;">
             <i class="bi bi-calendar-check me-2"></i>Lista de Chamada Mensal
         </h2>
-        <div class="text-muted" style="font-size:0.98em;">Consulte a frequência dos alunos por turma e mês</div>
+        <p class="text-muted">Consulte a frequência dos alunos por turma e mês.</p>
     </div>
-    <form method="POST" class="d-flex flex-row align-items-center gap-2 mb-4 bg-white p-2 rounded-4 shadow-sm justify-content-center" style="max-width:500px; margin:auto;">
-        <label for="turma" class="form-label mb-0">Turma:</label>
-        <select name="turma" id="turma" class="form-select form-select-sm shadow-none" style="max-width:180px; border-radius:8px;">
-            {% for turma in turmas %}
-                <option value="{{ turma }}" {% if turma_selecionada == turma %}selected{% endif %}>{{ turma }}</option>
-            {% endfor %}
-        </select>
-        <label for="mes" class="form-label mb-0">Mês:</label>
-        <input type="month" name="mes" id="mes" class="form-control form-control-sm shadow-none" style="max-width:180px; border-radius:8px;" value="{{ mes_selecionado.split('_') | reverse | join('-') if mes_selecionado else '' }}">
-        <button type="submit" class="btn btn-success btn-sm px-3"><i class="bi bi-search me-1"></i>Ver</button>
+
+    <form method="POST" class="d-flex flex-wrap justify-content-center align-items-center gap-2 mb-4 bg-white p-3 rounded-4 shadow-sm">
+        <div class="form-group">
+            <label for="turma" class="form-label">Turma:</label>
+            <select name="turma" id="turma" class="form-select">
+                {% for turma in turmas %}
+                    <option value="{{ turma }}" {% if turma == turma_selecionada %}selected{% endif %}>{{ turma }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="mes" class="form-label">Mês:</label>
+            <input type="month" id="mes" name="mes" class="form-control" value="{{ mes_selecionado }}">
+        </div>
+        <button type="submit" class="btn btn-success align-self-end">
+            <i class="bi bi-search me-1"></i>Ver
+        </button>
     </form>
-    {% if chamada_data %}
-    <div class="table-responsive bg-white p-2 rounded-4 shadow-sm">
-        <table class="table table-hover align-middle mb-0" style="border-radius:12px; overflow:hidden;">
-            <thead style="background:#e9f5ee;">
+
+    {% if dados_chamada %}
+    <div class="table-responsive bg-white p-3 rounded-4 shadow-sm">
+        <table class="table table-bordered table-hover text-center" style="font-size: 0.9em;">
+            <thead class="table-light">
                 <tr>
-                    <th class="text-nowrap">Código</th>
-                    <th class="text-nowrap">Nome</th>
-                    <th class="text-nowrap">Presenças</th>
+                    <th class="text-start" style="min-width: 200px;">ALUNO</th>
+                    {% for dia in dias_do_mes %}
+                        <th>{{ dia }}</th>
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody>
-                {% for codigo, aluno in chamada_data.items() %}
+                {% for aluno in dados_chamada %}
                 <tr>
-                    <td>{{ codigo }}</td>
-                    <td>{{ aluno.nome }}</td>
-                    <td>{{ aluno.presencas|join(', ') }}</td>
+                    <td class="text-start fw-bold">{{ aluno.nome }}</td>
+                    {% for presenca in aluno.presencas %}
+                        <td>
+                            {% if presenca %}
+                                <span style="color: #14532d; font-weight: bold;">•</span>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-    {% elif turma_selecionada %}
-    <div class="alert alert-warning text-center mt-4">Nenhum registro encontrado para a turma e mês selecionados.</div>
+    {% else %}
+    <div class="alert alert-warning text-center mt-4">
+        Nenhum aluno encontrado para a turma selecionada ou nenhum registro de presença no mês.
+    </div>
     {% endif %}
 </div>
-<!-- Bootstrap Icons CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const monthInput = document.getElementById('mes');
-        const form = monthInput.closest('form');
-
-        form.addEventListener('submit', function(event) {
-            const monthValue = monthInput.value; // Formato YYYY-MM
-            if (monthValue) {
-                const [year, month] = monthValue.split('-');
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'mes';
-                hiddenInput.value = `${month}_${year}`;
-                form.appendChild(hiddenInput);
-            }
-        });
-    });
-</script>
 {% endblock %}
