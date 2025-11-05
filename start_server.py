@@ -64,7 +64,12 @@ from dotenv import load_dotenv
 # Carregar variáveis do .env
 load_dotenv()
 
-
+# Configurar o locale para português do Brasil para formatação de data
+import locale
+try:
+    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+except locale.Error:
+    print("Locale pt_BR.UTF-8 não encontrado, usando o locale padrão.")
 
 
 app = Flask(__name__)
@@ -698,12 +703,18 @@ def chamada():
             'presencas': presencas_grid
         })
 
+    # Formatar o mês para exibição (ex: "Novembro de 2025")
+    data_obj = datetime(ano, mes, 1)
+    mes_formatado = data_obj.strftime("%B de %Y").capitalize()
+
     return render_template('lista_mensal_turma.html',
                            turmas=turmas,
                            turma_selecionada=turma_selecionada,
                            mes_selecionado=mes_ano_str,
+                           mes_formatado=mes_formatado,
                            dias_do_mes=dias_do_mes,
-                           dados_chamada=dados_chamada)
+                           dados_chamada=dados_chamada,
+                           escola_nome=CONFIG.get('escola', ''))
 
 def registrar_chamada(aluno):
     """Registra a presença do aluno no arquivo de chamada mensal da turma."""
