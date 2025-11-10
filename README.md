@@ -4,122 +4,138 @@ Sistema de controle de acesso para portaria escolar, desenvolvido em Python com 
 
 Repositório oficial: [github.com/joaovbelo5/schoolpass](https://github.com/joaovbelo5/schoolpass)
 
----
 
-## Funcionalidades
+## Sumário
 
-- Registro de **entradas e saídas** com histórico diário e geral.
-- **Geração automática de carteirinhas** com código de barras (Code128) e foto do usuário.
-- **Upload e edição de fotos** de alunos.
-- **Monitoramento em tempo real** do número de pessoas presentes por dia de acordo com o turno.
-- **Notificações no Telegram** para avisar os pais quando o filho chega ou sai da escola.
-- **Cadastro de Ocorrências** dos alunos.
-- Administração web completa: dados da instituição, token do bot, logo e assinatura, tudo via painel `/admin`.
+- Descrição
+- Pré-requisitos
+- Instalação rápida (Windows)
+- Configuração (.env e arquivos)
+- Como executar (servidor e utilitários)
+- Estrutura do projeto
+- Backups e restauração
+- Gerenciamento de usuários
+- Segurança e boas práticas
+- Contribuição e licença
 
----
+## Descrição
 
-## 📂 Estrutura do Projeto
+O SchoolPass fornece registro de entradas/saídas, geração de carteirinhas com código de barras, upload/edição de fotos, monitoramento por turno (carômetro), registro de ocorrências e notificações via Telegram.
+## Pré-requisitos
 
-```
-.  
-├── LICENSE
-├── README.md
-├── requirements.txt
-├── start_server.py
-├── database.csv
-├── usuarios.csv
-├── registros/
-├── registros_diarios/
-├── ocorrencias/
-├── static/
-│   ├── alert.mp3
-│   ├── assinatura.png
-│   ├── barcodes/
-│   ├── fotos/
-│   └── style.css
-└── templates/
-   ├── base.html
-   ├── index.html
-   ├── login.html
-   ├── consulta.html
-   ├── historico.html
-   ├── carometro.html
-   ├── carteirinha_index.html
-   ├── carteirinha_template.html
-   ├── upload_index.html
-   ├── upload_novo.html
-   ├── upload_editar.html
-   └── erro.html
+- Python 3.8+ (recomendado 3.10/3.11)
+- pip
+- No Windows: PowerShell (instruções abaixo consideram PowerShell)
+
+Dependências do projeto (arquivo `requirements.txt`):
+
+- Flask
+- Werkzeug
+- python-barcode
+- Pillow
+- requests
+- python-dotenv
+- Flask-Login
+- pandas
+
+Instale-as usando:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
----
+Se preferir instalar pacotes manualmente:
 
-## ⚙️ Instalação
+```powershell
+pip install Flask Werkzeug python-barcode Pillow requests python-dotenv Flask-Login pandas
+```
 
-1. **Clone o repositório:**
-   ```bash
-   git clone https://github.com/joaovbelo5/schoolpass.git
-   cd schoolpass
-   ```
-
-2. **Crie um ambiente virtual e ative-o:**
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate   # Windows
-   source venv/bin/activate # Linux/macOS
-   ```
-
-3. **Instale as dependências:**
-   ```bash
-   pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-   ou
-   ```bash
-   pip install Flask Werkzeug python-barcode Pillow requests python-dotenv Flask-Login
-   ```
+## Configuração
 
 
-4. **Configure o sistema:**
-   - Edite o arquivo `.env` com os dados da instituição, token do Telegram, logo e assinatura.
-   - Crie usuários de acesso no arquivo `usuarios.csv` (usuário e senha padrão: admin/admin).
-   - Substitua os arquivos `logo.svg` e `assinatura.png` na pasta `static/` conforme sua escola.
+1. Arquivos estáticos importantes (pasta `static`):
 
----
+- `logo.svg` — logotipo exibido nas carteirinhas/admin
+- `assinatura.png` — assinatura usada nas carteirinhas
+- `static/fotos/` — fotos dos alunos (upload de  foto salva aqui)
+- `static/barcodes/` — imagens de códigos de barras geradas
 
-## 🚀 Uso
+2. Base de dados e usuários
 
-1. **Inicie o servidor:**
-   ```bash
-   python start_server.py
-   ```
+- `database.csv` — arquivo CSV com os dados dos alunos (campos esperados: Codigo, Nome, Turma, Turno, Foto, Permissao, ...). Mantenha um cabeçalho.
+- `usuarios.csv` — arquivo CSV com usuários de acesso ao painel administrativo. As ferramentas `user_creator.py` (terminal) e `user_creator_gui.py` (GUI Tkinter) gerenciam esse arquivo.
 
-2. **Acesse no navegador:**
-   ```
-   http://localhost:5000 ou http://IP_DO_SERVIDOR:5000
-   ```
+Observação: o sistema preserva o cabeçalho do CSV ao executar operações de limpeza/backup.
 
-3. **Faça login** e utilize as funcionalidades:
-   - Gerenciar registros de entrada/saída
-   - Consultar histórico
-   - Gerar carteirinhas
-   - Upload/edição de fotos
-   - Monitorar carômetro
-   - Receber notificações no Telegram
-   - Administrar dados da escola via `/admin`
+## Como executar
 
----
+O repositório inclui scripts de início que ajudam a executar o servidor e suas partes.
 
-## 🤝 Contribuição
+1) Iniciar servidor principal (inicia backend `admin` e `consulta` em subprocessos):
 
-1. Faça um _fork_ do projeto.
-2. Crie uma _branch_ para sua feature: `git checkout -b feature/nova-funcionalidade`.
-3. Commit suas mudanças: `git commit -m 'Adiciona X'`.
-4. Envie para o remoto: `git push origin feature/nova-funcionalidade`.
-5. Abra um _Pull Request_ detalhando as alterações.
+```powershell
+python START_SERVER.py
+```
 
----
+Esse script inicia `start_admin_only.py` e `start_search_only.py` em processos separados e repassa stdout/stderr para o terminal.
 
-## 📄 Licença
+2) Iniciar apenas o painel administrativo:
 
-Este projeto está sob a licença descrita em [LICENSE](LICENSE).
+```powershell
+python start_admin_only.py
+```
+
+3) Iniciar apenas a interface pública/consulta:
+
+```powershell
+python start_search_only.py
+```
+
+4) Porta padrão: os scripts usam Flask com porta 5000/5010 conforme o arquivo. Verifique as linhas `app.run(...)` nos scripts caso precise alterar porta/host.
+
+## Ferramentas de gerenciamento de usuários
+
+- `user_creator.py` — utilitário de terminal para adicionar/listar/excluir usuários no `usuarios.csv`. As senhas são guardadas como hash.
+- `user_creator_gui.py` — interface Tkinter para gerenciar usuários (cadastrar, excluir, alterar senha).
+
+## Estrutura principal (resumida)
+
+```
+.
+├─ START_SERVER.py          # inicia admin + consulta como subprocessos
+├─ start_admin_only.py      # aplicação Flask com rotas administrativas e principais
+├─ start_search_only.py     # aplicação Flask pública de consulta/carteirinha
+├─ user_creator.py          # utilitário CLI para gerenciar usuarios.csv
+├─ user_creator_gui.py      # GUI Tkinter para gerenciar usuarios.csv
+├─ database.csv             # dados dos alunos (CSV)
+├─ usuarios.csv             # credenciais dos administradores (CSV)
+├─ templates/               # templates Jinja2 (views)
+└─ static/                  # css, imagens, barcodes, fotos, áudio
+```
+
+## Backups e restauração
+
+O painel `/admin` possui endpoints para criar backup (`/admin/backup`) e restaurar (`/admin/restore`). O backup gera um ZIP em `backups/` e mantém arquivos por 3 horas (limpeza automática). A restauração exige o upload do ZIP gerado e uma frase de confirmação.
+
+Você também pode criar backups manuais do diretório e dos CSVs.
+
+
+## Resolução de problemas comuns
+
+- Erro de locale pt_BR: o projeto tenta configurar `pt_BR.UTF-8`; se não existir, ele usa o locale padrão — isso é apenas informativo.
+- Se imagens de barcode não aparecem, verifique se `static/barcodes` tem permissão de escrita e se as dependências Pillow/python-barcode estão instaladas.
+- Problemas com Telegram: verifique `TELEGRAM_TOKEN` no `.env` e se o servidor consegue acessar a API do Telegram.
+
+## Contribuição
+
+1. Faça um fork.
+2. Abra uma branch (`git checkout -b feature/x`).
+3. Teste localmente e adicione testes mínimos se possível.
+4. Abra um PR descrevendo a alteração.
+
+## Licença
+
+Veja o arquivo `LICENSE` na raiz do repositório.
