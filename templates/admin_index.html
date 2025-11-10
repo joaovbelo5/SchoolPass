@@ -3,66 +3,291 @@
 {% block title %}Administração do Sistema{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4" style="max-width:700px; width:100%; margin:auto;">
-    <div class="text-center mb-4">
-        <h2 class="fw-bold mb-1" style="color: #14532d; letter-spacing: 1px;">
-            <i class="bi bi-gear-fill me-2"></i>Administração do Sistema
-        </h2>
-        <div class="text-muted" style="font-size:0.98em;">Gerencie as configurações da carteirinha, logo, assinatura e integração</div>
+<div class="container py-4" style="max-width:1000px;">
+    <div class="mb-4 text-center">
+        <h2 class="fw-bold mb-1" style="color:var(--verde-escuro);"><i class="bi bi-gear-fill me-2"></i>Administração do Sistema</h2>
+        <div class="text-muted">Gerencie configurações, logo, assinatura, backups e restauração</div>
     </div>
-    <div class="bg-white p-4 rounded-4 shadow-sm border border-1 mb-4">
-        <h4 class="fw-bold mb-3" style="color: #14532d;"><i class="bi bi-card-list me-2"></i>Configurações da Carteirinha</h4>
-        <form method="POST" action="/admin" class="row g-3">
-            <div class="col-md-6">
-                <label for="CARTEIRINHA_ESCOLA" class="form-label small">Escola</label>
-                <input type="text" class="form-control form-control-sm shadow-none" id="CARTEIRINHA_ESCOLA" name="CARTEIRINHA_ESCOLA" value="{{ config.escola }}" required style="border-radius:8px;">
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-success"><i class="bi bi-card-list me-2"></i>Configurações da Carteirinha</h5>
+                    <form method="POST" action="/admin" class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label for="CARTEIRINHA_ESCOLA" class="form-label small">Escola</label>
+                            <input type="text" class="form-control form-control-sm" id="CARTEIRINHA_ESCOLA" name="CARTEIRINHA_ESCOLA" value="{{ config.escola }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="CARTEIRINHA_TELEFONE" class="form-label small">Telefone</label>
+                            <input type="text" class="form-control form-control-sm" id="CARTEIRINHA_TELEFONE" name="CARTEIRINHA_TELEFONE" value="{{ config.telefone }}" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label for="CARTEIRINHA_ENDERECO" class="form-label small">Endereço</label>
+                            <input type="text" class="form-control form-control-sm" id="CARTEIRINHA_ENDERECO" name="CARTEIRINHA_ENDERECO" value="{{ config.endereco }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="CARTEIRINHA_VALIDADE" class="form-label small">Validade</label>
+                            <input type="text" class="form-control form-control-sm" id="CARTEIRINHA_VALIDADE" name="CARTEIRINHA_VALIDADE" value="{{ config.validade }}" required>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <button type="submit" class="btn btn-success w-100"><i class="bi bi-check-lg me-1"></i>Salvar Configurações</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="col-md-6">
-                <label for="CARTEIRINHA_TELEFONE" class="form-label small">Telefone</label>
-                <input type="text" class="form-control form-control-sm shadow-none" id="CARTEIRINHA_TELEFONE" name="CARTEIRINHA_TELEFONE" value="{{ config.telefone }}" required style="border-radius:8px;">
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h5 class="card-title text-success"><i class="bi bi-image me-2"></i>Logo e Assinatura</h5>
+                    <form method="POST" action="/admin" enctype="multipart/form-data" class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label for="assinatura" class="form-label small">Nova Assinatura (PNG)</label>
+                            <input class="form-control form-control-sm" type="file" id="assinatura" name="assinatura" accept=".png">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="logo" class="form-label small">Nova Logo (SVG)</label>
+                            <input class="form-control form-control-sm" type="file" id="logo" name="logo" accept=".svg">
+                        </div>
+                        <div class="col-12 mt-2">
+                            <button type="submit" class="btn btn-success w-100"><i class="bi bi-upload me-1"></i>Enviar</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="col-md-8">
-                <label for="CARTEIRINHA_ENDERECO" class="form-label small">Endereço</label>
-                <input type="text" class="form-control form-control-sm shadow-none" id="CARTEIRINHA_ENDERECO" name="CARTEIRINHA_ENDERECO" value="{{ config.endereco }}" required style="border-radius:8px;">
+
+            <div class="card shadow-sm mt-3 mb-3">
+                <div class="card-body">
+                    <h5 class="card-title text-success"><i class="bi bi-telegram me-2"></i>Token do Telegram</h5>
+                    <form method="POST" action="/admin" class="row g-3 mt-2">
+                        <div class="col-12">
+                            <label for="TELEGRAM_TOKEN" class="form-label small">Token</label>
+                            <input type="text" class="form-control form-control-sm" id="TELEGRAM_TOKEN" name="TELEGRAM_TOKEN" value="{{ token }}" required>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <button type="submit" class="btn btn-success w-100"><i class="bi bi-check-lg me-1"></i>Salvar</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label for="CARTEIRINHA_VALIDADE" class="form-label small">Validade</label>
-                <input type="text" class="form-control form-control-sm shadow-none" id="CARTEIRINHA_VALIDADE" name="CARTEIRINHA_VALIDADE" value="{{ config.validade }}" required style="border-radius:8px;">
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title text-danger"><i class="bi bi-trash3 me-2"></i>Limpar dados do servidor</h5>
+                    <p class="small text-muted">Atenção: operação irreversível. Será solicitada uma tripla verificação.</p>
+                    <div class="d-grid">
+                        <button id="openClearModal" class="btn btn-danger">Limpar dados do servidor</button>
+                    </div>
+                </div>
             </div>
-            <div class="col-12 mt-2">
-                <button type="submit" class="btn btn-success w-100" title="Salvar"><i class="bi bi-check-lg me-1"></i>Salvar Configurações</button>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary"><i class="bi bi-hdd-fill me-2"></i>Backup e Restauração</h5>
+                    <p class="small text-muted">Crie um backup ou restaure um backup previamente gerado. Backups ficam na pasta <code>backups/</code> do servidor por 3 horas.</p>
+                    <p class="small text-muted">Você pode também restaurar um backup. Basta selecionar o arquivo ZIP previamente baixado.</p>
+                    <div class="d-flex gap-2">
+                        <button id="backupBtn" class="btn btn-outline-primary flex-fill">Criar backup (ZIP)</button>
+                        <button id="restoreBtn" class="btn btn-outline-success flex-fill">Restaurar backup</button>
+                    </div>
+                </div>
             </div>
-        </form>
-    </div>
-    <div class="bg-white p-4 rounded-4 shadow-sm border border-1 mb-4">
-        <h4 class="fw-bold mb-3" style="color: #14532d;"><i class="bi bi-image me-2"></i>Logo e Assinatura</h4>
-        <form method="POST" action="/admin" enctype="multipart/form-data" class="row g-3">
-            <div class="col-md-6">
-                <label for="assinatura" class="form-label small">Nova Assinatura (PNG)</label>
-                <input class="form-control form-control-sm shadow-none" type="file" id="assinatura" name="assinatura" accept=".png" style="border-radius:8px;">
-            </div>
-            <div class="col-md-6">
-                <label for="logo" class="form-label small">Nova Logo (SVG)</label>
-                <input class="form-control form-control-sm shadow-none" type="file" id="logo" name="logo" accept=".svg" style="border-radius:8px;">
-            </div>
-            <div class="col-12 mt-2">
-                <button type="submit" class="btn btn-success w-100" title="Enviar"><i class="bi bi-upload me-1"></i>Enviar</button>
-            </div>
-        </form>
-    </div>
-    <div class="bg-white p-4 rounded-4 shadow-sm border border-1">
-        <h4 class="fw-bold mb-3" style="color: #14532d;"><i class="bi bi-telegram me-2"></i>Token do Telegram</h4>
-        <form method="POST" action="/admin" class="row g-3">
-            <div class="col-12">
-                <label for="TELEGRAM_TOKEN" class="form-label small">Token</label>
-                <input type="text" class="form-control form-control-sm shadow-none" id="TELEGRAM_TOKEN" name="TELEGRAM_TOKEN" value="{{ token }}" required style="border-radius:8px;">
-            </div>
-            <div class="col-12 mt-2">
-                <button type="submit" class="btn btn-success w-100" title="Salvar"><i class="bi bi-check-lg me-1"></i>Salvar</button>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
+                        <!-- Modal de restauração -->
+                        <div class="modal fade" id="restoreModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Restaurar backup</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="mb-2">Selecione o arquivo ZIP de backup para restaurar. Esta operação irá sobrescrever os dados atuais.</p>
+                                        <div class="mb-3">
+                                                <label class="form-label small">Arquivo ZIP</label>
+                                                <input id="backupFileInput" type="file" accept=".zip" class="form-control form-control-sm">
+                                        </div>
+                                        <div class="mb-3">
+                                                <label class="form-label small">Confirmação: digite <strong>RESTAURAR BACKUP</strong></label>
+                                                <input id="restorePhraseInput" class="form-control form-control-sm" placeholder="Digite RESTAURAR BACKUP">
+                                        </div>
+                                        <div id="restoreError" class="text-danger small" style="display:none;"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button id="confirmRestoreBtn" type="button" class="btn btn-success">Restaurar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+        <!-- Modal de confirmação e tripla verificação -->
+        <div class="modal fade" id="clearModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirmação de limpeza</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">Para confirmar, responda as três verificações abaixo:</p>
+                        <div class="mb-3">
+                                <label class="form-label small">1) Token de verificação (copie o número e cole abaixo)</label>
+                                <div class="p-2 bg-light border rounded">{{ clear_token }}</div>
+                                <input id="tokenInput" class="form-control form-control-sm mt-2" placeholder="Digite o token mostrado acima">
+                        </div>
+                        <div class="mb-3">
+                                <label class="form-label small">2) Operação matemática</label>
+                                <div class="p-2 bg-light border rounded">{{ math_question }}</div>
+                                <input id="mathInput" class="form-control form-control-sm mt-2" placeholder="Resultado da operação">
+                        </div>
+                        <div class="mb-3">
+                                <label class="form-label small">3) Digite a frase de confirmação</label>
+                                <div class="p-2 bg-light border rounded">DIGITAR: <strong>LIMPAR TUDO</strong></div>
+                                <input id="phraseInput" class="form-control form-control-sm mt-2" placeholder="Digite exatamente: LIMPAR TUDO">
+                        </div>
+                        <div id="clearError" class="text-danger small" style="display:none;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button id="confirmClearBtn" type="button" class="btn btn-danger">Confirmar e limpar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 <!-- Bootstrap Icons CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    var clearModalEl = document.getElementById('clearModal');
+    var clearModal = new bootstrap.Modal(clearModalEl);
+    document.getElementById('openClearModal').addEventListener('click', function(){
+        // abrir modal
+        document.getElementById('clearError').style.display = 'none';
+        document.getElementById('tokenInput').value = '';
+        document.getElementById('mathInput').value = '';
+        document.getElementById('phraseInput').value = '';
+        clearModal.show();
+    });
+
+    document.getElementById('confirmClearBtn').addEventListener('click', function(){
+        var token = document.getElementById('tokenInput').value.trim();
+        var math = document.getElementById('mathInput').value.trim();
+        var phrase = document.getElementById('phraseInput').value.trim();
+        var err = document.getElementById('clearError');
+        if(!token || !math || !phrase){
+            err.textContent = 'Por favor preencha todos os campos de verificação.';
+            err.style.display = 'block';
+            return;
+        }
+        // Enviar para o servidor
+        fetch('/admin/clear_data', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: token, math: math, phrase: phrase })
+        }).then(function(r){
+            // lidar com respostas que não são JSON (por exemplo páginas de erro HTML)
+            var ct = r.headers.get('content-type') || '';
+            if(ct.indexOf('application/json') !== -1){
+                return r.json().then(function(data){
+                    if(!r.ok){ throw new Error(data.msg || 'Falha na validação'); }
+                    return data;
+                });
+            }
+            return r.text().then(function(txt){
+                if(!r.ok){ throw new Error(txt || 'Falha na validação'); }
+                try{
+                    var parsed = JSON.parse(txt);
+                    return parsed;
+                }catch(e){
+                    return { ok: true };
+                }
+            });
+        }).then(function(data){
+            // sucesso
+            err.style.display = 'none';
+            clearModal.hide();
+            alert('Limpeza concluída com sucesso.');
+            window.location.reload();
+        }).catch(function(e){
+            err.textContent = e.message || 'Erro ao executar a limpeza.';
+            err.style.display = 'block';
+        });
+    });
+    // Backup button: redireciona para rota que gera o zip
+    var backupBtn = document.getElementById('backupBtn');
+    if(backupBtn){
+        backupBtn.addEventListener('click', function(){
+            // abrir em nova janela para forçar download
+            window.location.href = '/admin/backup';
+        });
+    }
+    // Restore button: abrir modal
+    var restoreBtn = document.getElementById('restoreBtn');
+    if(restoreBtn){
+        var restoreModalEl = document.getElementById('restoreModal');
+        var restoreModal = new bootstrap.Modal(restoreModalEl);
+        restoreBtn.addEventListener('click', function(){
+            document.getElementById('restoreError').style.display = 'none';
+            document.getElementById('backupFileInput').value = '';
+            document.getElementById('restorePhraseInput').value = '';
+            restoreModal.show();
+        });
+        document.getElementById('confirmRestoreBtn').addEventListener('click', function(){
+            var fileInput = document.getElementById('backupFileInput');
+            var phrase = document.getElementById('restorePhraseInput').value.trim();
+            var err = document.getElementById('restoreError');
+            if(!fileInput.files || fileInput.files.length === 0){
+                err.textContent = 'Selecione um arquivo ZIP para restaurar.';
+                err.style.display = 'block';
+                return;
+            }
+            if(phrase.toUpperCase() !== 'RESTAURAR BACKUP'){
+                err.textContent = 'Frase de confirmação incorreta.';
+                err.style.display = 'block';
+                return;
+            }
+            var fd = new FormData();
+            fd.append('backup_file', fileInput.files[0]);
+            fd.append('phrase', phrase);
+            fetch('/admin/restore', {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: fd
+            }).then(function(r){
+                var ct = r.headers.get('content-type') || '';
+                if(ct.indexOf('application/json') !== -1){
+                    return r.json().then(function(data){
+                        if(!r.ok) throw new Error(data.msg || 'Falha na restauração');
+                        return data;
+                    });
+                }
+                return r.text().then(function(txt){
+                    if(!r.ok){ throw new Error(txt || 'Falha na restauração'); }
+                    try{
+                        var parsed = JSON.parse(txt);
+                        return parsed;
+                    }catch(e){
+                        return { ok: true };
+                    }
+                });
+            }).then(function(data){
+                err.style.display = 'none';
+                restoreModal.hide();
+                alert('Restauração concluída com sucesso.');
+                window.location.reload();
+            }).catch(function(e){
+                err.textContent = e.message || 'Erro ao restaurar backup.';
+                err.style.display = 'block';
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

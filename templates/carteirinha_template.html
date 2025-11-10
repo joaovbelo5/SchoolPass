@@ -6,12 +6,12 @@
         .carteirinha {
             width: 112mm;
             height: 88mm;
-            border: 1.5px solid #14532d;
+            border: 1.5px solid #000000;
             margin: 5mm;
             display: inline-block;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: Arial, sans-serif;
             position: relative;
-            background: linear-gradient(135deg, #f6fff6 70%, #e6f7ee 100%);
+            background: linear-gradient(135deg, #ffffff 70%, #ffffff 100%);
             box-shadow: 0 2px 8px rgba(32,99,32,0.08);
             overflow: hidden;
         }
@@ -32,25 +32,25 @@
             width: 27mm;
             height: 35mm;
             object-fit: cover;
-            border: 2px solid #22ce6a;
-            border-radius: 4mm;
+            border: 2px solid #00421c;
+            border-radius: 2mm;
             margin: 2mm auto 1mm auto;
             display: block;
             background: #e6f7ee;
         }
 
         .dados-aluno {
-            font-size: 10pt;
+            font-size: 11pt;
             line-height: 1.35;
-            color: #14532d;
+            color: #000000;
             font-weight: 500;
             margin-bottom: 2mm;
-            text-align: left;
+            text-align: center;
         }
 
         .codigo-barras {
             width: 38mm;
-            height: 14mm;
+            height: 20mm;
             margin: 2mm auto 0 auto;
             display: block;
         }
@@ -59,9 +59,9 @@
             position: absolute;
             bottom: 2mm;
             right: 2mm;
-            font-size: 7pt;
-            color: #129b32;
-            background: #e6f7ee;
+            font-size: 10pt;
+            color: #303030;
+            background: #ffffff;
             padding: 1mm 3mm;
             border-radius: 3mm;
             box-shadow: 0 1px 3px rgba(32,99,32,0.07);
@@ -79,14 +79,14 @@
         .info-escola {
             font-size: 8.5pt;
             text-align: center;
-            margin-top: 1mm;
-            color: #14532d;
+            margin-top: 0.5mm;
+            color: #000000;
             font-weight: 500;
         }
 
         .logo-escola {
             width: 44mm;
-            height: auto;
+            height: 16mm;
             display: block;
             margin: 0 auto 2mm auto;
         }
@@ -115,12 +115,12 @@
                 <p>{{ aluno['CARTEIRINHA_ESCOLA'] }}</p>
                 <p>{{ aluno['CARTEIRINHA_TELEFONE'] }}</p>
                 <p>{{ aluno['CARTEIRINHA_ENDERECO'] }}</p>
-                <img src="{{ url_for('static', filename='assinatura.png') }}" class="assinatura" alt="Assinatura">
+                <img src="{{ url_for('static', filename='barcodes/' + aluno.Codigo + '.png') }}" class="codigo-barras" alt="Código de Barras">
+                
             </div>
-            <img src="{{ url_for('static', filename='barcodes/' + aluno.Codigo + '.png') }}" class="codigo-barras" alt="Código de Barras">
+            <img src="{{ url_for('static', filename='assinatura.png') }}" class="assinatura" alt="Assinatura">
             <div class="info-escola">
                 <p>Emitido em: {{ aluno.data_emissao }}</p>
-                <p>Código: {{ aluno.Codigo }}</p>
             </div>
         </div>
     </div>
