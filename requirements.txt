@@ -1,8 +1,8 @@
 Flask
+Flask-Login
 Werkzeug
 python-barcode
 Pillow
 requests
 python-dotenv
-Flask-Login
 pandas
