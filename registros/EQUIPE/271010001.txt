@@ -1,8 +1,0 @@
-Nome: Minion
-Turma: EQUIPE
-Turno: Manhã
-Código: 271010001
-
-REGISTRO DE ACESSOS:
-------------------------------
-10/11/2025 13:06:30 - Acesso

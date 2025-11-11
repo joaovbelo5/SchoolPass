@@ -4,6 +4,7 @@ import json
 import os
 from datetime import datetime
 from dotenv import load_dotenv
+import re
 
 # Carregar variáveis do .env
 load_dotenv()
@@ -28,7 +29,14 @@ def load_user_data(codigo, turma):
 def get_registros(codigo, turma):
     try:
         # Construir o caminho para o arquivo de registro do aluno
-        arquivo_path = os.path.join('registros', turma, f"{codigo}.txt")
+        # Sanitiza o nome da turma para evitar barras ou caracteres inválidos em paths
+        def sanitize_turma(name: str, replacement: str = '_') -> str:
+            if not isinstance(name, str):
+                return ''
+            return re.sub(r'[^A-Za-z0-9]', replacement, name)
+
+        turma_safe = sanitize_turma(turma)
+        arquivo_path = os.path.join('registros', turma_safe, f"{codigo}.txt")
         print(f"Tentando ler arquivo: {arquivo_path}")
         
         if os.path.exists(arquivo_path):

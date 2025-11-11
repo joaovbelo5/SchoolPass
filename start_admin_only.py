@@ -330,6 +330,7 @@ import logging
 from dotenv import load_dotenv
 import shutil
 import random
+import re
 
 # Carregar variáveis do .env
 load_dotenv()
@@ -467,6 +468,20 @@ def buscar_turma(turma):
         logger.error(f"Erro ao buscar turma: {str(e)}")
         return []
 
+
+def sanitize_turma(name: str, replacement: str = '_') -> str:
+    """Sanitiza o nome da turma para uso em paths/nomes de arquivo.
+
+    Substitui qualquer caractere que não seja letra ou número pelo caractere de
+    substituição (por padrão '_'). Isso evita barras e outros símbolos em nomes
+    de diretório/arquivo.
+    """
+    if not isinstance(name, str):
+        return ''
+    # Normalizar espaços e remover caracteres indesejados
+    # Mantemos apenas A-Z, a-z e 0-9. Outros vira replacement.
+    return re.sub(r'[^A-Za-z0-9]', replacement, name)
+
 def registrar_acesso(codigo, nome, turma, tipo_acesso):
     """Registra o acesso no arquivo TXT."""
     global alunos_registrados_hoje
@@ -482,7 +497,7 @@ def registrar_acesso(codigo, nome, turma, tipo_acesso):
     data_hora = now.strftime("%d/%m/%Y %H:%M:%S")
     registro = f"{data_hora} - {tipo_acesso}"
     
-    pasta_turma = os.path.join('registros', turma)
+    pasta_turma = os.path.join('registros', sanitize_turma(turma))
     os.makedirs(pasta_turma, exist_ok=True)
         
     arquivo_path = os.path.join(pasta_turma, f"{codigo}.txt")
@@ -948,7 +963,16 @@ def emitir():
 def registros_files(filename):
     """Serve files from the 'registros' directory."""
     registros_dir = os.path.join('registros')
-    return send_from_directory(registros_dir, filename)
+    # filename pode ter o formato "Turma/arquivo.txt" — sanitize a parte da turma
+    parts = filename.split('/', 1)
+    if len(parts) == 2:
+        turma_raw, rest = parts
+        turma_safe = sanitize_turma(turma_raw)
+        target_dir = os.path.join(registros_dir, turma_safe)
+        return send_from_directory(target_dir, rest)
+    else:
+        # Sem subdiretório: devolve diretamente dentro de registros
+        return send_from_directory(registros_dir, filename)
 
 @app.route('/historico', methods=['GET', 'POST'])
 @login_required
@@ -1047,7 +1071,8 @@ def chamada():
 
     # 4. Carregar os dados de presença do arquivo JSON
     mes_ano_arquivo = f"{str(mes).zfill(2)}_{ano}"
-    arquivo_chamada = os.path.join('chamadas', f"{turma_selecionada}_{mes_ano_arquivo}.json")
+    turma_safe = sanitize_turma(turma_selecionada)
+    arquivo_chamada = os.path.join('chamadas', f"{turma_safe}_{mes_ano_arquivo}.json")
 
     presencas_data = {}
     if os.path.exists(arquivo_chamada):
@@ -1095,7 +1120,8 @@ def registrar_chamada(aluno):
     chamada_dir = 'chamadas'
     os.makedirs(chamada_dir, exist_ok=True)
 
-    arquivo_chamada = os.path.join(chamada_dir, f"{turma}_{mes_ano}.json")
+    turma_safe = sanitize_turma(turma)
+    arquivo_chamada = os.path.join(chamada_dir, f"{turma_safe}_{mes_ano}.json")
 
     chamada_data = {}
     if os.path.exists(arquivo_chamada):
