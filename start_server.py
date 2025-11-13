@@ -4,6 +4,7 @@ import subprocess
 import threading
 import time
 import signal
+from datetime import datetime, timedelta
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ADMIN_PATH = os.path.join(SCRIPT_DIR, "start_admin_only.py")
@@ -45,11 +46,52 @@ def terminate(proc, name):
         pass
     print(f"[{name}] finalizado (returncode={proc.poll()})")
 
+
+def _daily_restart_scheduler(procs_list):
+    """Agendador que reinicia os processos filhos às 00:05 todos os dias.
+    
+    Calcula o tempo até a próxima ocorrência de 00:05, dorme, termina os processos
+    atuais, aguarda 3 segundos e reinicia-os.
+    """
+    while True:
+        now = datetime.now()
+        # próxima ocorrência de 00:05
+        # se já passou hoje, calcule para amanhã
+        target_time = datetime(now.year, now.month, now.day, 0, 5, 0)
+        if now >= target_time:
+            target_time += timedelta(days=1)
+        
+        wait_seconds = (target_time - now).total_seconds()
+        print(f"[scheduler] aguardando {wait_seconds:.0f}s até a próxima reinicialização às 00:05")
+        time.sleep(wait_seconds)
+        
+        # reiniciar processos
+        print("[scheduler] iniciando reinicialização diária (00:05)")
+        try:
+            for name, proc in procs_list:
+                if proc is not None:
+                    terminate(proc, name)
+            
+            time.sleep(3)  # aguardar 3 segundos
+            
+            # reiniciar
+            for i in range(len(procs_list)):
+                name, proc = procs_list[i]
+                procs_list[i] = (name, start(name, ADMIN_PATH if name == "admin" else CONSULTA_PATH))
+            
+            print("[scheduler] reinicialização concluída")
+        except Exception as e:
+            print(f"[scheduler] erro durante reinicialização: {e}")
+
 def main():
     admin = start("admin", ADMIN_PATH)
     consulta = start("consulta", CONSULTA_PATH)
 
-    procs = [("admin", admin), ("consulta", consulta)]
+    procs = [["admin", admin], ["consulta", consulta]]
+
+    # Iniciar agendador de reinicialização diária às 00:05
+    scheduler_thread = threading.Thread(target=_daily_restart_scheduler, args=(procs,), daemon=True)
+    scheduler_thread.start()
 
     def handle_sigint(signum, frame):
         print("Recebido sinal de interrupção, finalizando processos...")
@@ -63,16 +105,14 @@ def main():
         # Espera até que ambos terminem
         while True:
             alive = False
-            for name, p in procs:
+            for i, (name, p) in enumerate(procs):
                 if p is not None and p.poll() is None:
                     alive = True
                 elif p is not None and p.poll() is not None:
                     # já terminou, print returncode uma vez
                     print(f"[{name}] terminou (returncode={p.returncode})")
                     # set to None so we don't print repeatedly
-                    for i in range(len(procs)):
-                        if procs[i][0] == name:
-                            procs[i] = (name, None)
+                    procs[i] = (name, None)
             if not alive:
                 break
             time.sleep(0.5)
@@ -82,6 +122,7 @@ def main():
     # Certifica-se de terminar qualquer processo restante
     for name, p in procs:
         terminate(p, name)
+
 
 if __name__ == "__main__":
     main()

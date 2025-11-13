@@ -129,7 +129,6 @@ def register_admin_routes(app):
                 os.path.join(base_dir, 'chamadas'),
                 os.path.join(base_dir, 'ocorrencias'),
                 os.path.join(base_dir, 'registros'),
-                os.path.join(base_dir, 'registros_diarios'),
                 os.path.join(base_dir, 'static', 'barcodes'),
                 os.path.join(base_dir, 'static', 'fotos')
             ]
@@ -179,7 +178,6 @@ def register_admin_routes(app):
                 os.path.join(base_dir, 'chamadas'),
                 os.path.join(base_dir, 'ocorrencias'),
                 os.path.join(base_dir, 'registros'),
-                os.path.join(base_dir, 'registros_diarios'),
                 os.path.join(base_dir, 'static', 'barcodes'),
                 os.path.join(base_dir, 'static', 'fotos'),
                 os.path.join(base_dir, 'static', 'assinatura.png'),
@@ -286,7 +284,7 @@ def register_admin_routes(app):
 
             # Alvos a serem restaurados (mesma lista do backup)
             targets_dirs = [
-                'chamadas', 'ocorrencias', 'registros', 'registros_diarios',
+                'chamadas', 'ocorrencias', 'registros',
                 os.path.join('static', 'barcodes'), os.path.join('static', 'fotos')
             ]
             targets_files = [
@@ -318,6 +316,7 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import csv
 import os
+import time
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from collections import defaultdict
@@ -330,7 +329,7 @@ import logging
 from dotenv import load_dotenv
 import shutil
 import random
-import re
+import threading
 
 # Carregar variáveis do .env
 load_dotenv()
@@ -394,53 +393,122 @@ def load_user(user_id):
 # Variáveis globais para registro de acessos
 TURNOS = ['Manhã', 'Tarde', 'Noite']
 contadores = defaultdict(int)
-registros_diarios = []
+registros_diarios = []  # Buffer em memória para registros do dia (será salvo em JSON)
 ultimo_registro = {}
 alunos_registrados_hoje = set()  # Alunos registrados no dia atual
+last_reset_date = datetime.now().strftime('%Y-%m-%d')
+reset_lock = threading.Lock()
 
-# Funções auxiliares
-def reset_contadores():
-    """Reseta os contadores à meia-noite e salva os registros do dia anterior."""
-    global contadores, registros_diarios, alunos_registrados_hoje
-    contadores.clear()
-    alunos_registrados_hoje.clear()  # Limpa os alunos registrados no dia atual
-    if registros_diarios:
-        data = datetime.now().strftime("%Y-%m-%d")
-        pasta_registros = 'registros_diarios'
-        os.makedirs(pasta_registros, exist_ok=True)
-        
-        arquivo = os.path.join(pasta_registros, f"{data}.csv")
-        with open(arquivo, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=['codigo', 'turno', 'data/hora', 'tipo'])
-            writer.writeheader()
-            for registro in registros_diarios:
-                writer.writerow({
-                    'codigo': registro['codigo'],
-                    'turno': registro['turno'],
-                    'data/hora': f"{datetime.now().strftime('%Y-%m-%d')} {registro['hora']}",
-                    'tipo': registro['tipo']
-                })
-    registros_diarios.clear()
 
-def salvar_registro_diario(registro):
-    """Salva o registro no arquivo CSV do dia atual."""
+def salvar_registro_diario_json(registro):
+    """Salva registro no arquivo JSON do dia atual."""
     data = datetime.now().strftime("%Y-%m-%d")
     pasta_registros = 'registros_diarios'
     os.makedirs(pasta_registros, exist_ok=True)
     
-    arquivo = os.path.join(pasta_registros, f"{data}.csv")
-    arquivo_existe = os.path.exists(arquivo)
+    arquivo = os.path.join(pasta_registros, f"{data}.json")
     
-    with open(arquivo, 'a', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=['codigo', 'turno', 'data/hora', 'tipo'])
-        if not arquivo_existe:
-            writer.writeheader()
-        writer.writerow({
-            'codigo': registro['codigo'],
-            'turno': registro['turno'],
-            'data/hora': f"{datetime.now().strftime('%Y-%m-%d')} {registro['hora']}",
-            'tipo': registro['tipo']
-        })
+    registros = []
+    if os.path.exists(arquivo):
+        try:
+            with open(arquivo, 'r', encoding='utf-8') as f:
+                registros = json.load(f)
+        except Exception as e:
+            logger.error(f"Erro ao ler {arquivo}: {e}")
+    
+    registros.append(registro)
+    
+    try:
+        with open(arquivo, 'w', encoding='utf-8', newline='') as f:
+            json.dump(registros, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Erro ao salvar {arquivo}: {e}")
+
+
+def _midnight_scheduler_loop():
+    """Loop de background que aguarda até a próxima meia-noite e reseta os contadores."""
+    while True:
+        now = datetime.now()
+        # calcular próxima meia-noite (início do próximo dia)
+        next_midnight = datetime(now.year, now.month, now.day) + timedelta(days=1)
+        seconds = (next_midnight - now).total_seconds()
+        try:
+            # dormir até a meia-noite
+            time.sleep(seconds)
+        except Exception:
+            # em caso de interrupção, recomputar loop
+            continue
+        try:
+            with reset_lock:
+                # Salvar registros do dia anterior em JSON
+                if registros_diarios:
+                    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+                    pasta_registros = 'registros_diarios'
+                    os.makedirs(pasta_registros, exist_ok=True)
+                    arquivo = os.path.join(pasta_registros, f"{yesterday}.json")
+                    try:
+                        with open(arquivo, 'w', encoding='utf-8') as f:
+                            json.dump(registros_diarios, f, ensure_ascii=False, indent=2)
+                        logger.info(f"Registros do dia {yesterday} salvos em JSON")
+                    except Exception as e:
+                        logger.exception(f"Erro ao salvar registros JSON: {e}")
+                
+                reset_contadores()
+                global last_reset_date
+                last_reset_date = datetime.now().strftime('%Y-%m-%d')
+                logger.info('Reset de contadores executado pelo agendador de meia-noite')
+        except Exception as e:
+            logger.exception(f'Erro no agendador de meia-noite: {e}')
+
+
+try:
+    # Inicia thread daemon que executa reset pontual à meia-noite
+    t = threading.Thread(target=_midnight_scheduler_loop, daemon=True)
+    t.start()
+except Exception as e:
+    logger.exception(f'Falha ao iniciar agendador de meia-noite: {e}')
+
+
+
+
+# Funções auxiliares
+def reset_contadores():
+    """Reseta os contadores, limpa marcadores e buffer de registros diários."""
+    global contadores, alunos_registrados_hoje, registros_diarios
+    contadores.clear()
+    alunos_registrados_hoje.clear()
+    registros_diarios.clear()
+
+
+def ensure_current_day():
+    """Garante que os contadores pertencem ao dia corrente.
+
+    Se detectarmos que a data mudou desde `last_reset_date`, executamos
+    `reset_contadores()` (passando a data anterior para compatibilidade) e
+    atualizamos `last_reset_date`.
+    """
+    global last_reset_date
+    today = datetime.now().strftime('%Y-%m-%d')
+    if today == last_reset_date:
+        return
+    # Protege contra chamadas concorrentes
+    with reset_lock:
+        # Re-checar dentro do lock
+        if today == last_reset_date:
+            return
+        # salvar registros do dia anterior não é necessário aqui porque
+        # `salvar_registro_diario()` grava por registro. Mantemos a API
+        # chamando reset_contadores passando a data anterior por compatibilidade.
+        try:
+            reset_contadores()
+            last_reset_date = today
+            logger.info(f"Contadores resetados para o novo dia: {today}")
+        except Exception as e:
+            logger.exception(f"Erro ao resetar contadores na mudança de dia: {e}")
+
+# Nota: removido o buffer `registros_diarios` e os arquivos diários. O histórico
+# por arquivo diário foi descontinuado; preservamos apenas os logs individuais
+# nos arquivos de cada aluno em `registros/`.
 
 def buscar_aluno(codigo):
     """Busca um aluno no arquivo database.csv pelo código."""
@@ -468,23 +536,15 @@ def buscar_turma(turma):
         logger.error(f"Erro ao buscar turma: {str(e)}")
         return []
 
-
-def sanitize_turma(name: str, replacement: str = '_') -> str:
-    """Sanitiza o nome da turma para uso em paths/nomes de arquivo.
-
-    Substitui qualquer caractere que não seja letra ou número pelo caractere de
-    substituição (por padrão '_'). Isso evita barras e outros símbolos em nomes
-    de diretório/arquivo.
-    """
-    if not isinstance(name, str):
-        return ''
-    # Normalizar espaços e remover caracteres indesejados
-    # Mantemos apenas A-Z, a-z e 0-9. Outros vira replacement.
-    return re.sub(r'[^A-Za-z0-9]', replacement, name)
-
 def registrar_acesso(codigo, nome, turma, tipo_acesso):
     """Registra o acesso no arquivo TXT."""
     global alunos_registrados_hoje
+    # Garantir que estamos no dia correto antes de registrar (reset se necessário)
+    try:
+        ensure_current_day()
+    except Exception:
+        # não bloquear o registro em caso de erro no mecanismo de reset
+        logger.exception('Erro em ensure_current_day')
     now = datetime.now()
     data_atual = now.strftime("%Y-%m-%d")
 
@@ -497,7 +557,7 @@ def registrar_acesso(codigo, nome, turma, tipo_acesso):
     data_hora = now.strftime("%d/%m/%Y %H:%M:%S")
     registro = f"{data_hora} - {tipo_acesso}"
     
-    pasta_turma = os.path.join('registros', sanitize_turma(turma))
+    pasta_turma = os.path.join('registros', turma)
     os.makedirs(pasta_turma, exist_ok=True)
         
     arquivo_path = os.path.join(pasta_turma, f"{codigo}.txt")
@@ -518,14 +578,18 @@ def registrar_acesso(codigo, nome, turma, tipo_acesso):
     if aluno:
         registrar_chamada(aluno)
         contadores[aluno['Turno']] += 1
-        registro_diario = {
-            'hora': now.strftime("%H:%M:%S"),
+        
+        # Salvar no JSON diário
+        registro_json = {
             'codigo': codigo,
+            'nome': nome,
+            'turma': turma,
             'turno': aluno['Turno'],
-            'tipo': tipo_acesso
+            'foto': aluno.get('Foto', 'semfoto.jpg'),
+            'data_hora': data_hora,
+            'tipo_acesso': tipo_acesso
         }
-        registros_diarios.append(registro_diario)
-        salvar_registro_diario(registro_diario)
+        salvar_registro_diario_json(registro_json)
 
 def enviar_telegram(chat_id, nome, tipo_acesso):
     """Envia mensagem ao Telegram indicando entrada ou saída."""
@@ -751,9 +815,11 @@ def consulta():
 
 @app.route('/get_contadores')
 def get_contadores():
-    now = datetime.now()
-    if now.hour == 0 and now.minute == 0:
-        reset_contadores()
+    # Garantir que os contadores reflitam o dia atual
+    try:
+        ensure_current_day()
+    except Exception:
+        logger.exception('Erro em ensure_current_day durante get_contadores')
     return {'contadores': dict(contadores), 'total': sum(contadores.values())}
 
 # Rotas de cadastro (protegidas)
@@ -963,56 +1029,61 @@ def emitir():
 def registros_files(filename):
     """Serve files from the 'registros' directory."""
     registros_dir = os.path.join('registros')
-    # filename pode ter o formato "Turma/arquivo.txt" — sanitize a parte da turma
-    parts = filename.split('/', 1)
-    if len(parts) == 2:
-        turma_raw, rest = parts
-        turma_safe = sanitize_turma(turma_raw)
-        target_dir = os.path.join(registros_dir, turma_safe)
-        return send_from_directory(target_dir, rest)
-    else:
-        # Sem subdiretório: devolve diretamente dentro de registros
-        return send_from_directory(registros_dir, filename)
+    return send_from_directory(registros_dir, filename)
+
+
 
 @app.route('/historico', methods=['GET', 'POST'])
 @login_required
 def historico():
+    """Exibe histórico de acessos por data em formato JSON."""
     pasta_registros = 'registros_diarios'
-    arquivos = sorted(os.listdir(pasta_registros))  # Lista os arquivos na pasta
     registros = []
     data_selecionada = None
-
-    # Carregar os dados do database.csv
-    alunos = {}
+    datas_disponiveis = []
+    
+    # Listar datas disponíveis
+    if os.path.exists(pasta_registros):
+        try:
+            datas_disponiveis = sorted([
+                f[:-5] for f in os.listdir(pasta_registros) 
+                if f.endswith('.json')
+            ], reverse=True)
+        except FileNotFoundError:
+            pass
+    
+    # Carregar dados do database para enriquecer informações
+    alunos_db = {}
     try:
         with open(app.config['DATABASE'], 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                alunos[row['Codigo']] = {'nome': row['Nome'], 'turma': row['Turma']}
+                alunos_db[row['Codigo']] = row
     except FileNotFoundError:
-        return render_template('erro.html', mensagem="Arquivo database.csv não encontrado!")
-
+        pass
+    
     if request.method == 'POST':
-        data_selecionada = request.form.get('data')
+        data_selecionada = request.form.get('data_selecionada')
         if data_selecionada:
-            arquivo = os.path.join(pasta_registros, f"{data_selecionada}.csv")
+            arquivo = os.path.join(pasta_registros, f"{data_selecionada}.json")
             if os.path.exists(arquivo):
-                with open(arquivo, 'r', encoding='utf-8') as f:
-                    reader = csv.DictReader(f)
-                    for registro in reader:
-                        codigo = registro['codigo']
-                        # Adicionar nome e turma ao registro, se disponíveis
-                        if codigo in alunos:
-                            registro['nome'] = alunos[codigo]['nome']
-                            registro['turma'] = alunos[codigo]['turma']
-                        else:
-                            registro['nome'] = 'Desconhecido'
-                            registro['turma'] = 'Desconhecida'
-                        registros.append(registro)
+                try:
+                    with open(arquivo, 'r', encoding='utf-8') as f:
+                        registros = json.load(f)
+                        # Enriquecer com dados do database se necessário
+                        for reg in registros:
+                            if reg['codigo'] in alunos_db:
+                                reg.setdefault('foto', alunos_db[reg['codigo']].get('Foto', 'semfoto.jpg'))
+                except Exception as e:
+                    logger.error(f"Erro ao ler {arquivo}: {e}")
+                    return render_template('erro.html', mensagem=f"Erro ao carregar registros: {str(e)}")
             else:
-                return render_template('erro.html', mensagem=f"Arquivo para a data {data_selecionada} não encontrado!")
-
-    return render_template('historico.html', arquivos=arquivos, registros=registros, data_selecionada=data_selecionada)
+                return render_template('erro.html', mensagem=f"Nenhum registro encontrado para {data_selecionada}")
+    
+    return render_template('historico.html', 
+                          datas_disponiveis=datas_disponiveis,
+                          registros=registros, 
+                          data_selecionada=data_selecionada)
 
 @app.route('/pesquisar', methods=['GET'])
 @login_required
@@ -1071,8 +1142,7 @@ def chamada():
 
     # 4. Carregar os dados de presença do arquivo JSON
     mes_ano_arquivo = f"{str(mes).zfill(2)}_{ano}"
-    turma_safe = sanitize_turma(turma_selecionada)
-    arquivo_chamada = os.path.join('chamadas', f"{turma_safe}_{mes_ano_arquivo}.json")
+    arquivo_chamada = os.path.join('chamadas', f"{turma_selecionada}_{mes_ano_arquivo}.json")
 
     presencas_data = {}
     if os.path.exists(arquivo_chamada):
@@ -1120,8 +1190,7 @@ def registrar_chamada(aluno):
     chamada_dir = 'chamadas'
     os.makedirs(chamada_dir, exist_ok=True)
 
-    turma_safe = sanitize_turma(turma)
-    arquivo_chamada = os.path.join(chamada_dir, f"{turma_safe}_{mes_ano}.json")
+    arquivo_chamada = os.path.join(chamada_dir, f"{turma}_{mes_ano}.json")
 
     chamada_data = {}
     if os.path.exists(arquivo_chamada):

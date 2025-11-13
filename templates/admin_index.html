@@ -4,6 +4,19 @@
 
 {% block content %}
 <div class="container py-4" style="max-width:1000px;">
+    <!-- Toast container for visual feedback -->
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1080;"></div>
+
+    {# Render flashed messages as toasts (if any) #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flashedToasts" style="display:none;">
+                {% for category, msg in messages %}
+                    <div class="flashed-message" data-category="{{ category }}">{{ msg }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
     <div class="mb-4 text-center">
         <h2 class="fw-bold mb-1" style="color:var(--verde-escuro);"><i class="bi bi-gear-fill me-2"></i>Administração do Sistema</h2>
         <div class="text-muted">Gerencie configurações, logo, assinatura, backups e restauração</div>
@@ -126,6 +139,49 @@
                             </div>
                         </div>
 
+            <!-- Modal de resultado da restauração (log) -->
+            <div class="modal fade" id="restoreResultModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Resultado da Restauração</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="small text-muted">Abaixo está o log/resultado retornado pelo servidor para a operação de restauração. Você pode copiar o conteúdo ou fechar e recarregar a página.</p>
+                            <pre id="restoreLogContent" class="p-2 bg-light border rounded" style="white-space:pre-wrap; max-height:60vh; overflow:auto;"></pre>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="copyRestoreLog" type="button" class="btn btn-outline-secondary">Copiar</button>
+                            <button id="restoreReloadBtn" type="button" class="btn btn-primary">Fechar e Recarregar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+
+                        <!-- Modal de resultado do backup (log) -->
+                        <div class="modal fade" id="backupResultModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Resultado do Backup</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="small text-muted">Abaixo está o log/resultado retornado pelo servidor ao criar o backup.</p>
+                                        <pre id="backupLogContent" class="p-2 bg-light border rounded" style="white-space:pre-wrap; max-height:60vh; overflow:auto;"></pre>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button id="copyBackupLog" type="button" class="btn btn-outline-secondary">Copiar</button>
+                                        <a id="downloadBackupBtn" class="btn btn-success" style="display:none;" href="#" download>Baixar ZIP</a>
+                                        <button id="backupReloadBtn" type="button" class="btn btn-primary">Fechar e Recarregar</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            </div>
+
         <!-- Modal de confirmação e tripla verificação -->
         <div class="modal fade" id="clearModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -160,10 +216,70 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal de progresso do backup -->
+        <div class="modal fade" id="backupProgressModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body text-center py-4">
+                        <div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>
+                        <div class="fw-bold">Criando backup...</div>
+                        <div class="small text-muted">Aguarde enquanto o servidor gera o arquivo ZIP. Esta operação pode demorar alguns segundos.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 <!-- Bootstrap Icons CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
 <script>
 document.addEventListener('DOMContentLoaded', function(){
+    // Helper: create and show bootstrap toast
+    function showToast(message, type){
+        type = type || 'success';
+        var toastContainer = document.getElementById('toastContainer');
+        var toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-bg-light border-0';
+        toast.setAttribute('role','alert');
+        toast.setAttribute('aria-live','assertive');
+        toast.setAttribute('aria-atomic','true');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>`;
+
+        // Colorize by type
+        if(type === 'success'){
+            toast.classList.remove('text-bg-light');
+            toast.classList.add('text-bg-success');
+        } else if(type === 'error' || type === 'danger'){
+            toast.classList.remove('text-bg-light');
+            toast.classList.add('text-bg-danger');
+        } else if(type === 'info'){
+            toast.classList.remove('text-bg-light');
+            toast.classList.add('text-bg-info');
+        }
+
+        toastContainer.appendChild(toast);
+        var bsToast = new bootstrap.Toast(toast, { delay: 5000 });
+        bsToast.show();
+        // remove after hidden
+        toast.addEventListener('hidden.bs.toast', function(){ toast.remove(); });
+    }
+
+    // Show flashed messages from server as toasts
+    var flashed = document.getElementById('flashedToasts');
+    if(flashed){
+        var items = flashed.querySelectorAll('.flashed-message');
+        items.forEach(function(it){
+            var cat = it.getAttribute('data-category') || 'info';
+            var msg = it.textContent || it.innerText || '';
+            showToast(msg.trim(), cat === 'success' ? 'success' : (cat === 'error' ? 'danger' : 'info'));
+        });
+    }
+
     var clearModalEl = document.getElementById('clearModal');
     var clearModal = new bootstrap.Modal(clearModalEl);
     document.getElementById('openClearModal').addEventListener('click', function(){
@@ -185,6 +301,11 @@ document.addEventListener('DOMContentLoaded', function(){
             err.style.display = 'block';
             return;
         }
+        var btn = document.getElementById('confirmClearBtn');
+        var origHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processando...';
+
         // Enviar para o servidor
         fetch('/admin/clear_data', {
             method: 'POST',
@@ -213,20 +334,79 @@ document.addEventListener('DOMContentLoaded', function(){
             // sucesso
             err.style.display = 'none';
             clearModal.hide();
-            alert('Limpeza concluída com sucesso.');
+            showToast('Limpeza concluída com sucesso.', 'success');
             window.location.reload();
         }).catch(function(e){
             err.textContent = e.message || 'Erro ao executar a limpeza.';
             err.style.display = 'block';
+            showToast(err.textContent, 'danger');
+        }).finally(function(){
+            btn.disabled = false;
+            btn.innerHTML = origHTML;
         });
     });
     // Backup button: redireciona para rota que gera o zip
     var backupBtn = document.getElementById('backupBtn');
     if(backupBtn){
-        backupBtn.addEventListener('click', function(){
-            // abrir em nova janela para forçar download
-            window.location.href = '/admin/backup';
-        });
+            backupBtn.addEventListener('click', function(){
+                backupBtn.disabled = true;
+                var orig = backupBtn.innerHTML;
+                backupBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Criando backup...';
+                fetch('/admin/backup_api', { method: 'GET', credentials: 'same-origin' })
+                    .then(function(r){
+                        var ct = r.headers.get('content-type') || '';
+                        if(ct.indexOf('application/json') !== -1){
+                            return r.json().then(function(data){ if(!r.ok) throw new Error(data.msg || 'Erro'); return data; });
+                        }
+                        return r.text().then(function(txt){ if(!r.ok) throw new Error(txt || 'Erro'); try{ return JSON.parse(txt); }catch(e){ return { ok: true, msg: txt }; } });
+                    }).then(function(data){
+                        // show modal with log and download link
+                        var log = (typeof data === 'object') ? JSON.stringify(data, null, 2) : String(data);
+                        var el = document.getElementById('backupLogContent');
+                        if(el) el.textContent = log;
+                        var downloadBtn = document.getElementById('downloadBackupBtn');
+                        var startedDownload = false;
+                        if(downloadBtn && data.download_url){
+                            downloadBtn.href = data.download_url; downloadBtn.style.display = 'inline-block';
+                            // tentar iniciar download automaticamente
+                            try{
+                                var auto = document.createElement('a');
+                                auto.href = data.download_url;
+                                auto.download = data.filename || '';
+                                auto.style.display = 'none';
+                                document.body.appendChild(auto);
+                                auto.click();
+                                startedDownload = true;
+                                setTimeout(function(){ try{ document.body.removeChild(auto); }catch(e){} }, 1500);
+                                showToast('Download iniciado.', 'info');
+                            }catch(e){
+                                startedDownload = false;
+                            }
+                        }
+                        var bmodalEl = document.getElementById('backupResultModal');
+                        // Se o download foi iniciado automaticamente, não abrir o modal (fechar caso esteja aberto);
+                        if(startedDownload){
+                            try{
+                                var resInst = bootstrap.Modal.getInstance(bmodalEl);
+                                if(resInst) resInst.hide();
+                            }catch(e){}
+                            document.querySelectorAll('.modal-backdrop').forEach(function(el){ el.remove(); });
+                            document.body.classList.remove('modal-open');
+                        } else {
+                            if(bmodalEl){ var bmodal = new bootstrap.Modal(bmodalEl); bmodal.show(); }
+                        }
+                    }).catch(function(e){
+                        // ensure we show the error log modal so user can see details
+                        var el = document.getElementById('backupLogContent');
+                        if(el) el.textContent = e.message || String(e);
+                        var bmodalEl = document.getElementById('backupResultModal');
+                        if(bmodalEl){ var bmodal = new bootstrap.Modal(bmodalEl); bmodal.show(); }
+                        showToast(e.message || 'Erro ao criar backup', 'danger');
+                    }).finally(function(){
+                        backupBtn.disabled = false;
+                        backupBtn.innerHTML = orig;
+                    });
+            });
     }
     // Restore button: abrir modal
     var restoreBtn = document.getElementById('restoreBtn');
@@ -256,6 +436,11 @@ document.addEventListener('DOMContentLoaded', function(){
             var fd = new FormData();
             fd.append('backup_file', fileInput.files[0]);
             fd.append('phrase', phrase);
+            var btn = document.getElementById('confirmRestoreBtn');
+            var origHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Restaurando...';
+
             fetch('/admin/restore', {
                 method: 'POST',
                 credentials: 'same-origin',
@@ -280,14 +465,104 @@ document.addEventListener('DOMContentLoaded', function(){
             }).then(function(data){
                 err.style.display = 'none';
                 restoreModal.hide();
-                alert('Restauração concluída com sucesso.');
-                window.location.reload();
+                // Mostrar o log/resultado no modal de resultado
+                var logContent = (typeof data === 'object') ? JSON.stringify(data, null, 2) : String(data);
+                var logEl = document.getElementById('restoreLogContent');
+                if(logEl) logEl.textContent = logContent;
+                var resultModalEl = document.getElementById('restoreResultModal');
+                if(resultModalEl){
+                    var resultModal = new bootstrap.Modal(resultModalEl);
+                    resultModal.show();
+                } else {
+                    showToast('Restauração concluída com sucesso.', 'success');
+                    window.location.reload();
+                }
             }).catch(function(e){
                 err.textContent = e.message || 'Erro ao restaurar backup.';
                 err.style.display = 'block';
+                // Mostrar erro detalhado no modal de resultado
+                var logEl = document.getElementById('restoreLogContent');
+                if(logEl) logEl.textContent = e.message || String(e);
+                var resultModalEl = document.getElementById('restoreResultModal');
+                if(resultModalEl){
+                    var resultModal = new bootstrap.Modal(resultModalEl);
+                    resultModal.show();
+                }
+                showToast(err.textContent, 'danger');
+            }).finally(function(){
+                btn.disabled = false;
+                btn.innerHTML = origHTML;
             });
         });
     }
+    // Interceptar formulários que postam para /admin para mostrar feedback visual e evitar double submit
+    document.querySelectorAll('form[action="/admin"]').forEach(function(f){
+        f.addEventListener('submit', function(e){
+            var btn = f.querySelector('button[type="submit"]');
+            if(btn){
+                btn.disabled = true;
+                var orig = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Enviando...';
+            }
+            // allow normal submit (will reload page). Buttons will be reset on page load.
+        });
+    });
+
+    // Hooks for restore result modal buttons
+    var copyBtn = document.getElementById('copyRestoreLog');
+    if(copyBtn){
+        copyBtn.addEventListener('click', function(){
+            var logEl = document.getElementById('restoreLogContent');
+            if(!logEl) return;
+            navigator.clipboard.writeText(logEl.textContent || '').then(function(){
+                showToast('Log copiado para a área de transferência.', 'success');
+            }).catch(function(){
+                showToast('Falha ao copiar o log.', 'danger');
+            });
+        });
+    }
+    var reloadBtn = document.getElementById('restoreReloadBtn');
+    if(reloadBtn){
+        reloadBtn.addEventListener('click', function(){
+            // fecha modal e recarrega
+            var resModalEl = document.getElementById('restoreResultModal');
+            if(resModalEl){
+                var m = bootstrap.Modal.getInstance(resModalEl) || new bootstrap.Modal(resModalEl);
+                m.hide();
+            }
+            window.location.reload();
+        });
+    }
+
+    // Backup modal buttons
+    var copyBackup = document.getElementById('copyBackupLog');
+    if(copyBackup){
+        copyBackup.addEventListener('click', function(){
+            var el = document.getElementById('backupLogContent');
+            if(!el) return;
+            navigator.clipboard.writeText(el.textContent || '').then(function(){ showToast('Log copiado.', 'success'); }).catch(function(){ showToast('Falha ao copiar.', 'danger'); });
+        });
+    }
+    var backupReload = document.getElementById('backupReloadBtn');
+    if(backupReload){
+        backupReload.addEventListener('click', function(){
+            var el = document.getElementById('backupResultModal');
+            if(el){ var m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el); m.hide(); }
+            window.location.reload();
+        });
+    }
+    var downloadBackupBtn = document.getElementById('downloadBackupBtn');
+    if(downloadBackupBtn){
+        // nothing to do; href is set when backup created
+    }
+
+    // Global JS error handlers to surface problems to the user (helps debugging)
+    window.addEventListener('error', function(ev){
+        try{ showToast('Erro no cliente: ' + (ev.message || ev.error || 'unknown'), 'danger'); }catch(e){}
+    });
+    window.addEventListener('unhandledrejection', function(ev){
+        try{ showToast('Promise rejeitada: ' + (ev.reason && ev.reason.message ? ev.reason.message : String(ev.reason)), 'danger'); }catch(e){}
+    });
 });
 </script>
 {% endblock %}

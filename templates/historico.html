@@ -1,55 +1,106 @@
 {% extends "base.html" %}
 
-{% block title %}Histórico de Registros{% endblock %}
+{% block title %}Histórico de Acessos{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4" style="max-width:900px; width:100%; margin:auto;">
+<div class="container-fluid py-3" style="max-width:900px; width:100%; margin:auto;">
+    <!-- Header -->
     <div class="text-center mb-4">
-        <h2 class="fw-bold mb-1" style="color: #14532d; letter-spacing: 1px;">
-            <i class="bi bi-clock-history me-2"></i>Histórico de Registros
-        </h2>
-        <div class="text-muted" style="font-size:0.98em;">Consulte os acessos registrados por data</div>
+        <h1 class="fw-bold" style="color: #14532d; letter-spacing: 1px;">
+            <i class="bi bi-clock-history me-2"></i>Histórico de Acessos
+        </h1>
+        <p class="text-muted">Selecione uma data para visualizar os registros de entrada e saída dos alunos</p>
     </div>
-    <form method="POST" class="d-flex flex-row align-items-center gap-2 mb-4 bg-white p-2 rounded-4 shadow-sm justify-content-center" style="max-width:500px; margin:auto;">
-        <label for="data" class="form-label mb-0">Data:</label>
-        <select name="data" id="data" class="form-select form-select-sm shadow-none" style="max-width:180px; border-radius:8px;">
-            {% for arquivo in arquivos %}
-                <option value="{{ arquivo.split('.')[0] }}" {% if data_selecionada == arquivo.split('.')[0] %}selected{% endif %}>{{ arquivo.split('.')[0] }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn btn-success btn-sm px-3"><i class="bi bi-search me-1"></i>Ver</button>
+
+    <!-- Seletor de Data -->
+    <form method="POST" class="d-flex flex-row align-items-center gap-2 p-3 rounded-4 shadow-sm bg-white mb-4" style="min-height:unset;">
+        <input type="date" name="data_selecionada" class="form-control form-control-lg border-2" 
+               value="{{ data_selecionada or '' }}" style="font-size:1.1em;">
+        <button type="submit" class="btn btn-success btn-lg px-4 shadow-sm" style="letter-spacing:1px;">
+            <i class="bi bi-search me-2"></i>Buscar
+        </button>
     </form>
+
+    <!-- Resultados -->
     {% if registros %}
-    <div class="table-responsive bg-white p-2 rounded-4 shadow-sm">
-        <table class="table table-hover align-middle mb-0" style="border-radius:12px; overflow:hidden;">
-            <thead style="background:#e9f5ee;">
-                <tr>
-                    <th class="text-nowrap">Código</th>
-                    <th class="text-nowrap">Nome</th>
-                    <th class="text-nowrap">Turma</th>
-                    <th class="text-nowrap">Turno</th>
-                    <th class="text-nowrap">Data/Hora</th>
-                    <th class="text-nowrap">Tipo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for registro in registros %}
-                <tr>
-                    <td>{{ registro['codigo'] }}</td>
-                    <td>{{ registro['nome'] }}</td>
-                    <td>{{ registro['turma'] }}</td>
-                    <td>{{ registro['turno'] }}</td>
-                    <td>{{ registro['data/hora'] }}</td>
-                    <td>{{ registro['tipo'] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="mb-4">
+        <h5 class="fw-bold mb-3" style="color: #14532d;">
+            <i class="bi bi-list me-2"></i>{{ registros|length }} registro(s) encontrado(s) em {{ data_selecionada }}
+        </h5>
+        <div class="resultados-historico">
+            {% for registro in registros %}
+            <div class="card mb-3 shadow-sm rounded-4" style="max-width:700px; margin:auto;">
+                <div class="card-body d-flex flex-row align-items-center gap-3">
+                    <!-- Foto do Aluno -->
+                    <div>
+                        {% if registro.foto %}
+                        <img src="/static/fotos/{{ registro.foto }}" alt="{{ registro.nome }}" 
+                             class="foto-historico shadow" 
+                             style="width:80px; height:80px; object-fit:cover; border-radius:50%; border:3px solid #22ce6a; background:#f6f6f6;"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display: none; width:80px; height:80px; border-radius:50%; background-color: #e6e6e6; align-items: center; justify-content: center; color: #999;">
+                            <i class="bi bi-person-fill" style="font-size: 32px;"></i>
+                        </div>
+                        {% else %}
+                        <div style="width:80px; height:80px; border-radius:50%; background-color: #e6e6e6; display: flex; align-items: center; justify-content: center; color: #999;">
+                            <i class="bi bi-person-fill" style="font-size: 32px;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Informações do Aluno -->
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold mb-2" style="color:#14532d; word-break:break-word;">{{ registro.nome }}</h5>
+                        <div class="mb-2">
+                            <span class="badge bg-light text-dark px-2 py-1 shadow-sm me-2">Turma: <strong>{{ registro.turma }}</strong></span>
+                            <span class="badge bg-light text-dark px-2 py-1 shadow-sm">Código: <strong>{{ registro.codigo }}</strong></span>
+                        </div>
+                        <small class="text-muted d-block mb-2">
+                            <i class="bi bi-clock me-1"></i>{{ registro.data_hora }}
+                        </small>
+                        <div>
+                            {% if 'entrada' in registro.tipo_acesso.lower() or 'Acesso' in registro.tipo_acesso %}
+                            <span class="badge bg-success px-3 py-2" style="font-size:0.85rem;">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>{{ registro.tipo_acesso }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-danger px-3 py-2" style="font-size:0.85rem;">
+                                <i class="bi bi-box-arrow-right me-1"></i>{{ registro.tipo_acesso }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
+    
     {% elif data_selecionada %}
-    <div class="alert alert-warning text-center mt-4">Nenhum registro encontrado para a data selecionada.</div>
+    <div class="alert alert-info shadow-sm rounded-4" role="alert">
+        <i class="bi bi-info-circle me-2"></i><strong>Nenhum registro encontrado</strong> para a data <strong>{{ data_selecionada }}</strong>.
+    </div>
+    
+    {% else %}
+    <div class="alert alert-warning shadow-sm rounded-4" role="alert">
+        <i class="bi bi-calendar-event me-2"></i><strong>Selecione uma data</strong> para visualizar o histórico de acessos.
+    </div>
     {% endif %}
 </div>
-<!-- Bootstrap Icons CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
+
+<style>
+    .foto-historico {
+        flex-shrink: 0;
+    }
+    
+    @media (max-width: 700px) {
+        .card-body {
+            flex-direction: column !important;
+        }
+        .foto-historico {
+            width: 100px !important;
+            height: 100px !important;
+        }
+    }
+</style>
 {% endblock %}
