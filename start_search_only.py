@@ -82,5 +82,53 @@ def public_consulta():
     
     return render_template('public_consulta.html')
 
+
+# Nova rota para cadastro de TelegramID
+@app.route('/cadastro', methods=['GET', 'POST'])
+def cadastro_telegram():
+    if request.method == 'POST':
+        codigo = request.form.get('codigo')
+        turma = request.form.get('turma')
+        nome = request.form.get('nome')
+        telegram_id = request.form.get('telegram_id')
+
+        # Validação básica
+        if not codigo or not turma or not nome or not telegram_id:
+            return render_template('cadastro_telegram.html', error="Por favor, preencha todos os campos.")
+
+        # Autenticação igual à consulta
+        user_data = load_user_data(codigo, turma)
+        if not user_data:
+            return render_template('cadastro_telegram.html', error="Código ou turma inválidos.")
+        # Conferir nome do aluno (case-insensitive, ignora espaços extras)
+        if user_data['Nome'].strip().lower() != nome.strip().lower():
+            return render_template('cadastro_telegram.html', error="Nome do aluno não confere com a carteirinha.")
+
+        # Atualizar o database.csv
+        updated = False
+        database_path = app.config['DATABASE']
+        alunos = []
+        with open(database_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            fieldnames = reader.fieldnames
+            for row in reader:
+                if row['Codigo'] == codigo and row['Turma'].lower() == turma.lower():
+                    row['TelegramID'] = telegram_id
+                    updated = True
+                alunos.append(row)
+
+        if not updated:
+            return render_template('cadastro_telegram.html', error="Não foi possível atualizar o ID do Telegram.")
+
+        # Escrever de volta no CSV
+        with open(database_path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(alunos)
+
+        return render_template('cadastro_telegram.html', success="ID do Telegram cadastrado com sucesso!")
+
+    return render_template('cadastro_telegram.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5010, debug=True)
