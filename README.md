@@ -1,106 +1,136 @@
 # SchoolPass
 
-O SchoolPass é um sistema de gerenciamento de acesso e registros para escolas, projetado para modernizar e simplificar o controle de entrada e saída de alunos, a geração de carteirinhas estudantis e o registro de ocorrências.
+O **SchoolPass** é um sistema completo de gerenciamento de acesso e segurança escolar. Ele moderniza o controle de entrada e saída de alunos, oferece carteirinhas digitais, integrações com Telegram para notificações em tempo real e ferramentas administrativas robustas para gestão de dados e usuários.
 
-## ✨ Funcionalidades
+## ✨ Funcionalidades Principais
 
-*   **Controle de Acesso:** Registra a entrada e saída de alunos através da leitura de códigos de barras.
-*   **Gerador de Carteirinhas:** Cria e personaliza carteirinhas estudantis com foto, informações do aluno e código de barras.
-*   **Carômetro:** Uma interface visual para consulta rápida de alunos por turma.
-*   **Histórico de Acesso:** Mantém um registro detalhado de todos os acessos dos alunos.
-*   **Gestão de Ocorrências:** Permite o registro e a consulta de ocorrências disciplinares ou de outra natureza.
-*   **Alertas no Telegram:** Envia notificações em tempo real para um chatbot no Telegram no momento da entrada ou saída do aluno.
-*   **Níveis de Acesso:** Módulos separados para administração completa e para consulta/busca de alunos.
-*   **Interface Web:** Acessível a partir de qualquer dispositivo na rede local.
+### 🏢 Painel Administrativo (`start_admin_only.py`)
+O coração do sistema para a equipe da escola.
+*   **Monitoramento em Tempo Real**: Visualize entradas e saídas conforme elas acontecem.
+*   **Registro Manual**: Registre acessos manualmente caso o aluno esqueça a carteirinha.
+*   **Gestão de Dados**: Ferramentas para backup (ZIP), restauração e limpeza segura do banco de dados.
+*   **Carômetro**: Visualização rápida de todos os alunos por turma com fotos.
+*   **Histórico Completo**: Logs detalhados de acesso de cada aluno.
 
-## 🛠️ Tecnologias Utilizadas
+### 🔍 Portal de Consulta (`start_search_only.py`)
+Interface pública ou restrita para alunos e responsáveis.
+*   **Busca de Alunos**: Encontre alunos por código e turma.
+*   **Carteirinha Digital**: Visualize e imprima a carteirinha estudantil com código de barras.
+*   **Histórico de Acesso**: Consulte os registros de entrada e saída do aluno.
+*   **Integração Telegram**: Vincule um ID do Telegram para receber notificações.
 
-*   **Backend:** Python com [Flask](https://flask.palletsprojects.com/)
-*   **Frontend:** HTML, CSS, JavaScript
-*   **Banco de Dados:** Arquivos CSV (gerenciados com a biblioteca [Pandas](https://pandas.pydata.org/))
-*   **Geração de Código de Barras:** [python-barcode](https://pypi.org/project/python-barcode/)
-*   **Manipulação de Imagens:** [Pillow](https://python-pillow.org/)
-*   **Autenticação:** [Flask-Login](https://flask-login.readthedocs.io/)
+### 📱 Notificações via Telegram
+*   **Alertas em Tempo Real**: Os responsáveis recebem uma mensagem instantânea no Telegram sempre que o aluno entra ou sai da escola.
+*   **Cadastro Fácil**: Interface dedicada para vincular o usuário do Telegram ao perfil do aluno.
 
-## 🚀 Instalação e Execução
+### 👥 Gerenciador de Usuários (`user_creator_gui.py`)
+Uma ferramenta gráfica (GUI) para gerenciar quem tem acesso ao sistema.
+*   **Interface Amigável**: Janela desktop simples para adicionar, remover e editar usuários.
+*   **Segurança**: As senhas são armazenadas com hash seguro.
 
-Siga os passos abaixo para configurar e executar o projeto em seu ambiente local.
+---
+
+## 🚀 Instalação
 
 ### Pré-requisitos
+*   Python 3.8 ou superior
+*   Git
 
-*   [Python 3.8+](https://www.python.org/downloads/)
-*   pip (gerenciador de pacotes do Python)
+### Passo a Passo
 
-### 1. Clone o Repositório
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/joaovbelo5/SchoolPass.git
+    cd SchoolPass
+    ```
 
+2.  **Crie e ative um ambiente virtual:**
+    *   Windows:
+        ```bash
+        python -m venv venv
+        venv\Scripts\activate
+        ```
+    *   Linux/Mac:
+        ```bash
+        python3 -m venv venv
+        source venv/bin/activate
+        ```
+
+3.  **Instale as dependências:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+---
+
+## ⚙️ Configuração
+
+Crie um arquivo `.env` na raiz do projeto para configurar as variáveis de ambiente. Você pode usar o arquivo `.env.example` (se existir) como base.
+
+**Exemplo de `.env`:**
+```ini
+# Configurações do Telegram
+TELEGRAM_BOT_TOKEN=seu_token_do_bot_aqui
+
+# Configurações da Carteirinha
+CARTEIRINHA_ESCOLA=Nome da Sua Escola
+CARTEIRINHA_TELEFONE=(XX) XXXXX-XXXX
+CARTEIRINHA_ENDERECO=Rua Exemplo, 123
+CARTEIRINHA_VALIDADE=31/12/2025
+
+# Outras Configurações
+SECRET_KEY=sua_chave_secreta_flask
+```
+
+---
+
+## 🖥️ Como Usar
+
+### 1. Iniciar o Servidor Completo
+Para rodar tanto o painel administrativo quanto a busca simultaneamente (recomendado para testes ou servidores unificados):
 ```bash
-git clone https://github.com/joaovbelo5/SchoolPass.git
-cd SchoolPass
+python start_server.py
 ```
+*   **Admin:** `http://localhost:5000`
+*   **Busca:** `http://localhost:5010`
 
-### 2. Crie um Ambiente Virtual
+### 2. Rodar Módulos Separadamente
+Se preferir rodar serviços em portas ou máquinas diferentes:
 
-É uma boa prática usar um ambiente virtual para isolar as dependências do projeto.
+*   **Apenas Admin:**
+    ```bash
+    python start_admin_only.py
+    ```
+*   **Apenas Busca:**
+    ```bash
+    python start_search_only.py
+    ```
 
+### 3. Gerenciar Usuários do Sistema
+Para criar logins para o painel administrativo, execute a ferramenta gráfica:
 ```bash
-# Para Windows
-python -m venv venv
-venv\Scripts\activate
-
-# Para macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
+python user_creator_gui.py
 ```
+Uma janela abrirá permitindo cadastrar novos administradores.
 
-### 3. Instale as Dependências
+---
 
-Instale todas as bibliotecas necessárias a partir do arquivo `requirements.txt`.
+## 📂 Estrutura do Projeto
 
-```bash
-pip install -r requirements.txt
-```
+*   `start_admin_only.py`: Servidor Flask do painel administrativo.
+*   `start_search_only.py`: Servidor Flask da busca pública.
+*   `user_creator_gui.py`: Interface Tkinter para gestão de usuários (`usuarios.csv`).
+*   `database.csv`: Banco de dados principal com informações dos alunos.
+*   `usuarios.csv`: Banco de dados de usuários do sistema (admin).
+*   `registros/`: Pasta onde são salvos os logs de acesso individuais (`.txt`).
+*   `backups/`: Pasta para armazenamento de backups gerados pelo sistema.
+*   `templates/`: Arquivos HTML (Jinja2).
+*   `static/`: Arquivos CSS, JS e imagens.
 
-### 4. Execute o Servidor
+## 🛠️ Tecnologias
 
-Para iniciar a aplicação principal com todas as funcionalidades de administrador, execute:
-
-```bash
-python START_SERVER.py
-```
-
-O servidor estará disponível em `http://IP_DO_SERVIDOR:5000` (administrador e registros) e `http://IP_DO_SERVIDOR:5010` (consulta/busca).
-
-### Módulos Adicionais
-
-O projeto inclui scripts para iniciar a aplicação em modos específicos:
-
-*   **Admin (somente):** `python start_admin_only.py`
-*   **Busca (somente):** `python start_search_only.py`
-
-## 📂 Estrutura de Arquivos
-
-```
-SchoolPass/
-├─── static/              # Arquivos estáticos (CSS, JS, imagens, sons)
-├─── templates/           # Templates HTML do Flask
-├─── .env                 # Arquivo de variáveis de ambiente (deve ser criado)
-├─── database.csv         # "Banco de dados" principal com informações dos alunos
-├─── usuarios.csv         # "Banco de dados" de usuários do sistema
-├─── requirements.txt     # Lista de dependências do Python
-├─── START_SERVER.py      # Script principal para iniciar a aplicação
-└─── ...                  # Outros arquivos e pastas
-```
-
-## 🤝 Contribuições
-
-Contribuições são bem-vindas! Se você tem ideias para melhorias ou encontrou um bug, sinta-se à vontade para abrir uma *issue* ou enviar um *pull request*.
-
-1.  Faça um *fork* do projeto.
-2.  Crie uma nova *branch* (`git checkout -b feature/nova-funcionalidade`).
-3.  Faça o *commit* de suas alterações (`git commit -m 'Adiciona nova funcionalidade'`).
-4.  Faça o *push* para a *branch* (`git push origin feature/nova-funcionalidade`).
-5.  Abra um *Pull Request*.
-
-## 📄 Licença
-
-Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+*   **Backend:** Python (Flask)
+*   **Frontend:** HTML5, CSS3, JavaScript
+*   **Dados:** CSV (Pandas)
+*   **GUI Desktop:** Tkinter
+*   **Outros:** `python-barcode`, `Pillow` (processamento de imagem)
