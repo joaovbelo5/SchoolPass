@@ -1,129 +1,312 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
+
 <head>
+    <meta charset="UTF-8">
     <title>Carteirinha Escolar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .carteirinha {
-            width: 112mm;
-            height: 88mm;
-            border: 1.5px solid #000000;
-            margin: 5mm;
-            display: inline-block;
-            font-family: Arial, sans-serif;
-            position: relative;
-            background: linear-gradient(135deg, #ffffff 70%, #ffffff 100%);
-            box-shadow: 0 2px 8px rgba(32,99,32,0.08);
-            overflow: hidden;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
-        .frente, .verso {
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f0;
+            /* Light gray background for screen view to distinguish card */
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        .carteirinha {
+            width: 120mm;
+            height: 95mm;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            margin: 5mm;
+            display: inline-flex;
+            /* Use flex for side-by-side */
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            page-break-inside: avoid;
+        }
+
+        /* Print specific overrides */
+        @media print {
+            body {
+                background-color: #ffffff;
+            }
+
+            .carteirinha {
+                margin: 0 0 5mm 0;
+                box-shadow: none;
+                border: 1px solid #000;
+                /* Solid border for print */
+            }
+        }
+
+        .lado {
             width: 50%;
             height: 100%;
-            padding: 2.5mm 2mm 2mm 2.5mm;
-            box-sizing: border-box;
-            float: left;
+            padding: 4mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
         }
 
+        /* --- FRENTE --- */
         .frente {
-            border-right: 1px dashed #22ce6a;
+            border-right: 1px dashed #cbd5e1;
         }
 
-        .foto-aluno {
-            width: 27mm;
-            height: 35mm;
-            object-fit: cover;
-            border: 2px solid #00421c;
-            border-radius: 2mm;
-            margin: 2mm auto 1mm auto;
-            display: block;
-            background: #e6f7ee;
-        }
-
-        .dados-aluno {
-            font-size: 11pt;
-            line-height: 1.35;
-            color: #000000;
-            font-weight: 500;
+        .logo-container {
+            height: 15mm;
             margin-bottom: 2mm;
-            text-align: center;
-        }
-
-        .codigo-barras {
-            width: 38mm;
-            height: 20mm;
-            margin: 2mm auto 0 auto;
-            display: block;
-        }
-
-        .validade {
-            position: absolute;
-            bottom: 2mm;
-            right: 2mm;
-            font-size: 10pt;
-            color: #303030;
-            background: #ffffff;
-            padding: 1mm 3mm;
-            border-radius: 3mm;
-            box-shadow: 0 1px 3px rgba(32,99,32,0.07);
-        }
-
-        .assinatura {
-            width: 30mm;
-            height: 17mm;
-            object-fit: contain;
-            margin: 1mm auto 0 auto;
-            display: block;
-            border-bottom: 1px solid #14532d;
-        }
-
-        .info-escola {
-            font-size: 8.5pt;
-            text-align: center;
-            margin-top: 0.5mm;
-            color: #000000;
-            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
         }
 
         .logo-escola {
-            width: 44mm;
-            height: 16mm;
-            display: block;
-            margin: 0 auto 2mm auto;
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
         }
-        /* .frente .logo-escola { filter: drop-shadow(0 1px 2px #22ce6a); } Removido conforme solicitado */
+
+        .foto-container {
+            width: 28mm;
+            height: 36mm;
+            padding: 1mm;
+            border: 2px solid #15803d;
+            /* Primary Green */
+            border-radius: 3mm;
+            margin-bottom: 2mm;
+            background: #ffffff;
+        }
+
+        .foto-aluno {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 2mm;
+            background-color: #f1f5f9;
+        }
+
+        .dados-aluno {
+            text-align: center;
+            width: 100%;
+        }
+
+        .nome-aluno {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1mm;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .info-grid {
+            display: flex;
+            justify-content: center;
+            gap: 3mm;
+            font-size: 9pt;
+            color: #475569;
+            margin-bottom: 1mm;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .info-label {
+            font-size: 6.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .validade-badge {
+            background-color: #15803d;
+            color: #ffffff;
+            font-size: 7pt;
+            font-weight: 600;
+            padding: 1mm 3mm;
+            border-radius: 4mm;
+            margin-top: auto;
+            /* Push to bottom */
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- VERSO --- */
+        .verso {
+            justify-content: space-between;
+        }
+
+        .escola-info {
+            text-align: center;
+            font-size: 8pt;
+            color: #334155;
+            width: 100%;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 2mm;
+            margin-bottom: 2mm;
+        }
+
+        .escola-nome {
+            font-weight: 700;
+            color: #15803d;
+            font-size: 9pt;
+            margin-bottom: 0.5mm;
+        }
+
+        .barcode-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .codigo-barras {
+            width: 60mm;
+            height: 25mm;
+            /* Fixed height for barcode */
+            object-fit: contain;
+            margin-bottom: 1mm;
+        }
+
+        .codigo-texto {
+            font-family: 'Courier New', monospace;
+            font-size: 9pt;
+            font-weight: 600;
+            color: #000;
+            letter-spacing: 1px;
+        }
+
+        .assinatura-container {
+            text-align: center;
+            width: 80%;
+            margin-top: 2mm;
+        }
+
+        .assinatura-img {
+            height: 20mm;
+            max-width: 100%;
+            object-fit: contain;
+            margin-bottom: 0.5mm;
+        }
+
+        .assinatura-linha {
+            border-top: 1px solid #94a3b8;
+            width: 100%;
+            margin-bottom: 1mm;
+        }
+
+        .assinatura-label {
+            font-size: 6pt;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .emissao-info {
+            font-size: 6.5pt;
+            color: #94a3b8;
+            margin-top: 2mm;
+        }
     </style>
 </head>
+
 <body>
     {% for aluno in alunos %}
     <div class="carteirinha">
-        <!-- Frente -->
-        <div class="frente">
-            <img src="{{ url_for('static', filename='logo.svg') }}" class="logo-escola" alt="Logo">
-            <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" class="foto-aluno" alt="Foto">
-            <div class="dados-aluno">
-                <strong>{{ aluno.Nome }}</strong><br>
-                Turma: {{ aluno.Turma }}<br>
-                Turno: {{ aluno.Turno }}<br>
-                Código: {{ aluno.Codigo }}
+        <!-- FRENTE -->
+        <div class="lado frente">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='logo.svg') }}" class="logo-escola" alt="Logo da Escola"
+                    onerror="this.style.display='none'">
             </div>
-            <div class="validade">Validade: {{ aluno['CARTEIRINHA_VALIDADE'] }}</div>
+
+            <div class="foto-container">
+                <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" class="foto-aluno"
+                    alt="Foto do Aluno">
+            </div>
+
+            <div class="dados-aluno">
+                <div class="nome-aluno">{{ aluno.Nome }}</div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Turma</span>
+                        <span class="info-value">{{ aluno.Turma }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Turno</span>
+                        <span class="info-value">{{ aluno.Turno }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Código</span>
+                        <span class="info-value">{{ aluno.Codigo }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="validade-badge">
+                Validade: {{ aluno['CARTEIRINHA_VALIDADE'] }}
+            </div>
         </div>
 
-        <!-- Verso -->
-        <div class="verso">
-            <div class="info-escola">
-                <p>{{ aluno['CARTEIRINHA_ESCOLA'] }}</p>
-                <p>{{ aluno['CARTEIRINHA_TELEFONE'] }}</p>
-                <p>{{ aluno['CARTEIRINHA_ENDERECO'] }}</p>
-                <img src="{{ url_for('static', filename='barcodes/' + aluno.Codigo + '.png') }}" class="codigo-barras" alt="Código de Barras">
-                
+        <!-- VERSO -->
+        <div class="lado verso">
+            <div class="escola-info">
+                <div class="escola-nome">{{ aluno['CARTEIRINHA_ESCOLA'] }}</div>
+                <div>{{ aluno['CARTEIRINHA_ENDERECO'] }}</div>
+                <div>{{ aluno['CARTEIRINHA_TELEFONE'] }}</div>
             </div>
-            <img src="{{ url_for('static', filename='assinatura.png') }}" class="assinatura" alt="Assinatura">
-            <div class="info-escola">
-                <p>Emitido em: {{ aluno.data_emissao }}</p>
+
+            <div class="barcode-container">
+                <img src="{{ url_for('static', filename='barcodes/' + aluno.Codigo + '.png') }}" class="codigo-barras"
+                    alt="Código de Barras">
+            </div>
+
+            <div class="assinatura-container">
+                <img src="{{ url_for('static', filename='assinatura.png') }}" class="assinatura-img" alt="Assinatura"
+                    onerror="this.style.display='none'">
+                <div class="assinatura-linha"></div>
+                <div class="assinatura-label">Direção / Secretaria</div>
+            </div>
+
+            <div class="emissao-info">
+                Emitido em: {{ aluno.data_emissao }}
             </div>
         </div>
     </div>
     {% endfor %}
 </body>
+
 </html>

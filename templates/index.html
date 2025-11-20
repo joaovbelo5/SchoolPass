@@ -1,70 +1,113 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid py-2" style="max-width:600px; width:100%; margin:auto;">
-    <form method="POST" class="p-2 rounded-4 shadow-sm bg-white d-flex flex-row align-items-center gap-2 mb-2" style="min-height:unset;">
-        <input type="text" name="codigo" class="form-control form-control-sm border-2" placeholder="Digite ou escaneie o código da carteirinha" autofocus required style="font-size:0.95em; min-width:0;">
-        <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm" style="letter-spacing:0.5px; min-width:80px;">Registrar</button>
-    </form>
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-    {% if mensagem %}
-    <div class="mensagem {% if 'Negado' in mensagem or 'não encontrado' in mensagem %}erro{% else %}sucesso{% endif %} text-center" style="font-size:0.75em;">
-        {{ mensagem }}
-    </div>
-    {% endif %}
-
-    {% if aluno %}
-    <div class="d-flex flex-column flex-md-row align-items-center gap-3 p-3 rounded-4 shadow bg-white my-2">
-        <div class="d-flex justify-content-center align-items-center" style="min-width:160px;">
-            <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" alt="Foto do Aluno" class="shadow" style="width: 140px; height: 140px; object-fit: cover; border-radius: 50%; border: 4px solid #22ce6a; background: #f6f6f6;">
-        </div>
-        <div class="flex-grow-1 text-center text-md-start">
-            <h2 class="fw-bold mb-1" style="color: #14532d; font-size:2em; word-break: break-word;">{{ aluno.Nome }}</h2>
-            <div class="mb-1"><span class="badge bg-light text-dark px-2 py-1 shadow-sm">Turma: <strong>{{ aluno.Turma }}</strong></span></div>
-            <div class="mb-1"><span class="badge bg-light text-dark px-2 py-1 shadow-sm">Turno: <strong>{{ aluno.Turno }}</strong></span></div>
-            <div class="mb-1">
-                <span class="badge px-2 py-1 shadow-sm {% if aluno.Permissao == 'Sim' %}bg-success{% else %}bg-danger{% endif %}" style="font-size:1.1em;">
-                    {{ 'PERMITIDO' if aluno.Permissao == 'Sim' else 'PROIBIDO' }}
-                </span>
+        <!-- Search Card -->
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body p-3">
+                <form method="POST" class="d-flex gap-2">
+                    <input type="text" name="codigo" class="form-control form-control-lg"
+                        placeholder="Digite ou escaneie o código..." autofocus required autocomplete="off">
+                    <button type="submit" class="btn btn-primary btn-lg px-4">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                </form>
             </div>
         </div>
-    </div>
-    {% endif %}
 
-    <div class="counter-container mt-2 mb-2 p-2 rounded-4 shadow-sm bg-white d-flex gap-2">
-        <div class="counter-item flex-fill">
-            <h5 class="text-success mb-1" style="font-size:0.95em;">Manhã</h5>
-            <h3 id="contador-manha" class="fw-bold" style="font-size:1.2em;">0</h3>
+        {% if mensagem %}
+        <div
+            class="alert {% if 'Negado' in mensagem or 'não encontrado' in mensagem %}alert-danger{% else %}alert-success{% endif %} text-center mb-3 shadow-sm py-2">
+            <i
+                class="bi {% if 'Negado' in mensagem or 'não encontrado' in mensagem %}bi-exclamation-circle{% else %}bi-check-circle{% endif %} me-2"></i>
+            {{ mensagem }}
         </div>
-        <div class="counter-item flex-fill">
-            <h5 class="text-success mb-1" style="font-size:0.95em;">Tarde</h5>
-            <h3 id="contador-tarde" class="fw-bold" style="font-size:1.2em;">0</h3>
+        {% endif %}
+
+        {% if aluno %}
+        <!-- Student Info Card -->
+        <div class="card mb-3 border-0 shadow-md overflow-hidden">
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-4 bg-light d-flex align-items-center justify-content-center p-3">
+                        <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" alt="Foto do Aluno"
+                            class="rounded-circle shadow-sm border border-4 border-white"
+                            style="width: 130px; height: 130px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-8 p-3 d-flex flex-column justify-content-center">
+                        <h3 class="fw-bold text-primary mb-1">{{ aluno.Nome }}</h3>
+
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <span class="badge bg-light text-dark border px-2 py-1 rounded-pill">
+                                <i class="bi bi-people me-1"></i> {{ aluno.Turma }}
+                            </span>
+                            <span class="badge bg-light text-dark border px-2 py-1 rounded-pill">
+                                <i class="bi bi-clock me-1"></i> {{ aluno.Turno }}
+                            </span>
+                        </div>
+
+                        <div>
+                            {% if aluno.Permissao == 'Sim' %}
+                            <div
+                                class="d-inline-flex align-items-center px-3 py-1 rounded-pill bg-success text-white fw-bold small">
+                                <i class="bi bi-check-circle-fill me-2"></i> PERMITIDO
+                            </div>
+                            {% else %}
+                            <div
+                                class="d-inline-flex align-items-center px-3 py-1 rounded-pill bg-danger text-white fw-bold small">
+                                <i class="bi bi-x-circle-fill me-2"></i> PROIBIDO
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="counter-item flex-fill">
-            <h5 class="text-success mb-1" style="font-size:0.95em;">Noite</h5>
-            <h3 id="contador-noite" class="fw-bold" style="font-size:1.2em;">0</h3>
+        {% endif %}
+
+        <!-- Counters -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-3">
+                <div class="row text-center g-0">
+                    <div class="col border-end">
+                        <div class="text-muted small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Manhã</div>
+                        <div class="h4 mb-0 text-primary" id="contador-manha">0</div>
+                    </div>
+                    <div class="col border-end">
+                        <div class="text-muted small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Tarde</div>
+                        <div class="h4 mb-0 text-primary" id="contador-tarde">0</div>
+                    </div>
+                    <div class="col border-end">
+                        <div class="text-muted small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Noite</div>
+                        <div class="h4 mb-0 text-primary" id="contador-noite">0</div>
+                    </div>
+                    <div class="col bg-light rounded-end">
+                        <div class="text-muted small text-uppercase fw-bold mb-1 pt-1" style="font-size: 0.7rem;">Total
+                        </div>
+                        <div class="h4 mb-0 text-success" id="contador-total">0</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="counter-item total flex-fill">
-            <h5 class="text-success mb-1" style="font-size:0.95em;">Total</h5>
-            <h3 id="contador-total" class="fw-bold" style="font-size:1.2em;">0</h3>
-        </div>
+
     </div>
 </div>
 
-
-
 <script>
-function atualizarContadores() {
-    fetch('/get_contadores')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('contador-manha').textContent = data.contadores['Manhã'] || 0;
-            document.getElementById('contador-tarde').textContent = data.contadores['Tarde'] || 0;
-            document.getElementById('contador-noite').textContent = data.contadores['Noite'] || 0;
-            document.getElementById('contador-total').textContent = data.total || 0;
-        });
-}
-setInterval(atualizarContadores, 1000);
-atualizarContadores();
+    function atualizarContadores() {
+        fetch('/get_contadores')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('contador-manha').textContent = data.contadores['Manhã'] || 0;
+                document.getElementById('contador-tarde').textContent = data.contadores['Tarde'] || 0;
+                document.getElementById('contador-noite').textContent = data.contadores['Noite'] || 0;
+                document.getElementById('contador-total').textContent = data.total || 0;
+            })
+            .catch(err => console.error('Erro ao atualizar contadores:', err));
+    }
+    setInterval(atualizarContadores, 1000);
+    atualizarContadores();
 </script>
 
 {% if alerta %}

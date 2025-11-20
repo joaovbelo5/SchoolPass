@@ -1,9 +1,0 @@
-Nome: Aluno
-Turma: EQUIPE
-Turno: Manhã
-Código: 261010001
-
-REGISTRO DE ACESSOS:
-------------------------------
-14/11/2025 15:53:09 - Acesso
-14/11/2025 15:54:32 - Acesso

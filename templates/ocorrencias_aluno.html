@@ -1,51 +1,95 @@
-
 {% extends "base.html" %}
-{% block content %}
-<div class="container py-4" style="max-width:800px;">
-    <div class="d-flex flex-column flex-md-row align-items-center gap-3 mb-4">
-        <div class="d-flex align-items-center justify-content-center" style="min-width:120px;">
-            <img src="{{ url_for('static', filename='fotos/' ~ aluno.Foto) }}" alt="Foto do Aluno" class="shadow" style="width:100px; height:100px; object-fit:cover; border-radius:50%; border:3px solid #22ce6a; background:#f6f6f6;">
-        </div>
-        <div class="flex-grow-1 text-center text-md-start">
-            <h2 class="fw-bold mb-1" style="color:#14532d; font-size:2em; word-break:break-word;">{{ aluno.Nome }}</h2>
-            <span class="badge bg-light text-dark px-2 py-1 shadow-sm me-2">Turma: <strong>{{ aluno.Turma }}</strong></span>
-            <span class="badge bg-light text-dark px-2 py-1 shadow-sm">Código: <strong>{{ aluno.Codigo }}</strong></span>
-        </div>
-        <div class="mt-2 mt-md-0">
-            <a href="{{ url_for('nova_ocorrencia', codigo=aluno.Codigo) }}" class="btn btn-success rounded-4 px-4 py-2"><i class="bi bi-plus-circle"></i> Nova Ocorrência</a>
-        </div>
-    </div>
 
-    <div class="bg-white rounded-4 shadow-sm p-3">
-        <h4 class="fw-bold mb-3 text-success"><i class="bi bi-journal-text"></i> Ocorrências</h4>
-        {% if ocorrencias %}
-        <div class="row g-3">
-            {% for ocorrencia in ocorrencias %}
-            <div class="col-12 col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body d-flex flex-column justify-content-between h-100">
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-dark"><i class="bi bi-exclamation-circle text-warning"></i> {{ ocorrencia.medida }}</span>
-                                <span class="badge bg-secondary bg-opacity-25 text-dark" style="font-size:0.95em;">{{ ocorrencia.data }}</span>
+{% block title %}Ocorrências do Aluno{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- Student Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+                        <img src="{{ url_for('static', filename='fotos/' ~ aluno.Foto) }}" alt="Foto"
+                            class="rounded-circle shadow border border-4 border-success"
+                            style="width: 100px; height: 100px; object-fit: cover;">
+                        <div class="text-center text-md-start flex-grow-1">
+                            <h2 class="fw-bold text-dark mb-2">{{ aluno.Nome }}</h2>
+                            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
+                                <span class="badge bg-light text-dark border px-3 py-2"><i
+                                        class="bi bi-people me-2"></i>{{ aluno.Turma }}</span>
+                                <span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-upc me-2"></i>{{
+                                    aluno.Codigo }}</span>
                             </div>
-                            <div class="mb-2 text-break" style="font-size:1.05em;">{{ ocorrencia.texto }}</div>
                         </div>
-                        <div class="d-flex justify-content-between align-items-end mt-2">
-                            <span class="text-secondary" style="font-size:0.95em;">Registrado por: <strong>{{ ocorrencia.registrado_por }}</strong></span>
-                            <form method="POST" action="{{ url_for('excluir_ocorrencia', codigo=aluno.Codigo) }}">
-                                <input type="hidden" name="indice" value="{{ loop.index0 }}">
-                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-4"><i class="bi bi-trash"></i></button>
-                            </form>
+                        <div>
+                            <a href="{{ url_for('nova_ocorrencia', codigo=aluno.Codigo) }}"
+                                class="btn btn-success fw-bold px-4 py-2 shadow-sm">
+                                <i class="bi bi-plus-lg me-2"></i>Nova Ocorrência
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-            {% endfor %}
+
+            <!-- Occurrences List -->
+            <h4 class="fw-bold text-secondary mb-3 ps-2 border-start border-4 border-warning">
+                Histórico de Ocorrências
+            </h4>
+
+            {% if ocorrencias %}
+            <div class="d-flex flex-column gap-3">
+                {% for ocorrencia in ocorrencias %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="fw-bold text-danger mb-1">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>{{ ocorrencia.medida }}
+                                </h5>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar-event me-1"></i>{{ ocorrencia.data }}
+                                </small>
+                            </div>
+                            <form method="POST" action="{{ url_for('excluir_ocorrencia', codigo=aluno.Codigo) }}"
+                                onsubmit="return confirm('Tem certeza que deseja excluir esta ocorrência?');">
+                                <input type="hidden" name="indice" value="{{ loop.index0 }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-2"
+                                    title="Excluir">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="bg-light rounded-3 p-3 mb-3 border-start border-3 border-danger">
+                            <p class="mb-0 text-dark">{{ ocorrencia.texto }}</p>
+                        </div>
+
+                        <div class="d-flex align-items-center text-muted small">
+                            <i class="bi bi-person-check me-2"></i>
+                            Registrado por: <strong class="ms-1">{{ ocorrencia.registrado_por }}</strong>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-success d-flex align-items-center shadow-sm p-4" role="alert">
+                <i class="bi bi-check-circle-fill fs-3 me-3"></i>
+                <div>
+                    <h5 class="alert-heading fw-bold mb-1">Nenhuma ocorrência</h5>
+                    <p class="mb-0">Este aluno não possui registros disciplinares.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="mt-4 text-center">
+                <a href="javascript:history.back()" class="btn btn-link text-muted text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i>Voltar
+                </a>
+            </div>
         </div>
-        {% else %}
-        <div class="alert alert-info rounded-4 text-center py-3"><i class="bi bi-info-circle"></i> Nenhuma ocorrência registrada para este aluno.</div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

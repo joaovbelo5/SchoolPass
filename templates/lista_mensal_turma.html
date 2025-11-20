@@ -4,34 +4,64 @@
 
 {% block content %}
 <style>
-    /* Estilos para a impressão */
+    /* Print Styles */
     @media print {
         .no-print {
             display: none !important;
         }
+
         .print-header {
             display: block !important;
             text-align: center;
             margin-bottom: 20px;
         }
-        .print-header h4, .print-header h5, .print-header h6 {
+
+        .print-header h4,
+        .print-header h5,
+        .print-header h6 {
             margin: 0;
+            color: black !important;
         }
+
         .table {
             font-size: 10pt !important;
+            width: 100% !important;
+            border-collapse: collapse !important;
         }
-        .table th, .table td {
-            padding: 0.2rem;
+
+        .table th,
+        .table td {
+            padding: 4px !important;
+            border: 1px solid #000 !important;
         }
+
+        .badge-dot {
+            color: black !important;
+            font-size: 14pt !important;
+        }
+
         @page {
             size: A4 landscape;
             margin: 1cm;
+        }
+
+        body {
+            background: white !important;
+        }
+
+        .container-fluid {
+            padding: 0 !important;
+        }
+
+        .card {
+            border: none !important;
+            shadow: none !important;
         }
     }
 </style>
 
 <div class="container-fluid py-4">
-    <!-- Cabeçalho visível apenas para impressão -->
+    <!-- Print Header -->
     <div class="print-header d-none">
         <h4>{{ escola_nome }}</h4>
         <h5>Lista de Chamada - {{ turma_selecionada }}</h5>
@@ -39,65 +69,98 @@
     </div>
 
     <div class="text-center mb-4 no-print">
-        <h2 class="fw-bold mb-1" style="color: #14532d; letter-spacing: 1px;">
-            <i class="bi bi-calendar-check me-2"></i>Lista de Chamada Mensal
-        </h2>
-        <p class="text-muted">Consulte a frequência dos alunos por turma e mês.</p>
+        <h1 class="fw-bold text-primary mb-2">
+            <i class="bi bi-calendar-check me-2"></i>Lista de Chamada
+        </h1>
+        <p class="text-muted">Consulte a frequência mensal por turma</p>
     </div>
 
-    <!-- Filtros -->
-    <form method="POST" class="d-flex flex-wrap justify-content-center align-items-end gap-3 mb-4 bg-white p-3 rounded-4 shadow-sm no-print">
-        <div class="form-group">
-            <label for="turma" class="form-label fw-bold">Turma:</label>
-            <select name="turma" id="turma" class="form-select" style="min-width: 200px;">
-                {% for turma in turmas %}
-                    <option value="{{ turma }}" {% if turma == turma_selecionada %}selected{% endif %}>{{ turma }}</option>
-                {% endfor %}
-            </select>
+    <!-- Filter Form -->
+    <div class="row justify-content-center mb-4 no-print">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="POST" class="row g-3 align-items-end justify-content-center">
+                        <div class="col-md-4">
+                            <label for="turma" class="form-label fw-bold text-secondary">Turma</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-people"></i></span>
+                                <select name="turma" id="turma" class="form-select" required>
+                                    {% for turma in turmas %}
+                                    <option value="{{ turma }}" {% if turma==turma_selecionada %}selected{% endif %}>{{
+                                        turma }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mes" class="form-label fw-bold text-secondary">Mês de Referência</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-calendar-month"></i></span>
+                                <input type="month" id="mes" name="mes" class="form-control"
+                                    value="{{ mes_selecionado }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-auto d-flex gap-2">
+                            <button type="submit" class="btn btn-primary fw-bold px-4">
+                                <i class="bi bi-search me-2"></i>Visualizar
+                            </button>
+                            <button type="button" onclick="window.print();"
+                                class="btn btn-outline-secondary fw-bold px-4">
+                                <i class="bi bi-printer me-2"></i>Imprimir
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="mes" class="form-label fw-bold">Mês:</label>
-            <input type="month" id="mes" name="mes" class="form-control" value="{{ mes_selecionado }}">
-        </div>
-        <button type="submit" class="btn btn-success">
-            <i class="bi bi-search me-1"></i>Ver
-        </button>
-        <button type="button" onclick="window.print();" class="btn btn-secondary">
-            <i class="bi bi-printer me-1"></i>Imprimir
-        </button>
-    </form>
+    </div>
 
+    <!-- Results Table -->
     <div id="secao-impressao">
         {% if dados_chamada %}
-        <div class="table-responsive bg-white p-3 rounded-4 shadow-sm">
-            <table class="table table-bordered table-hover text-center" style="font-size: 0.9em;">
-                <thead class="table-light">
-                    <tr>
-                        <th class="text-start" style="min-width: 200px; vertical-align: middle;">ALUNO</th>
-                        {% for dia in dias_do_mes %}
-                            <th style="width: 30px;">{{ dia }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for aluno in dados_chamada %}
-                    <tr>
-                        <td class="text-start fw-bold">{{ aluno.nome }}</td>
-                        {% for presenca in aluno.presencas %}
-                            <td class="text-center" style="vertical-align: middle;">
-                                {% if presenca %}
-                                    <span style="color: #14532d; font-weight: bold; font-size: 1.2em;">•</span>
-                                {% endif %}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0 text-center align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-start ps-3 py-3" style="min-width: 250px;">ALUNO</th>
+                                {% for dia in dias_do_mes %}
+                                <th style="width: 35px;" class="small">{{ dia }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for aluno in dados_chamada %}
+                            <tr>
+                                <td class="text-start fw-bold ps-3 text-nowrap">{{ aluno.nome }}</td>
+                                {% for presenca in aluno.presencas %}
+                                <td class="p-1">
+                                    {% if presenca %}
+                                    <i class="bi bi-circle-fill text-success badge-dot d-print-none"
+                                        style="font-size: 0.6rem;"></i>
+                                    <span class="d-none d-print-inline badge-dot">•</span>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         {% else %}
-        <div class="alert alert-warning text-center mt-4 no-print">
-            Nenhum aluno encontrado para a turma selecionada ou nenhum registro de presença no mês.
+        <div class="row justify-content-center no-print">
+            <div class="col-lg-8">
+                <div class="alert alert-warning d-flex align-items-center shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-circle-fill fs-4 me-3"></i>
+                    <div>
+                        Nenhum registro encontrado para a turma e mês selecionados.
+                    </div>
+                </div>
+            </div>
         </div>
         {% endif %}
     </div>

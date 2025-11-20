@@ -3,246 +3,292 @@
 {% block title %}Administração do Sistema{% endblock %}
 
 {% block content %}
-<div class="container py-4" style="max-width:1000px;">
+<div class="container py-4">
     <!-- Toast container for visual feedback -->
     <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1080;"></div>
 
     {# Render flashed messages as toasts (if any) #}
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div id="flashedToasts" style="display:none;">
-                {% for category, msg in messages %}
-                    <div class="flashed-message" data-category="{{ category }}">{{ msg }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+    {% if messages %}
+    <div id="flashedToasts" style="display:none;">
+        {% for category, msg in messages %}
+        <div class="flashed-message" data-category="{{ category }}">{{ msg }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
     {% endwith %}
-    <div class="mb-4 text-center">
-        <h2 class="fw-bold mb-1" style="color:var(--verde-escuro);"><i class="bi bi-gear-fill me-2"></i>Administração do Sistema</h2>
-        <div class="text-muted">Gerencie configurações, logo, assinatura, backups e restauração</div>
+
+    <div class="mb-5 text-center">
+        <h1 class="fw-bold text-primary mb-2"><i class="bi bi-gear-fill me-2"></i>Administração</h1>
+        <p class="text-muted">Gerencie configurações, identidade visual e manutenção do sistema</p>
     </div>
 
     <div class="row g-4">
+        <!-- Left Column -->
         <div class="col-12 col-lg-8">
-            <div class="card shadow-sm">
+
+            <!-- Carteirinha Settings -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 text-primary"><i class="bi bi-card-heading me-2"></i>Configurações da Carteirinha
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title text-success"><i class="bi bi-card-list me-2"></i>Configurações da Carteirinha</h5>
-                    <form method="POST" action="/admin" class="row g-3 mt-2">
+                    <form method="POST" action="/admin" class="row g-3">
                         <div class="col-md-6">
-                            <label for="CARTEIRINHA_ESCOLA" class="form-label small">Escola</label>
-                            <input type="text" class="form-control form-control-sm" id="CARTEIRINHA_ESCOLA" name="CARTEIRINHA_ESCOLA" value="{{ config.escola }}" required>
+                            <label for="CARTEIRINHA_ESCOLA" class="form-label">Escola</label>
+                            <input type="text" class="form-control" id="CARTEIRINHA_ESCOLA" name="CARTEIRINHA_ESCOLA"
+                                value="{{ config.escola }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="CARTEIRINHA_TELEFONE" class="form-label small">Telefone</label>
-                            <input type="text" class="form-control form-control-sm" id="CARTEIRINHA_TELEFONE" name="CARTEIRINHA_TELEFONE" value="{{ config.telefone }}" required>
+                            <label for="CARTEIRINHA_TELEFONE" class="form-label">Telefone</label>
+                            <input type="text" class="form-control" id="CARTEIRINHA_TELEFONE"
+                                name="CARTEIRINHA_TELEFONE" value="{{ config.telefone }}" required>
                         </div>
                         <div class="col-md-8">
-                            <label for="CARTEIRINHA_ENDERECO" class="form-label small">Endereço</label>
-                            <input type="text" class="form-control form-control-sm" id="CARTEIRINHA_ENDERECO" name="CARTEIRINHA_ENDERECO" value="{{ config.endereco }}" required>
+                            <label for="CARTEIRINHA_ENDERECO" class="form-label">Endereço</label>
+                            <input type="text" class="form-control" id="CARTEIRINHA_ENDERECO"
+                                name="CARTEIRINHA_ENDERECO" value="{{ config.endereco }}" required>
                         </div>
                         <div class="col-md-4">
-                            <label for="CARTEIRINHA_VALIDADE" class="form-label small">Validade</label>
-                            <input type="text" class="form-control form-control-sm" id="CARTEIRINHA_VALIDADE" name="CARTEIRINHA_VALIDADE" value="{{ config.validade }}" required>
+                            <label for="CARTEIRINHA_VALIDADE" class="form-label">Validade</label>
+                            <input type="text" class="form-control" id="CARTEIRINHA_VALIDADE"
+                                name="CARTEIRINHA_VALIDADE" value="{{ config.validade }}" required>
                         </div>
-                        <div class="col-12 mt-2">
-                            <button type="submit" class="btn btn-success w-100"><i class="bi bi-check-lg me-1"></i>Salvar Configurações</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card shadow-sm mt-3">
-                <div class="card-body">
-                    <h5 class="card-title text-success"><i class="bi bi-image me-2"></i>Logo e Assinatura</h5>
-                    <form method="POST" action="/admin" enctype="multipart/form-data" class="row g-3 mt-2">
-                        <div class="col-md-6">
-                            <label for="assinatura" class="form-label small">Nova Assinatura (PNG)</label>
-                            <input class="form-control form-control-sm" type="file" id="assinatura" name="assinatura" accept=".png">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="logo" class="form-label small">Nova Logo (SVG)</label>
-                            <input class="form-control form-control-sm" type="file" id="logo" name="logo" accept=".svg">
-                        </div>
-                        <div class="col-12 mt-2">
-                            <button type="submit" class="btn btn-success w-100"><i class="bi bi-upload me-1"></i>Enviar</button>
+                        <div class="col-12 text-end mt-4">
+                            <button type="submit" class="btn btn-success px-4"><i class="bi bi-check-lg me-2"></i>Salvar
+                                Alterações</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <div class="card shadow-sm mt-3 mb-3">
+            <!-- Logo & Signature -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 text-primary"><i class="bi bi-palette me-2"></i>Identidade Visual</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title text-success"><i class="bi bi-telegram me-2"></i>Token do Telegram</h5>
-                    <form method="POST" action="/admin" class="row g-3 mt-2">
+                    <form method="POST" action="/admin" enctype="multipart/form-data" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="assinatura" class="form-label">Nova Assinatura (PNG)</label>
+                            <input class="form-control" type="file" id="assinatura" name="assinatura" accept=".png">
+                            <div class="form-text">Recomendado: Fundo transparente</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="logo" class="form-label">Nova Logo (SVG)</label>
+                            <input class="form-control" type="file" id="logo" name="logo" accept=".svg">
+                            <div class="form-text">Formato vetorial SVG</div>
+                        </div>
+                        <div class="col-12 text-end mt-4">
+                            <button type="submit" class="btn btn-primary px-4"><i
+                                    class="bi bi-upload me-2"></i>Atualizar Imagens</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Telegram Token -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 text-primary"><i class="bi bi-telegram me-2"></i>Integração Telegram</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/admin" class="row g-3">
                         <div class="col-12">
-                            <label for="TELEGRAM_TOKEN" class="form-label small">Token</label>
-                            <input type="text" class="form-control form-control-sm" id="TELEGRAM_TOKEN" name="TELEGRAM_TOKEN" value="{{ token }}" required>
+                            <label for="TELEGRAM_TOKEN" class="form-label">Token do Bot</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
+                                <input type="text" class="form-control" id="TELEGRAM_TOKEN" name="TELEGRAM_TOKEN"
+                                    value="{{ token }}" required placeholder="Cole o token aqui">
+                            </div>
                         </div>
-                        <div class="col-12 mt-2">
-                            <button type="submit" class="btn btn-success w-100"><i class="bi bi-check-lg me-1"></i>Salvar</button>
+                        <div class="col-12 text-end mt-4">
+                            <button type="submit" class="btn btn-success px-4"><i class="bi bi-check-lg me-2"></i>Salvar
+                                Token</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
+        <!-- Right Column -->
         <div class="col-12 col-lg-4">
-            <div class="card shadow-sm mb-3">
+
+            <!-- Danger Zone -->
+            <div class="card mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Zona de Perigo</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title text-danger"><i class="bi bi-trash3 me-2"></i>Limpar dados do servidor</h5>
-                    <p class="small text-muted">Atenção: operação irreversível. Será solicitada uma tripla verificação.</p>
-                    <div class="d-grid">
-                        <button id="openClearModal" class="btn btn-danger">Limpar dados do servidor</button>
-                    </div>
+                    <h6 class="fw-bold text-danger">Limpar Dados</h6>
+                    <p class="small text-muted mb-3">Esta ação apagará todos os registros e é irreversível. Requer
+                        verificação tripla.</p>
+                    <button id="openClearModal" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-trash3 me-2"></i>Iniciar Limpeza
+                    </button>
                 </div>
             </div>
 
-            <div class="card shadow-sm">
+            <!-- Backup & Restore -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 text-primary"><i class="bi bi-hdd-network me-2"></i>Manutenção</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title text-primary"><i class="bi bi-hdd-fill me-2"></i>Backup e Restauração</h5>
-                    <p class="small text-muted">Crie um backup ou restaure um backup previamente gerado. Backups ficam na pasta <code>backups/</code> do servidor por 3 horas.</p>
-                    <p class="small text-muted">Você pode também restaurar um backup. Basta selecionar o arquivo ZIP previamente baixado.</p>
-                    <div class="d-flex gap-2">
-                        <button id="backupBtn" class="btn btn-outline-primary flex-fill">Criar backup (ZIP)</button>
-                        <button id="restoreBtn" class="btn btn-outline-success flex-fill">Restaurar backup</button>
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2">Backup</h6>
+                        <p class="small text-muted mb-2">Gera um arquivo ZIP com todos os dados.</p>
+                        <button id="backupBtn" class="btn btn-primary w-100">
+                            <i class="bi bi-download me-2"></i>Criar Backup
+                        </button>
+                    </div>
+                    <hr>
+                    <div>
+                        <h6 class="fw-bold mb-2">Restauração</h6>
+                        <p class="small text-muted mb-2">Restaura dados a partir de um backup ZIP.</p>
+                        <button id="restoreBtn" class="btn btn-outline-success w-100">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Restaurar Backup
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-                        <!-- Modal de restauração -->
-                        <div class="modal fade" id="restoreModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Restaurar backup</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p class="mb-2">Selecione o arquivo ZIP de backup para restaurar. Esta operação irá sobrescrever os dados atuais.</p>
-                                        <div class="mb-3">
-                                                <label class="form-label small">Arquivo ZIP</label>
-                                                <input id="backupFileInput" type="file" accept=".zip" class="form-control form-control-sm">
-                                        </div>
-                                        <div class="mb-3">
-                                                <label class="form-label small">Confirmação: digite <strong>RESTAURAR BACKUP</strong></label>
-                                                <input id="restorePhraseInput" class="form-control form-control-sm" placeholder="Digite RESTAURAR BACKUP">
-                                        </div>
-                                        <div id="restoreError" class="text-danger small" style="display:none;"></div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <button id="confirmRestoreBtn" type="button" class="btn btn-success">Restaurar</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-            <!-- Modal de resultado da restauração (log) -->
-            <div class="modal fade" id="restoreResultModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Resultado da Restauração</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p class="small text-muted">Abaixo está o log/resultado retornado pelo servidor para a operação de restauração. Você pode copiar o conteúdo ou fechar e recarregar a página.</p>
-                            <pre id="restoreLogContent" class="p-2 bg-light border rounded" style="white-space:pre-wrap; max-height:60vh; overflow:auto;"></pre>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="copyRestoreLog" type="button" class="btn btn-outline-secondary">Copiar</button>
-                            <button id="restoreReloadBtn" type="button" class="btn btn-primary">Fechar e Recarregar</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                        </div>
-                    </div>
-                </div>
+<!-- Modals (Preserved Logic) -->
 
-                        <!-- Modal de resultado do backup (log) -->
-                        <div class="modal fade" id="backupResultModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Resultado do Backup</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p class="small text-muted">Abaixo está o log/resultado retornado pelo servidor ao criar o backup.</p>
-                                        <pre id="backupLogContent" class="p-2 bg-light border rounded" style="white-space:pre-wrap; max-height:60vh; overflow:auto;"></pre>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button id="copyBackupLog" type="button" class="btn btn-outline-secondary">Copiar</button>
-                                        <a id="downloadBackupBtn" class="btn btn-success" style="display:none;" href="#" download>Baixar ZIP</a>
-                                        <button id="backupReloadBtn" type="button" class="btn btn-primary">Fechar e Recarregar</button>
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<!-- Restore Modal -->
+<div class="modal fade" id="restoreModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Restaurar Backup</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
-        <!-- Modal de confirmação e tripla verificação -->
-        <div class="modal fade" id="clearModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirmação de limpeza</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p class="mb-2">Para confirmar, responda as três verificações abaixo:</p>
-                        <div class="mb-3">
-                                <label class="form-label small">1) Token de verificação (copie o número e cole abaixo)</label>
-                                <div class="p-2 bg-light border rounded">{{ clear_token }}</div>
-                                <input id="tokenInput" class="form-control form-control-sm mt-2" placeholder="Digite o token mostrado acima">
-                        </div>
-                        <div class="mb-3">
-                                <label class="form-label small">2) Operação matemática</label>
-                                <div class="p-2 bg-light border rounded">{{ math_question }}</div>
-                                <input id="mathInput" class="form-control form-control-sm mt-2" placeholder="Resultado da operação">
-                        </div>
-                        <div class="mb-3">
-                                <label class="form-label small">3) Digite a frase de confirmação</label>
-                                <div class="p-2 bg-light border rounded">DIGITAR: <strong>LIMPAR TUDO</strong></div>
-                                <input id="phraseInput" class="form-control form-control-sm mt-2" placeholder="Digite exatamente: LIMPAR TUDO">
-                        </div>
-                        <div id="clearError" class="text-danger small" style="display:none;"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button id="confirmClearBtn" type="button" class="btn btn-danger">Confirmar e limpar</button>
-                    </div>
+            <div class="modal-body">
+                <div class="alert alert-warning small">
+                    <i class="bi bi-exclamation-triangle me-1"></i> Atenção: Esta operação irá sobrescrever os dados
+                    atuais.
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Arquivo ZIP</label>
+                    <input id="backupFileInput" type="file" accept=".zip" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Confirmação</label>
+                    <input id="restorePhraseInput" class="form-control" placeholder="Digite: RESTAURAR BACKUP">
+                </div>
+                <div id="restoreError" class="text-danger small" style="display:none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="confirmRestoreBtn" type="button" class="btn btn-success">Confirmar Restauração</button>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Modal de progresso do backup -->
-        <div class="modal fade" id="backupProgressModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-body text-center py-4">
-                        <div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>
-                        <div class="fw-bold">Criando backup...</div>
-                        <div class="small text-muted">Aguarde enquanto o servidor gera o arquivo ZIP. Esta operação pode demorar alguns segundos.</div>
-                    </div>
-                </div>
+<!-- Restore Result Modal -->
+<div class="modal fade" id="restoreResultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Resultado da Restauração</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="restoreLogContent" class="p-3 bg-light border rounded small"
+                    style="white-space:pre-wrap; max-height:400px; overflow:auto;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button id="copyRestoreLog" type="button" class="btn btn-outline-secondary">Copiar Log</button>
+                <button id="restoreReloadBtn" type="button" class="btn btn-primary">Fechar e Recarregar</button>
             </div>
         </div>
-<!-- Bootstrap Icons CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
+    </div>
+</div>
+
+<!-- Backup Result Modal -->
+<div class="modal fade" id="backupResultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Resultado do Backup</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="backupLogContent" class="p-3 bg-light border rounded small"
+                    style="white-space:pre-wrap; max-height:400px; overflow:auto;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button id="copyBackupLog" type="button" class="btn btn-outline-secondary">Copiar Log</button>
+                <a id="downloadBackupBtn" class="btn btn-success" style="display:none;" href="#" download>Baixar ZIP</a>
+                <button id="backupReloadBtn" type="button" class="btn btn-primary">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clear Data Modal -->
+<div class="modal fade" id="clearModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmação de Limpeza</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger fw-bold">Responda as verificações para confirmar:</p>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">1. Token de Verificação</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light font-monospace">{{ clear_token }}</span>
+                        <input id="tokenInput" class="form-control" placeholder="Copie o token">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">2. Operação Matemática</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light font-monospace">{{ math_question }}</span>
+                        <input id="mathInput" class="form-control" placeholder="Resultado">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">3. Frase de Segurança</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light font-monospace">LIMPAR TUDO</span>
+                        <input id="phraseInput" class="form-control" placeholder="Digite: LIMPAR TUDO">
+                    </div>
+                </div>
+
+                <div id="clearError" class="alert alert-danger py-2 small" style="display:none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button id="confirmClearBtn" type="button" class="btn btn-danger">Confirmar Limpeza</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-document.addEventListener('DOMContentLoaded', function(){
-    // Helper: create and show bootstrap toast
-    function showToast(message, type){
-        type = type || 'success';
-        var toastContainer = document.getElementById('toastContainer');
-        var toast = document.createElement('div');
-        toast.className = 'toast align-items-center text-bg-light border-0';
-        toast.setAttribute('role','alert');
-        toast.setAttribute('aria-live','assertive');
-        toast.setAttribute('aria-atomic','true');
-        toast.innerHTML = `
+    document.addEventListener('DOMContentLoaded', function () {
+        // Helper: create and show bootstrap toast
+        function showToast(message, type) {
+            type = type || 'success';
+            var toastContainer = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-bg-light border-0 shadow';
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">
                     ${message}
@@ -250,126 +296,126 @@ document.addEventListener('DOMContentLoaded', function(){
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>`;
 
-        // Colorize by type
-        if(type === 'success'){
-            toast.classList.remove('text-bg-light');
-            toast.classList.add('text-bg-success');
-        } else if(type === 'error' || type === 'danger'){
-            toast.classList.remove('text-bg-light');
-            toast.classList.add('text-bg-danger');
-        } else if(type === 'info'){
-            toast.classList.remove('text-bg-light');
-            toast.classList.add('text-bg-info');
-        }
-
-        toastContainer.appendChild(toast);
-        var bsToast = new bootstrap.Toast(toast, { delay: 5000 });
-        bsToast.show();
-        // remove after hidden
-        toast.addEventListener('hidden.bs.toast', function(){ toast.remove(); });
-    }
-
-    // Show flashed messages from server as toasts
-    var flashed = document.getElementById('flashedToasts');
-    if(flashed){
-        var items = flashed.querySelectorAll('.flashed-message');
-        items.forEach(function(it){
-            var cat = it.getAttribute('data-category') || 'info';
-            var msg = it.textContent || it.innerText || '';
-            showToast(msg.trim(), cat === 'success' ? 'success' : (cat === 'error' ? 'danger' : 'info'));
-        });
-    }
-
-    var clearModalEl = document.getElementById('clearModal');
-    var clearModal = new bootstrap.Modal(clearModalEl);
-    document.getElementById('openClearModal').addEventListener('click', function(){
-        // abrir modal
-        document.getElementById('clearError').style.display = 'none';
-        document.getElementById('tokenInput').value = '';
-        document.getElementById('mathInput').value = '';
-        document.getElementById('phraseInput').value = '';
-        clearModal.show();
-    });
-
-    document.getElementById('confirmClearBtn').addEventListener('click', function(){
-        var token = document.getElementById('tokenInput').value.trim();
-        var math = document.getElementById('mathInput').value.trim();
-        var phrase = document.getElementById('phraseInput').value.trim();
-        var err = document.getElementById('clearError');
-        if(!token || !math || !phrase){
-            err.textContent = 'Por favor preencha todos os campos de verificação.';
-            err.style.display = 'block';
-            return;
-        }
-        var btn = document.getElementById('confirmClearBtn');
-        var origHTML = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processando...';
-
-        // Enviar para o servidor
-        fetch('/admin/clear_data', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: token, math: math, phrase: phrase })
-        }).then(function(r){
-            // lidar com respostas que não são JSON (por exemplo páginas de erro HTML)
-            var ct = r.headers.get('content-type') || '';
-            if(ct.indexOf('application/json') !== -1){
-                return r.json().then(function(data){
-                    if(!r.ok){ throw new Error(data.msg || 'Falha na validação'); }
-                    return data;
-                });
+            // Colorize by type
+            if (type === 'success') {
+                toast.classList.remove('text-bg-light');
+                toast.classList.add('text-bg-success');
+            } else if (type === 'error' || type === 'danger') {
+                toast.classList.remove('text-bg-light');
+                toast.classList.add('text-bg-danger');
+            } else if (type === 'info') {
+                toast.classList.remove('text-bg-light');
+                toast.classList.add('text-bg-info');
             }
-            return r.text().then(function(txt){
-                if(!r.ok){ throw new Error(txt || 'Falha na validação'); }
-                try{
-                    var parsed = JSON.parse(txt);
-                    return parsed;
-                }catch(e){
-                    return { ok: true };
-                }
+
+            toastContainer.appendChild(toast);
+            var bsToast = new bootstrap.Toast(toast, { delay: 5000 });
+            bsToast.show();
+            // remove after hidden
+            toast.addEventListener('hidden.bs.toast', function () { toast.remove(); });
+        }
+
+        // Show flashed messages from server as toasts
+        var flashed = document.getElementById('flashedToasts');
+        if (flashed) {
+            var items = flashed.querySelectorAll('.flashed-message');
+            items.forEach(function (it) {
+                var cat = it.getAttribute('data-category') || 'info';
+                var msg = it.textContent || it.innerText || '';
+                showToast(msg.trim(), cat === 'success' ? 'success' : (cat === 'error' ? 'danger' : 'info'));
             });
-        }).then(function(data){
-            // sucesso
-            err.style.display = 'none';
-            clearModal.hide();
-            showToast('Limpeza concluída com sucesso.', 'success');
-            window.location.reload();
-        }).catch(function(e){
-            err.textContent = e.message || 'Erro ao executar a limpeza.';
-            err.style.display = 'block';
-            showToast(err.textContent, 'danger');
-        }).finally(function(){
-            btn.disabled = false;
-            btn.innerHTML = origHTML;
+        }
+
+        var clearModalEl = document.getElementById('clearModal');
+        var clearModal = new bootstrap.Modal(clearModalEl);
+        document.getElementById('openClearModal').addEventListener('click', function () {
+            // abrir modal
+            document.getElementById('clearError').style.display = 'none';
+            document.getElementById('tokenInput').value = '';
+            document.getElementById('mathInput').value = '';
+            document.getElementById('phraseInput').value = '';
+            clearModal.show();
         });
-    });
-    // Backup button: redireciona para rota que gera o zip
-    var backupBtn = document.getElementById('backupBtn');
-    if(backupBtn){
-            backupBtn.addEventListener('click', function(){
+
+        document.getElementById('confirmClearBtn').addEventListener('click', function () {
+            var token = document.getElementById('tokenInput').value.trim();
+            var math = document.getElementById('mathInput').value.trim();
+            var phrase = document.getElementById('phraseInput').value.trim();
+            var err = document.getElementById('clearError');
+            if (!token || !math || !phrase) {
+                err.textContent = 'Por favor preencha todos os campos de verificação.';
+                err.style.display = 'block';
+                return;
+            }
+            var btn = document.getElementById('confirmClearBtn');
+            var origHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processando...';
+
+            // Enviar para o servidor
+            fetch('/admin/clear_data', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token, math: math, phrase: phrase })
+            }).then(function (r) {
+                // lidar com respostas que não são JSON (por exemplo páginas de erro HTML)
+                var ct = r.headers.get('content-type') || '';
+                if (ct.indexOf('application/json') !== -1) {
+                    return r.json().then(function (data) {
+                        if (!r.ok) { throw new Error(data.msg || 'Falha na validação'); }
+                        return data;
+                    });
+                }
+                return r.text().then(function (txt) {
+                    if (!r.ok) { throw new Error(txt || 'Falha na validação'); }
+                    try {
+                        var parsed = JSON.parse(txt);
+                        return parsed;
+                    } catch (e) {
+                        return { ok: true };
+                    }
+                });
+            }).then(function (data) {
+                // sucesso
+                err.style.display = 'none';
+                clearModal.hide();
+                showToast('Limpeza concluída com sucesso.', 'success');
+                window.location.reload();
+            }).catch(function (e) {
+                err.textContent = e.message || 'Erro ao executar a limpeza.';
+                err.style.display = 'block';
+                showToast(err.textContent, 'danger');
+            }).finally(function () {
+                btn.disabled = false;
+                btn.innerHTML = origHTML;
+            });
+        });
+        // Backup button: redireciona para rota que gera o zip
+        var backupBtn = document.getElementById('backupBtn');
+        if (backupBtn) {
+            backupBtn.addEventListener('click', function () {
                 backupBtn.disabled = true;
                 var orig = backupBtn.innerHTML;
-                backupBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Criando backup...';
+                backupBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Criando...';
                 fetch('/admin/backup_api', { method: 'GET', credentials: 'same-origin' })
-                    .then(function(r){
+                    .then(function (r) {
                         var ct = r.headers.get('content-type') || '';
-                        if(ct.indexOf('application/json') !== -1){
-                            return r.json().then(function(data){ if(!r.ok) throw new Error(data.msg || 'Erro'); return data; });
+                        if (ct.indexOf('application/json') !== -1) {
+                            return r.json().then(function (data) { if (!r.ok) throw new Error(data.msg || 'Erro'); return data; });
                         }
-                        return r.text().then(function(txt){ if(!r.ok) throw new Error(txt || 'Erro'); try{ return JSON.parse(txt); }catch(e){ return { ok: true, msg: txt }; } });
-                    }).then(function(data){
+                        return r.text().then(function (txt) { if (!r.ok) throw new Error(txt || 'Erro'); try { return JSON.parse(txt); } catch (e) { return { ok: true, msg: txt }; } });
+                    }).then(function (data) {
                         // show modal with log and download link
                         var log = (typeof data === 'object') ? JSON.stringify(data, null, 2) : String(data);
                         var el = document.getElementById('backupLogContent');
-                        if(el) el.textContent = log;
+                        if (el) el.textContent = log;
                         var downloadBtn = document.getElementById('downloadBackupBtn');
                         var startedDownload = false;
-                        if(downloadBtn && data.download_url){
+                        if (downloadBtn && data.download_url) {
                             downloadBtn.href = data.download_url; downloadBtn.style.display = 'inline-block';
                             // tentar iniciar download automaticamente
-                            try{
+                            try {
                                 var auto = document.createElement('a');
                                 auto.href = data.download_url;
                                 auto.download = data.filename || '';
@@ -377,192 +423,192 @@ document.addEventListener('DOMContentLoaded', function(){
                                 document.body.appendChild(auto);
                                 auto.click();
                                 startedDownload = true;
-                                setTimeout(function(){ try{ document.body.removeChild(auto); }catch(e){} }, 1500);
+                                setTimeout(function () { try { document.body.removeChild(auto); } catch (e) { } }, 1500);
                                 showToast('Download iniciado.', 'info');
-                            }catch(e){
+                            } catch (e) {
                                 startedDownload = false;
                             }
                         }
                         var bmodalEl = document.getElementById('backupResultModal');
                         // Se o download foi iniciado automaticamente, não abrir o modal (fechar caso esteja aberto);
-                        if(startedDownload){
-                            try{
+                        if (startedDownload) {
+                            try {
                                 var resInst = bootstrap.Modal.getInstance(bmodalEl);
-                                if(resInst) resInst.hide();
-                            }catch(e){}
-                            document.querySelectorAll('.modal-backdrop').forEach(function(el){ el.remove(); });
+                                if (resInst) resInst.hide();
+                            } catch (e) { }
+                            document.querySelectorAll('.modal-backdrop').forEach(function (el) { el.remove(); });
                             document.body.classList.remove('modal-open');
                         } else {
-                            if(bmodalEl){ var bmodal = new bootstrap.Modal(bmodalEl); bmodal.show(); }
+                            if (bmodalEl) { var bmodal = new bootstrap.Modal(bmodalEl); bmodal.show(); }
                         }
-                    }).catch(function(e){
+                    }).catch(function (e) {
                         // ensure we show the error log modal so user can see details
                         var el = document.getElementById('backupLogContent');
-                        if(el) el.textContent = e.message || String(e);
+                        if (el) el.textContent = e.message || String(e);
                         var bmodalEl = document.getElementById('backupResultModal');
-                        if(bmodalEl){ var bmodal = new bootstrap.Modal(bmodalEl); bmodal.show(); }
+                        if (bmodalEl) { var bmodal = new bootstrap.Modal(bmodalEl); bmodal.show(); }
                         showToast(e.message || 'Erro ao criar backup', 'danger');
-                    }).finally(function(){
+                    }).finally(function () {
                         backupBtn.disabled = false;
                         backupBtn.innerHTML = orig;
                     });
             });
-    }
-    // Restore button: abrir modal
-    var restoreBtn = document.getElementById('restoreBtn');
-    if(restoreBtn){
-        var restoreModalEl = document.getElementById('restoreModal');
-        var restoreModal = new bootstrap.Modal(restoreModalEl);
-        restoreBtn.addEventListener('click', function(){
-            document.getElementById('restoreError').style.display = 'none';
-            document.getElementById('backupFileInput').value = '';
-            document.getElementById('restorePhraseInput').value = '';
-            restoreModal.show();
-        });
-        document.getElementById('confirmRestoreBtn').addEventListener('click', function(){
-            var fileInput = document.getElementById('backupFileInput');
-            var phrase = document.getElementById('restorePhraseInput').value.trim();
-            var err = document.getElementById('restoreError');
-            if(!fileInput.files || fileInput.files.length === 0){
-                err.textContent = 'Selecione um arquivo ZIP para restaurar.';
-                err.style.display = 'block';
-                return;
-            }
-            if(phrase.toUpperCase() !== 'RESTAURAR BACKUP'){
-                err.textContent = 'Frase de confirmação incorreta.';
-                err.style.display = 'block';
-                return;
-            }
-            var fd = new FormData();
-            fd.append('backup_file', fileInput.files[0]);
-            fd.append('phrase', phrase);
-            var btn = document.getElementById('confirmRestoreBtn');
-            var origHTML = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Restaurando...';
-
-            fetch('/admin/restore', {
-                method: 'POST',
-                credentials: 'same-origin',
-                body: fd
-            }).then(function(r){
-                var ct = r.headers.get('content-type') || '';
-                if(ct.indexOf('application/json') !== -1){
-                    return r.json().then(function(data){
-                        if(!r.ok) throw new Error(data.msg || 'Falha na restauração');
-                        return data;
-                    });
-                }
-                return r.text().then(function(txt){
-                    if(!r.ok){ throw new Error(txt || 'Falha na restauração'); }
-                    try{
-                        var parsed = JSON.parse(txt);
-                        return parsed;
-                    }catch(e){
-                        return { ok: true };
-                    }
-                });
-            }).then(function(data){
-                err.style.display = 'none';
-                restoreModal.hide();
-                // Mostrar o log/resultado no modal de resultado
-                var logContent = (typeof data === 'object') ? JSON.stringify(data, null, 2) : String(data);
-                var logEl = document.getElementById('restoreLogContent');
-                if(logEl) logEl.textContent = logContent;
-                var resultModalEl = document.getElementById('restoreResultModal');
-                if(resultModalEl){
-                    var resultModal = new bootstrap.Modal(resultModalEl);
-                    resultModal.show();
-                } else {
-                    showToast('Restauração concluída com sucesso.', 'success');
-                    window.location.reload();
-                }
-            }).catch(function(e){
-                err.textContent = e.message || 'Erro ao restaurar backup.';
-                err.style.display = 'block';
-                // Mostrar erro detalhado no modal de resultado
-                var logEl = document.getElementById('restoreLogContent');
-                if(logEl) logEl.textContent = e.message || String(e);
-                var resultModalEl = document.getElementById('restoreResultModal');
-                if(resultModalEl){
-                    var resultModal = new bootstrap.Modal(resultModalEl);
-                    resultModal.show();
-                }
-                showToast(err.textContent, 'danger');
-            }).finally(function(){
-                btn.disabled = false;
-                btn.innerHTML = origHTML;
+        }
+        // Restore button: abrir modal
+        var restoreBtn = document.getElementById('restoreBtn');
+        if (restoreBtn) {
+            var restoreModalEl = document.getElementById('restoreModal');
+            var restoreModal = new bootstrap.Modal(restoreModalEl);
+            restoreBtn.addEventListener('click', function () {
+                document.getElementById('restoreError').style.display = 'none';
+                document.getElementById('backupFileInput').value = '';
+                document.getElementById('restorePhraseInput').value = '';
+                restoreModal.show();
             });
-        });
-    }
-    // Interceptar formulários que postam para /admin para mostrar feedback visual e evitar double submit
-    document.querySelectorAll('form[action="/admin"]').forEach(function(f){
-        f.addEventListener('submit', function(e){
-            var btn = f.querySelector('button[type="submit"]');
-            if(btn){
+            document.getElementById('confirmRestoreBtn').addEventListener('click', function () {
+                var fileInput = document.getElementById('backupFileInput');
+                var phrase = document.getElementById('restorePhraseInput').value.trim();
+                var err = document.getElementById('restoreError');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    err.textContent = 'Selecione um arquivo ZIP para restaurar.';
+                    err.style.display = 'block';
+                    return;
+                }
+                if (phrase.toUpperCase() !== 'RESTAURAR BACKUP') {
+                    err.textContent = 'Frase de confirmação incorreta.';
+                    err.style.display = 'block';
+                    return;
+                }
+                var fd = new FormData();
+                fd.append('backup_file', fileInput.files[0]);
+                fd.append('phrase', phrase);
+                var btn = document.getElementById('confirmRestoreBtn');
+                var origHTML = btn.innerHTML;
                 btn.disabled = true;
-                var orig = btn.innerHTML;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Enviando...';
-            }
-            // allow normal submit (will reload page). Buttons will be reset on page load.
-        });
-    });
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Restaurando...';
 
-    // Hooks for restore result modal buttons
-    var copyBtn = document.getElementById('copyRestoreLog');
-    if(copyBtn){
-        copyBtn.addEventListener('click', function(){
-            var logEl = document.getElementById('restoreLogContent');
-            if(!logEl) return;
-            navigator.clipboard.writeText(logEl.textContent || '').then(function(){
-                showToast('Log copiado para a área de transferência.', 'success');
-            }).catch(function(){
-                showToast('Falha ao copiar o log.', 'danger');
+                fetch('/admin/restore', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: fd
+                }).then(function (r) {
+                    var ct = r.headers.get('content-type') || '';
+                    if (ct.indexOf('application/json') !== -1) {
+                        return r.json().then(function (data) {
+                            if (!r.ok) throw new Error(data.msg || 'Falha na restauração');
+                            return data;
+                        });
+                    }
+                    return r.text().then(function (txt) {
+                        if (!r.ok) { throw new Error(txt || 'Falha na restauração'); }
+                        try {
+                            var parsed = JSON.parse(txt);
+                            return parsed;
+                        } catch (e) {
+                            return { ok: true };
+                        }
+                    });
+                }).then(function (data) {
+                    err.style.display = 'none';
+                    restoreModal.hide();
+                    // Mostrar o log/resultado no modal de resultado
+                    var logContent = (typeof data === 'object') ? JSON.stringify(data, null, 2) : String(data);
+                    var logEl = document.getElementById('restoreLogContent');
+                    if (logEl) logEl.textContent = logContent;
+                    var resultModalEl = document.getElementById('restoreResultModal');
+                    if (resultModalEl) {
+                        var resultModal = new bootstrap.Modal(resultModalEl);
+                        resultModal.show();
+                    } else {
+                        showToast('Restauração concluída com sucesso.', 'success');
+                        window.location.reload();
+                    }
+                }).catch(function (e) {
+                    err.textContent = e.message || 'Erro ao restaurar backup.';
+                    err.style.display = 'block';
+                    // Mostrar erro detalhado no modal de resultado
+                    var logEl = document.getElementById('restoreLogContent');
+                    if (logEl) logEl.textContent = e.message || String(e);
+                    var resultModalEl = document.getElementById('restoreResultModal');
+                    if (resultModalEl) {
+                        var resultModal = new bootstrap.Modal(resultModalEl);
+                        resultModal.show();
+                    }
+                    showToast(err.textContent, 'danger');
+                }).finally(function () {
+                    btn.disabled = false;
+                    btn.innerHTML = origHTML;
+                });
+            });
+        }
+        // Interceptar formulários que postam para /admin para mostrar feedback visual e evitar double submit
+        document.querySelectorAll('form[action="/admin"]').forEach(function (f) {
+            f.addEventListener('submit', function (e) {
+                var btn = f.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.disabled = true;
+                    var orig = btn.innerHTML;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Enviando...';
+                }
+                // allow normal submit (will reload page). Buttons will be reset on page load.
             });
         });
-    }
-    var reloadBtn = document.getElementById('restoreReloadBtn');
-    if(reloadBtn){
-        reloadBtn.addEventListener('click', function(){
-            // fecha modal e recarrega
-            var resModalEl = document.getElementById('restoreResultModal');
-            if(resModalEl){
-                var m = bootstrap.Modal.getInstance(resModalEl) || new bootstrap.Modal(resModalEl);
-                m.hide();
-            }
-            window.location.reload();
-        });
-    }
 
-    // Backup modal buttons
-    var copyBackup = document.getElementById('copyBackupLog');
-    if(copyBackup){
-        copyBackup.addEventListener('click', function(){
-            var el = document.getElementById('backupLogContent');
-            if(!el) return;
-            navigator.clipboard.writeText(el.textContent || '').then(function(){ showToast('Log copiado.', 'success'); }).catch(function(){ showToast('Falha ao copiar.', 'danger'); });
-        });
-    }
-    var backupReload = document.getElementById('backupReloadBtn');
-    if(backupReload){
-        backupReload.addEventListener('click', function(){
-            var el = document.getElementById('backupResultModal');
-            if(el){ var m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el); m.hide(); }
-            window.location.reload();
-        });
-    }
-    var downloadBackupBtn = document.getElementById('downloadBackupBtn');
-    if(downloadBackupBtn){
-        // nothing to do; href is set when backup created
-    }
+        // Hooks for restore result modal buttons
+        var copyBtn = document.getElementById('copyRestoreLog');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+                var logEl = document.getElementById('restoreLogContent');
+                if (!logEl) return;
+                navigator.clipboard.writeText(logEl.textContent || '').then(function () {
+                    showToast('Log copiado para a área de transferência.', 'success');
+                }).catch(function () {
+                    showToast('Falha ao copiar o log.', 'danger');
+                });
+            });
+        }
+        var reloadBtn = document.getElementById('restoreReloadBtn');
+        if (reloadBtn) {
+            reloadBtn.addEventListener('click', function () {
+                // fecha modal e recarrega
+                var resModalEl = document.getElementById('restoreResultModal');
+                if (resModalEl) {
+                    var m = bootstrap.Modal.getInstance(resModalEl) || new bootstrap.Modal(resModalEl);
+                    m.hide();
+                }
+                window.location.reload();
+            });
+        }
 
-    // Global JS error handlers to surface problems to the user (helps debugging)
-    window.addEventListener('error', function(ev){
-        try{ showToast('Erro no cliente: ' + (ev.message || ev.error || 'unknown'), 'danger'); }catch(e){}
+        // Backup modal buttons
+        var copyBackup = document.getElementById('copyBackupLog');
+        if (copyBackup) {
+            copyBackup.addEventListener('click', function () {
+                var el = document.getElementById('backupLogContent');
+                if (!el) return;
+                navigator.clipboard.writeText(el.textContent || '').then(function () { showToast('Log copiado.', 'success'); }).catch(function () { showToast('Falha ao copiar.', 'danger'); });
+            });
+        }
+        var backupReload = document.getElementById('backupReloadBtn');
+        if (backupReload) {
+            backupReload.addEventListener('click', function () {
+                var el = document.getElementById('backupResultModal');
+                if (el) { var m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el); m.hide(); }
+                window.location.reload();
+            });
+        }
+        var downloadBackupBtn = document.getElementById('downloadBackupBtn');
+        if (downloadBackupBtn) {
+            // nothing to do; href is set when backup created
+        }
+
+        // Global JS error handlers to surface problems to the user (helps debugging)
+        window.addEventListener('error', function (ev) {
+            try { showToast('Erro no cliente: ' + (ev.message || ev.error || 'unknown'), 'danger'); } catch (e) { }
+        });
+        window.addEventListener('unhandledrejection', function (ev) {
+            try { showToast('Promise rejeitada: ' + (ev.reason && ev.reason.message ? ev.reason.message : String(ev.reason)), 'danger'); } catch (e) { }
+        });
     });
-    window.addEventListener('unhandledrejection', function(ev){
-        try{ showToast('Promise rejeitada: ' + (ev.reason && ev.reason.message ? ev.reason.message : String(ev.reason)), 'danger'); }catch(e){}
-    });
-});
 </script>
 {% endblock %}

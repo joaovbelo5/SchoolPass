@@ -1,125 +1,63 @@
 {% extends 'base.html' %}
 {% block title %}Carômetro{% endblock %}
 {% block content %}
-<div class="container-fluid py-4" style="max-width:1200px; width:100%; margin:auto;">
-    <div class="d-print-none mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
-        <div>
-            <h2 class="fw-bold mb-1" style="color: #14532d; letter-spacing: 1px;">
-                <i class="bi bi-people me-2"></i>Carômetro
-            </h2>
-            <div class="text-muted" style="font-size:0.98em;">Visualize e imprima o carômetro dos alunos</div>
-        </div>
-        <button class="btn btn-outline-primary px-4" onclick="window.print()" title="Imprimir"><i class="bi bi-printer me-1"></i>Imprimir</button>
+<div class="container-fluid py-4">
+
+    <!-- Print Header (Visible only in print) -->
+    <div class="carometro-print-header text-center mb-4">
+        <h1 class="fw-bold">{{ config['escola'] }}</h1>
+        <h2 class="text-muted">Carômetro - {{ turma_selecionada if turma_selecionada else 'Todas as Turmas' }}</h2>
     </div>
-    <form method="POST" class="row g-2 mb-4 d-print-none">
-        <div class="col-12 col-md-8">
-            <select name="turma" class="form-select form-select-sm" style="border-radius:8px;">
-                <option value="">Todas as Turmas</option>
-                {% for turma in turmas %}
-                    <option value="{{ turma }}" {% if turma == turma_selecionada %}selected{% endif %}>{{ turma }}</option>
-                {% endfor %}
-            </select>
+
+    <div class="d-print-none mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+        <div>
+            <h2 class="fw-bold text-primary mb-1">
+                <i class="bi bi-grid-3x3-gap-fill me-2"></i>Carômetro
+            </h2>
+            <p class="text-muted mb-0">Visualize e imprima a lista de alunos com fotos</p>
         </div>
-        <div class="col-12 col-md-4 d-grid">
-            <button type="submit" class="btn btn-success">Filtrar</button>
+        <button class="btn btn-primary px-4" onclick="window.print()">
+            <i class="bi bi-printer-fill me-2"></i>Imprimir Lista
+        </button>
+    </div>
+
+    <div class="card mb-4 d-print-none border-0 shadow-sm">
+        <div class="card-body p-3">
+            <form method="POST" class="row g-2 align-items-center">
+                <div class="col-12 col-md-auto">
+                    <label class="fw-bold text-secondary me-2">Filtrar por Turma:</label>
+                </div>
+                <div class="col-12 col-md">
+                    <select name="turma" class="form-select">
+                        <option value="">Todas as Turmas</option>
+                        {% for turma in turmas %}
+                        <option value="{{ turma }}" {% if turma==turma_selecionada %}selected{% endif %}>{{ turma }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-auto">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-filter me-2"></i>Aplicar Filtro
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
+
     <div class="carometro-grid">
         {% for aluno in alunos %}
-        <div class="carometro-cartao shadow-sm">
-            <img src="{{ url_for('static', filename='fotos/' ~ aluno['Foto']) }}" alt="Foto do Aluno" class="carometro-foto">
+        <div class="carometro-card">
+            <img src="{{ url_for('static', filename='fotos/' ~ aluno['Foto']) }}" alt="Foto do Aluno"
+                class="carometro-photo">
             <div class="carometro-info">
-                <h3>{{ aluno['Nome'] }}</h3>
-                <p><strong>Turma:</strong> {{ aluno['Turma'] }}</p>
-                <p><strong>Código:</strong> {{ aluno['Codigo'] }}</p>
-                <p><strong>Turno:</strong> {{ aluno['Turno'] }}</p>
+                <div class="carometro-name" title="{{ aluno['Nome'] }}">{{ aluno['Nome'] }}</div>
+                <div class="carometro-detail"><strong>Turma:</strong> {{ aluno['Turma'] }}</div>
+                <div class="carometro-detail"><strong>Cód:</strong> {{ aluno['Codigo'] }}</div>
+                <div class="carometro-detail"><strong>Turno:</strong> {{ aluno['Turno'] }}</div>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
-<!-- Bootstrap Icons CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
-<style>
-.carometro-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 18px;
-    margin-top: 10px;
-}
-.carometro-cartao {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 12px 8px 10px 8px;
-    min-width: 0;
-    min-height: 240px;
-    max-width: 180px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-    page-break-inside: avoid;
-}
-.carometro-foto {
-    width: 150px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 2px solid #22ce6a;
-    margin-bottom: 10px;
-    background: #f6f6f6;
-}
-.carometro-info h3 {
-    font-size: 1.05em;
-    color: #14532d;
-    margin-bottom: 4px;
-    text-align: center;
-    word-break: break-word;
-}
-.carometro-info p {
-    margin: 2px 0;
-    font-size: 0.92em;
-    text-align: center;
-}
-@media print {
-    body {
-        background: white !important;
-    }
-    .d-print-none, nav, header, footer, .navbar, .navbar-custom, .footer-custom {
-        display: none !important;
-    }
-    .container-fluid, .carometro-grid {
-        max-width: 100vw !important;
-        width: 100vw !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    .carometro-grid {
-        grid-template-columns: repeat(5, 1fr) !important;
-        gap: 8px !important;
-    }
-    .carometro-cartao {
-        min-height: 180px !important;
-        max-width: 100% !important;
-        padding: 6px 2px 6px 2px !important;
-        font-size: 0.95em !important;
-        box-shadow: none !important;
-        border: 1px solid #bbb !important;
-    }
-    .carometro-foto {
-        width: 70px !important;
-        height: 100px !important;
-        margin-bottom: 4px !important;
-    }
-    .carometro-info h3 {
-        font-size: 0.95em !important;
-        margin-bottom: 2px !important;
-    }
-    .carometro-info p {
-        font-size: 0.8em !important;
-        margin: 1px 0 !important;
-    }
-}
-</style>
 {% endblock %}

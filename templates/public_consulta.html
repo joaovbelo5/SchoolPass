@@ -1,280 +1,165 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SchoolPass - Consulta</title>
-    <!-- Bootstrap CSS -->
+    <title>Consulta Pública</title>
+    <!-- Preconnect for Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-        .card-header {
-            background-color: #14532d;
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 1.5rem;
-        }
-        .form-control {
-            border-radius: 8px;
-            padding: 12px;
-            border: 1px solid #ddd;
-        }
-        .form-control:focus {
-            box-shadow: 0 0 0 0.2rem rgba(20, 83, 45, 0.25);
-            border-color: #14532d;
-        }
-        .btn-primary {
-            background-color: #14532d;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        .btn-primary:hover {
-            background-color: #0f4024;
-            transform: translateY(-2px);
-        }
-        .btn-secondary {
-            background-color: #22ce6a;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        .btn-secondary:hover {
-            background-color: #1db75d;
-            transform: translateY(-2px);
-        }
-        .registro-card {
-            background-color: white;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            padding: 15px;
-            border-left: 4px solid #14532d;
-        }
-        .error-message {
-            background-color: #fff3f3;
-            color: #dc3545;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border-left: 4px solid #dc3545;
-        }
-        .brand-title {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #14532d;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        .icon-box {
-            width: 50px;
-            height: 50px;
-            background-color: #e6f7ee;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-        }
-        .icon-box i {
-            color: #14532d;
-            font-size: 1.5rem;
-        }
-    </style>
 </head>
-<body>
+
+<body class="bg-light">
     <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <h1 class="brand-title">
-                    <i class="fas fa-id-card me-2"></i> SchoolPass
-                </h1>
+            <div class="col-md-8 col-lg-6">
+                <div class="text-center mb-5">
+                    <h1 class="fw-bold text-primary mb-2">
+                        <i class="bi bi-person-badge me-2"></i>SchoolPass
+                    </h1>
+                    <p class="text-muted">Consulta Pública de Alunos</p>
+                </div>
 
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h2 class="mb-0">Consulta Pública</h2>
+                <!-- Search Card -->
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 text-primary fw-bold">
+                            <i class="bi bi-search me-2"></i>Consultar Aluno
+                        </h5>
                     </div>
                     <div class="card-body p-4">
                         <form method="POST" action="{{ url_for('public_consulta') }}">
-                            <div class="mb-4">
-                                <label for="codigo" class="form-label">Código da Carteirinha</label>
+                            <div class="mb-3">
+                                <label for="codigo" class="form-label fw-bold text-secondary">Código da
+                                    Carteirinha</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                                    <input type="text" class="form-control" id="codigo" name="codigo" required>
+                                    <span class="input-group-text bg-light"><i class="bi bi-upc-scan"></i></span>
+                                    <input type="text" class="form-control" id="codigo" name="codigo" required
+                                        placeholder="Ex: 2023001">
                                 </div>
                             </div>
                             <div class="mb-4">
-                                <label for="turma" class="form-label">Turma</label>
+                                <label for="turma" class="form-label fw-bold text-secondary">Turma</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-users"></i></span>
-                                    <input type="text" class="form-control" id="turma" name="turma" required>
+                                    <span class="input-group-text bg-light"><i class="bi bi-people"></i></span>
+                                    <input type="text" class="form-control" id="turma" name="turma" required
+                                        placeholder="Ex: 9A">
                                 </div>
                             </div>
-                            <div class="alert alert-info mb-4" role="alert">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Atenção:</strong> Os dados devem estar exatamente idênticos aos da Carteirinha. Em caso de dúvidas, por favor, procure a Escola.
+
+                            <div class="alert alert-info d-flex align-items-center shadow-sm mb-4" role="alert">
+                                <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                <div class="small">
+                                    <strong>Atenção:</strong> Os dados devem ser idênticos aos da carteirinha. Em caso
+                                    de
+                                    dúvidas, procure a secretaria.
+                                </div>
                             </div>
+
                             <div class="d-grid gap-2">
-                                <button type="submit" name="action" value="registros" class="btn btn-primary">
-                                    <i class="fas fa-history me-2"></i> Ver Registros de Entrada
+                                <button type="submit" name="action" value="registros"
+                                    class="btn btn-primary btn-lg fw-bold">
+                                    <i class="bi bi-clock-history me-2"></i>Ver Histórico
                                 </button>
-                                <button type="submit" name="action" value="carteirinha" class="btn btn-secondary">
-                                    <i class="fas fa-id-card me-2"></i> Emitir 2ª via da carteirinha
+                                <button type="submit" name="action" value="carteirinha"
+                                    class="btn btn-outline-secondary btn-lg fw-bold">
+                                    <i class="bi bi-card-heading me-2"></i>Emitir 2ª Via
                                 </button>
                             </div>
                         </form>
-                        <div class="text-center mt-3">
-                            <a href="{{ url_for('cadastro_telegram') }}" class="btn btn-link" style="color:#14532d; font-weight:600; text-decoration:underline;">
-                                Para configurar o alerta de entrada e saída, clique neste link
+
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('cadastro_telegram') }}"
+                                class="text-decoration-none fw-bold text-success">
+                                <i class="bi bi-telegram me-1"></i>Configurar alertas no Telegram
                             </a>
                         </div>
                     </div>
                 </div>
 
                 {% if error %}
-                <div class="error-message">
-                    <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+                <div class="alert alert-danger d-flex align-items-center shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                    <div>{{ error }}</div>
                 </div>
                 {% endif %}
 
                 {% if registros %}
-                <div class="card">
-                    <div class="card-header d-flex align-items-center">
-                        <div class="icon-box">
-                            <i class="fas fa-user"></i>
+                <!-- Results Card -->
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="bi bi-person-fill fs-4 text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold">{{ aluno.Nome }}</h5>
+                                <small class="text-muted">Turma: {{ aluno.Turma }}</small>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="mb-0">{{ aluno.Nome }}</h4>
-                            <small>Turma: {{ aluno.Turma }}</small>
-                        </div>
-                        <button class="btn btn-primary ms-auto" onclick="imprimirRegistros()">
-                            <i class="fas fa-print me-2"></i> Imprimir
+                        <button class="btn btn-sm btn-outline-primary" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i>Imprimir
                         </button>
                     </div>
-                    <div class="card-body p-4">
-                        <h5 class="mb-4">Histórico de Registros</h5>
-                        <div class="registro-area" id="area-registros">
-                            {% if registros %}
-                                <textarea class="form-control" rows="15" style="font-family: monospace;" readonly>{{ registros }}</textarea>
-                            {% else %}
-                                <div class="alert alert-info">Nenhum registro encontrado.</div>
-                            {% endif %}
+                    <div class="card-body p-0">
+                        <div class="bg-light p-3 border-bottom">
+                            <h6 class="fw-bold text-secondary mb-0">Histórico de Registros</h6>
                         </div>
-                        <!-- DEBUG -->
-                        <div class="d-none">
-                            Tipo de registros: {{ registros.__class__.__name__ }}
-                            Conteúdo: {{ registros|string }}
+                        <div class="p-3">
+                            <textarea class="form-control bg-white font-monospace" rows="15" readonly
+                                style="font-size: 0.9rem;">{{ registros }}</textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Versão para impressão -->
-                <div id="versao-impressao" style="display: none;">
-                    <div class="registro-print">
-                        <div class="conteudo-print">
-                            <pre>{{ registros }}</pre>
-                        </div>
-                        <div class="rodape-print">
-                            <p>Documento gerado em: {{ now.strftime('%d/%m/%Y às %H:%M') }}</p>
-                        </div>
+                <!-- Print Version (Hidden on Screen) -->
+                <div id="versao-impressao" class="d-none d-print-block">
+                    <div class="text-center mb-4">
+                        <h2>Histórico de Acessos</h2>
+                        <p>{{ aluno.Nome }} - Turma {{ aluno.Turma }}</p>
+                        <hr>
+                    </div>
+                    <pre style="font-family: 'Courier New', monospace; white-space: pre-wrap;">{{ registros }}</pre>
+                    <div class="text-center mt-5 text-muted small">
+                        Documento gerado em: {{ now.strftime('%d/%m/%Y às %H:%M') }}
                     </div>
                 </div>
 
-                <!-- Estilo para impressão -->
-                <style type="text/css" media="print">
-                    /* Ocultar tudo exceto a versão de impressão */
+                <style media="print">
                     body * {
                         visibility: hidden;
-                        margin: 0;
-                        padding: 0;
                     }
-                    #versao-impressao, #versao-impressao * {
+
+                    #versao-impressao,
+                    #versao-impressao * {
                         visibility: visible;
-                        display: block !important;
                     }
+
                     #versao-impressao {
                         position: absolute;
                         left: 0;
                         top: 0;
                         width: 100%;
-                        padding: 20px;
+                        padding: 2cm;
                     }
-                    
-                    /* Estilos da versão impressa */
-                    .registro-print {
-                        font-family: Arial, sans-serif;
-                        line-height: 1.5;
-                        color: #000;
-                    }
-                    .cabecalho-print {
-                        text-align: center;
-                        margin-bottom: 20px;
-                    }
-                    .cabecalho-print h2 {
-                        font-size: 18pt;
-                        margin: 0 0 10px 0;
-                    }
-                    .cabecalho-print p {
-                        font-size: 12pt;
-                        margin: 5px 0;
-                    }
-                    .cabecalho-print hr {
-                        border: 1px solid #000;
-                        margin: 20px 0;
-                    }
-                    .conteudo-print {
-                        margin: 20px 0;
-                    }
-                    .conteudo-print pre {
-                        font-family: "Courier New", Courier, monospace;
-                        font-size: 11pt;
-                        white-space: pre-wrap;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    .rodape-print {
-                        margin-top: 30px;
-                        font-size: 10pt;
-                        text-align: center;
-                        color: #666;
-                    }
-                    
-                    /* Remover elementos desnecessários */
-                    .btn-primary, .form-control {
-                        display: none !important;
-                    }
-                    
-                    /* Ajustes de página */
+
                     @page {
-                        margin: 2cm;
-                        size: A4;
+                        margin: 0;
                     }
                 </style>
-
-                <!-- Script para impressão -->
-                <script>
-                    function imprimirRegistros() {
-                        window.print();
-                    }
-                </script>
                 {% endif %}
             </div>
         </div>
     </div>
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

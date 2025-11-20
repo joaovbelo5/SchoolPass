@@ -1,58 +1,92 @@
 {% extends 'base.html' %}
+
 {% block title %}Gerenciar Cadastros{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-3" style="max-width:950px; width:100%; margin:auto;">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3 gap-2">
-        <h2 class="fw-bold mb-0" style="color: #14532d; letter-spacing: 1px;">Gerenciamento de Alunos</h2>
-        <a href="{{ url_for('novo') }}" class="btn btn-success px-4">Novo Cadastro</a>
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="fw-bold text-primary mb-1"><i class="bi bi-people-fill me-2"></i>Gerenciar Alunos</h1>
+            <p class="text-muted mb-0">Consulte, edite ou adicione novos alunos</p>
+        </div>
+        <a href="{{ url_for('novo') }}" class="btn btn-success btn-lg shadow-sm fw-bold">
+            <i class="bi bi-person-plus-fill me-2"></i>Novo Aluno
+        </a>
     </div>
-    <form method="GET" action="{{ url_for('pesquisar') }}" class="d-flex flex-row align-items-center gap-2 mb-3 bg-white p-2 rounded-4 shadow-sm">
-        <input type="text" name="query" class="form-control form-control-lg border-2" placeholder="Pesquisar por nome ou turma..." required style="font-size:1.1em;">
-        <button type="submit" class="btn btn-outline-success btn-lg px-4">Pesquisar</button>
-    </form>
-    <div class="table-responsive bg-white p-2 rounded-4 shadow-sm">
-        <table class="table table-hover align-middle mb-0" style="border-radius:12px; overflow:hidden;">
-            <thead style="background:#e9f5ee;">
-                <tr>
-                    <th class="text-nowrap">Código</th>
-                    <th class="text-nowrap">Nome</th>
-                    <th class="text-nowrap">Turma</th>
-                    <th class="text-nowrap">Permissão</th>
-                    <th class="text-nowrap">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for aluno in alunos %}
-                <tr>
-                    <td>{{ aluno.Codigo }}</td>
-                    <td>{{ aluno.Nome }}</td>
-                    <td>{{ aluno.Turma }}</td>
-                    <td>
-                        <span class="badge {% if aluno.Permissao == 'Sim' %}bg-success{% else %}bg-danger{% endif %}" style="font-size:1em;">
-                            {{ aluno.Permissao }}
-                        </span>
-                    </td>
-                    <td>
-                        <a href="{{ url_for('editar', codigo=aluno.Codigo) }}" class="btn btn-outline-primary btn-sm me-1" title="Editar" aria-label="Editar">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        <a href="{{ url_for('excluir', codigo=aluno.Codigo) }}" class="btn btn-outline-danger btn-sm me-1" title="Excluir" aria-label="Excluir">
-                            <i class="bi bi-trash"></i>
-                        </a>
-                        <form method="POST" action="{{ url_for('emitir') }}" style="display:inline;">
-                            <input type="hidden" name="tipo_emissao" value="unitaria">
-                            <input type="hidden" name="codigo" value="{{ aluno.Codigo }}">
-                            <button type="submit" class="btn btn-outline-success btn-sm" title="Emitir Carteirinha" aria-label="Emitir Carteirinha">
-                                <i class="bi bi-printer"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <!-- Search Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-2">
+            <form method="GET" action="{{ url_for('pesquisar') }}" class="d-flex gap-2">
+                <input type="text" name="query" class="form-control form-control-lg border-0 bg-light"
+                    placeholder="Pesquisar por nome, turma ou código..." required>
+                <button type="submit" class="btn btn-primary px-4 fw-bold">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold">Código</th>
+                            <th class="py-3 text-secondary text-uppercase small fw-bold">Nome</th>
+                            <th class="py-3 text-secondary text-uppercase small fw-bold">Turma</th>
+                            <th class="py-3 text-secondary text-uppercase small fw-bold">Permissão</th>
+                            <th class="pe-4 py-3 text-end text-secondary text-uppercase small fw-bold">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aluno in alunos %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-secondary">{{ aluno.Codigo }}</td>
+                            <td class="fw-bold text-dark">{{ aluno.Nome }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ aluno.Turma }}</span></td>
+                            <td>
+                                {% if aluno.Permissao == 'Sim' %}
+                                <span
+                                    class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Permitido
+                                </span>
+                                {% else %}
+                                <span
+                                    class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                    <i class="bi bi-x-circle-fill me-1"></i>Negado
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="btn-group">
+                                    <a href="{{ url_for('editar', codigo=aluno.Codigo) }}"
+                                        class="btn btn-outline-primary btn-sm" title="Editar">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('emitir') }}" class="d-inline">
+                                        <input type="hidden" name="tipo_emissao" value="unitaria">
+                                        <input type="hidden" name="codigo" value="{{ aluno.Codigo }}">
+                                        <button type="submit" class="btn btn-outline-success btn-sm"
+                                            title="Emitir Carteirinha">
+                                            <i class="bi bi-printer-fill"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ url_for('excluir', codigo=aluno.Codigo) }}"
+                                        class="btn btn-outline-danger btn-sm" title="Excluir"
+                                        onclick="return confirm('Tem certeza que deseja excluir este aluno?');">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
-<!-- Bootstrap Icons CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
 {% endblock %}

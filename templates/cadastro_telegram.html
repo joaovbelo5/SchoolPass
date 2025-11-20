@@ -1,161 +1,136 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SchoolPass - Cadastro Telegram</title>
+    <title>Cadastro Telegram</title>
+    <!-- Preconnect for Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .brand-title {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #14532d;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-        .card-header {
-            background-color: #14532d;
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 1.5rem;
-        }
-        .form-control {
-            border-radius: 8px;
-            padding: 12px;
-            border: 1px solid #ddd;
-        }
-        .form-control:focus {
-            box-shadow: 0 0 0 0.2rem rgba(20, 83, 45, 0.25);
-            border-color: #14532d;
-        }
-        .btn-primary {
-            background-color: #14532d;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        .btn-primary:hover {
-            background-color: #0f4024;
-            transform: translateY(-2px);
-        }
-        .alert-custom {
-            background-color: #e6f7ee;
-            color: #14532d;
-            border-left: 4px solid #22ce6a;
-            border-radius: 8px;
-            padding: 18px;
-            margin-bottom: 24px;
-        }
-        .video-embed {
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 24px;
-            box-shadow: 0 0 10px rgba(20, 83, 45, 0.08);
-        }
-    </style>
 </head>
-<body>
+
+<body class="bg-light">
     <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <h1 class="brand-title">
-                    <i class="fas fa-paper-plane me-2"></i> Vincular Telegram à Carteirinha
-                </h1>
+            <div class="col-md-8 col-lg-6">
+                <div class="text-center mb-5">
+                    <h1 class="fw-bold text-primary mb-2">
+                        <i class="bi bi-telegram me-2"></i>Vincular Telegram
+                    </h1>
+                    <p class="text-muted">Receba notificações de entrada e saída diretamente no seu celular</p>
+                </div>
 
+                <div class="alert alert-light border-start border-success border-4 shadow-sm mb-4">
+                    <div class="d-flex">
+                        <div class="me-3 text-success">
+                            <i class="bi bi-info-circle-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="alert-heading fw-bold text-success mb-2">Como Ativar os Avisos</h5>
+                            <p class="mb-3 small text-muted">Siga os passos abaixo para configurar o recebimento de
+                                mensagens. Este processo é feito apenas uma vez.</p>
 
-                <div class="alert-custom">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <div style="font-size:1.1rem;">
-                        <strong style="font-size:1.2rem;">🔔 Como Ativar os Avisos de Entrada e Saída do Aluno</strong>
-                        <br><br>
-                        Para começar a receber as mensagens com os horários do aluno, siga estes 4 passos. Você só precisará fazer este processo uma única vez.
-                        <br><br>
-                        <b>Passo 1: Instale o Telegram</b><br>
-                        <ul>
-                            <li>Baixe o aplicativo Telegram na sua loja de aplicativos (Play Store ou App Store).</li>
-                            <li>Abra o app e crie sua conta.</li>
-                        </ul>
-                        <b>Passo 2: Obtenha seu "Telegram ID"</b><br>
-                        <ul>
-                            <li>Após criar sua conta, clique neste link: <a href="https://t.me/getmyidx_bot" target="_blank">https://t.me/getmyidx_bot</a></li>
-                            <li>O link abrirá uma conversa no Telegram. Clique no botão <b>Iniciar</b>.</li>
-                            <li>O bot enviará uma mensagem com seu <b>"Telegram ID"</b>.</li>
-                            <li><b>Copie esse número</b> (você precisará dele no próximo passo).</li>
-                        </ul>
-                        <b>Passo 3: Preencha o Formulário de Cadastro</b><br>
-                        <ul>
-                            <li>Vá até o formulário de cadastro (localizado abaixo deste guia).</li>
-                            <li>Preencha os dados <b>exatamente como estão na carteirinha do aluno</b>.</li>
-                            <li>No campo "Telegram ID", cole o número que você copiou no Passo 2.</li>
-                            <li>Clique em <b>Cadastrar</b>.</li>
-                        </ul>
-                        <b>Passo 4: Ative o Bot de Avisos</b><br>
-                        <ul>
-                            <li>Após finalizar o cadastro no formulário, clique neste segundo link: <a href="https://t.me/GISNO_bot" target="_blank">https://t.me/GISNO_bot</a></li>
-                            <li>Este link abrirá <i>outra</i> conversa. Clique em <b>Iniciar</b>.</li>
-                        </ul>
-                        <b>Pronto!</b> Você concluiu o cadastro e deve começar a receber as mensagens de entrada e saída.
+                            <ol class="list-group list-group-numbered list-group-flush bg-transparent small mb-3">
+                                <li class="list-group-item bg-transparent border-0 ps-0 py-1">Instale o
+                                    <strong>Telegram</strong> no seu celular.
+                                </li>
+                                <li class="list-group-item bg-transparent border-0 ps-0 py-1">
+                                    Obtenha seu ID clicando aqui: <a href="https://t.me/getmyidx_bot" target="_blank"
+                                        class="fw-bold text-decoration-none">@getmyidx_bot</a>
+                                    <br><span class="text-muted fst-italic ms-2">(Clique em "Iniciar" e copie o número
+                                        recebido)</span>
+                                </li>
+                                <li class="list-group-item bg-transparent border-0 ps-0 py-1">Preencha o formulário
+                                    abaixo
+                                    com os dados da carteirinha e o ID copiado.</li>
+                                <li class="list-group-item bg-transparent border-0 ps-0 py-1">
+                                    Ative o bot de avisos: <a href="https://t.me/GISNO_bot" target="_blank"
+                                        class="fw-bold text-decoration-none">@GISNO_bot</a>
+                                    <br><span class="text-muted fst-italic ms-2">(Clique em "Iniciar" para autorizar o
+                                        envio)</span>
+                                </li>
+                            </ol>
+                            <p class="mb-0 fw-bold text-success"><i class="bi bi-check2-circle me-1"></i>Pronto! Você
+                                receberá os avisos.</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h2 class="mb-0"><i class="fab fa-telegram me-2"></i> Cadastro do Telegram</h2>
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-person-badge me-2"></i>Dados do Aluno</h5>
                     </div>
                     <div class="card-body p-4">
                         <form method="POST" action="{{ url_for('cadastro_telegram') }}">
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="codigo" class="form-label">Código da Carteirinha</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                                    <input type="text" class="form-control" id="codigo" name="codigo" required>
+                                    <span class="input-group-text bg-light"><i class="bi bi-upc-scan"></i></span>
+                                    <input type="text" class="form-control" id="codigo" name="codigo" required
+                                        placeholder="Ex: 2023001">
                                 </div>
                             </div>
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="turma" class="form-label">Turma</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-users"></i></span>
-                                    <input type="text" class="form-control" id="turma" name="turma" required>
+                                    <span class="input-group-text bg-light"><i class="bi bi-people"></i></span>
+                                    <input type="text" class="form-control" id="turma" name="turma" required
+                                        placeholder="Ex: 9A">
                                 </div>
                             </div>
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="nome" class="form-label">Nome do Aluno</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="text" class="form-control" id="nome" name="nome" required>
+                                    <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control" id="nome" name="nome" required
+                                        placeholder="Nome completo">
                                 </div>
                             </div>
                             <div class="mb-4">
-                                <label for="telegram_id" class="form-label">ID do Telegram</label>
+                                <label for="telegram_id" class="form-label">Seu ID do Telegram</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fab fa-telegram"></i></span>
-                                    <input type="text" class="form-control" id="telegram_id" name="telegram_id" required>
+                                    <span class="input-group-text bg-light"><i class="bi bi-telegram"></i></span>
+                                    <input type="text" class="form-control" id="telegram_id" name="telegram_id" required
+                                        placeholder="Cole o número aqui">
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-paper-plane me-2"></i>Cadastrar</button>
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                                <i class="bi bi-send-fill me-2"></i>Cadastrar
+                            </button>
                         </form>
+
                         {% if error %}
-                        <div class="alert alert-danger mt-3">{{ error }}</div>
+                        <div class="alert alert-danger mt-3 d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>{{ error }}</div>
+                        </div>
                         {% endif %}
                         {% if success %}
-                        <div class="alert alert-success mt-3">{{ success }}</div>
+                        <div class="alert alert-success mt-3 d-flex align-items-center" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <div>{{ success }}</div>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
+
                 <div class="text-center">
-                    <a href="/" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Voltar para Consulta</a>
+                    <a href="/" class="btn btn-link text-decoration-none text-muted">
+                        <i class="bi bi-arrow-left me-1"></i>Voltar para Início
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
