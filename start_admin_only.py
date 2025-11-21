@@ -330,6 +330,15 @@ from dotenv import load_dotenv
 import shutil
 import random
 import threading
+import re
+
+# Lock global para proteger acesso ao database.csv
+# Lock global para proteger acesso ao database.csv
+db_lock = threading.RLock()
+
+# Configuração de logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Carregar variáveis do .env
 load_dotenv()
@@ -348,8 +357,97 @@ app.config['STATIC_FOLDER'] = 'static'
 app.config['DATABASE'] = 'database.csv'
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey')
 app.config['TELEGRAM_TOKEN'] = os.getenv('TELEGRAM_TOKEN', 'SEU_TOKEN_AQUI')
-app.config['TELEGRAM_API_URL'] = f'https://api.telegram.org/bot{app.config["TELEGRAM_TOKEN"]}/sendMessage'
+app.config['TELEGRAM_API_URL'] = f'https://api.telegram.org/bot{app.config["TELEGRAM_TOKEN"]}/'
 app.config['COOLDOWN_MINUTES'] = int(os.getenv('COOLDOWN_MINUTES', 5))
+
+def normalize_phone(phone):
+    """Remove caracteres não numéricos e ignora código do país (+55)."""
+    if not phone:
+        return ""
+    # Remove tudo que não é dígito
+    nums = re.sub(r'\D', '', str(phone))
+    # Se começar com 55 e tiver mais de 11 dígitos (ex: 5561999999999), remove o 55
+    if nums.startswith('55') and len(nums) > 11:
+        nums = nums[2:]
+    return nums
+
+def telegram_bot_listener():
+    """Thread que escuta atualizações do Bot para vincular contatos."""
+    offset = 0
+    api_url = app.config['TELEGRAM_API_URL']
+    logger.info("Iniciando listener do Telegram Bot...")
+    logger.info(f"API URL configurada: {api_url.replace(app.config['TELEGRAM_TOKEN'], '******')}")
+    
+    # Verificar se o token tem aspas extras (erro comum no .env)
+    if "'" in app.config['TELEGRAM_TOKEN'] or '"' in app.config['TELEGRAM_TOKEN']:
+        logger.warning("⚠️ AVISO: O token do Telegram parece conter aspas. Verifique o arquivo .env!")
+
+    while True:
+        try:
+            # Long polling
+            response = requests.get(f"{api_url}getUpdates", params={'offset': offset, 'timeout': 30}, timeout=40)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('result'):
+                    logger.info(f"Updates recebidos: {data['result']}")
+                for result in data.get('result', []):
+                    offset = result['update_id'] + 1
+                    message = result.get('message', {})
+                    chat_id = message.get('chat', {}).get('id')
+                    contact = message.get('contact')
+                    
+                    if contact and chat_id:
+                        phone_number = contact.get('phone_number')
+                        user_id = contact.get('user_id')
+                        
+                        # Normalizar telefone recebido
+                        normalized_received = normalize_phone(phone_number)
+                        logger.info(f"Recebido contato: {normalized_received} de {user_id}")
+                        
+                        # Buscar no banco de dados
+                        alunos_encontrados = []
+                        with db_lock:
+                            alunos = read_database()
+                            updated = False
+                            for aluno in alunos:
+                                # Compara com o telefone cadastrado (também normalizado)
+                                stored_phone = normalize_phone(aluno.get('TelefoneResponsavel', ''))
+                                if stored_phone and stored_phone == normalized_received:
+                                    aluno['TelegramID'] = str(user_id)
+                                    alunos_encontrados.append(aluno['Nome'])
+                                    updated = True
+                                    # Não damos break pois pode haver irmãos (mesmo telefone)
+                            
+                            if updated:
+                                write_database(alunos)
+                        
+                        # Responder ao usuário
+                        if alunos_encontrados:
+                            nomes = ", ".join(alunos_encontrados)
+                            msg = f"✅ Vinculado com sucesso! Você receberá avisos de: {nomes}."
+                        else:
+                            msg = "❌ Número não encontrado no sistema. Peça para a escola cadastrar seu telefone."
+                            
+                        requests.post(f"{api_url}sendMessage", json={'chat_id': chat_id, 'text': msg})
+                    
+                    elif chat_id and message.get('text'):
+                        # Se o usuário mandou texto, pedimos o contato
+                        msg = "👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:"
+                        keyboard = {
+                            "keyboard": [[{"text": "📱 Compartilhar meu Contato", "request_contact": True}]],
+                            "resize_keyboard": True,
+                            "one_time_keyboard": True
+                        }
+                        requests.post(f"{api_url}sendMessage", json={'chat_id': chat_id, 'text': msg, 'reply_markup': keyboard})
+                        
+            time.sleep(5)
+        except Exception as e:
+            logger.error(f"Erro no listener do Telegram: {e}")
+            time.sleep(5)
+
+# Iniciar thread do bot apenas no processo filho (reloader) ou se debug estiver desligado
+if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+    threading.Thread(target=telegram_bot_listener, daemon=True).start()
 
 # Configurações da instituição para carteirinhas
 CONFIG = {
@@ -373,9 +471,9 @@ BARCODE_SETTINGS = {
     'quiet_zone': 5
 }
 
-# Configuração de logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configuração de logging (REMOVIDO - JÁ CONFIGURADO NO TOPO)
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
 
 # Inicialização do Flask-Login
 login_manager = LoginManager()
@@ -598,11 +696,38 @@ def enviar_telegram(chat_id, nome, tipo_acesso):
     params = {'chat_id': chat_id, 'text': mensagem}
     def send_async():
         try:
-            response = requests.post(app.config['TELEGRAM_API_URL'], params=params, timeout=2)
+            url = f"{app.config['TELEGRAM_API_URL']}sendMessage"
+            response = requests.post(url, params=params, timeout=2)
             response.raise_for_status()
             logger.info(f"Mensagem enviada com sucesso: {response.json()}")
         except requests.exceptions.RequestException as e:
             logger.error(f"Erro ao enviar para Telegram: {e}")
+    threading.Thread(target=send_async, daemon=True).start()
+
+def enviar_notificacao_ocorrencia(chat_id, nome_aluno, medida, descricao, registrado_por):
+    """Envia notificação de ocorrência disciplinar ao Telegram."""
+    import threading
+    
+    msg = (
+        f"⚠️ *NOVA OCORRÊNCIA REGISTRADA*\n\n"
+        f"👤 *Aluno:* {nome_aluno}\n"
+        f"⚖️ *Medida:* {medida}\n"
+        f"📝 *Descrição:* {descricao}\n"
+        f"👮 *Registrado por:* {registrado_por}\n\n"
+        f"📅 {datetime.now().strftime('%d/%m/%Y às %H:%M')}"
+    )
+    
+    params = {'chat_id': chat_id, 'text': msg, 'parse_mode': 'Markdown'}
+    
+    def send_async():
+        try:
+            url = f"{app.config['TELEGRAM_API_URL']}sendMessage"
+            response = requests.post(url, params=params, timeout=5)
+            response.raise_for_status()
+            logger.info(f"Notificação de ocorrência enviada para {nome_aluno}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Erro ao enviar notificação de ocorrência: {e}")
+            
     threading.Thread(target=send_async, daemon=True).start()
 
 def verificar_usuario(username, password):
@@ -621,15 +746,17 @@ def allowed_file(filename):
 
 def read_database():
     """Lê o arquivo database.csv e retorna a lista de alunos."""
-    with open(app.config['DATABASE'], 'r', encoding='utf-8') as f:
-        return list(csv.DictReader(f))
+    with db_lock:
+        with open(app.config['DATABASE'], 'r', encoding='utf-8') as f:
+            return list(csv.DictReader(f))
 
 def write_database(data):
     """Escreve os dados no arquivo database.csv."""
-    with open(app.config['DATABASE'], 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=data[0].keys())
-        writer.writeheader()
-        writer.writerows(data)
+    with db_lock:
+        with open(app.config['DATABASE'], 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=data[0].keys())
+            writer.writeheader()
+            writer.writerows(data)
 
 
 def extract_validade_year():
@@ -840,7 +967,8 @@ def editar(codigo):
         aluno['Turma'] = request.form['turma']
         aluno['Turno'] = request.form['turno']
         aluno['Permissao'] = request.form['permissao']
-        aluno['TelegramID'] = request.form['telegramid']
+        # aluno['TelegramID'] não é atualizado diretamente pelo form
+        aluno['TelefoneResponsavel'] = request.form.get('telefone_responsavel', '')
         
         if 'foto' in request.files:
             file = request.files['foto']
@@ -853,6 +981,18 @@ def editar(codigo):
         return redirect(url_for('cadastro'))
     
     return render_template('upload_editar.html', aluno=aluno)
+
+@app.route('/cadastro/desvincular/<codigo>')
+@login_required
+def desvincular(codigo):
+    alunos = read_database()
+    aluno = next((a for a in alunos if a['Codigo'] == codigo), None)
+    if aluno:
+        aluno['TelegramID'] = ''
+        aluno['TelefoneResponsavel'] = ''
+        write_database(alunos)
+        flash('Telegram e telefone desvinculados com sucesso!', 'success')
+    return redirect(url_for('editar', codigo=codigo))
 
 @app.route('/cadastro/excluir/<codigo>')
 @login_required
@@ -870,7 +1010,8 @@ def novo():
         turma = request.form.get('turma', '').strip()
         turno = request.form.get('turno', '').strip()
         permissao = request.form.get('permissao', '').strip()
-        telegramid = request.form.get('telegramid', '').strip()
+        telefone_responsavel = request.form.get('telefone_responsavel', '').strip()
+        # telegramid = request.form.get('telegramid', '').strip() # Removido
         codigo_fornecido = request.form.get('codigo', '').strip()
 
         # Lê alunos atuais
@@ -918,7 +1059,8 @@ def novo():
             'Turno': turno,
             'Permissao': permissao,
             'Foto': 'semfoto.jpg',
-            'TelegramID': telegramid
+            'TelegramID': '', # Inicialmente vazio, será preenchido pelo bot
+            'TelefoneResponsavel': telefone_responsavel
         }
 
         if 'foto' in request.files:
@@ -1255,6 +1397,18 @@ def nova_ocorrencia(codigo):
         ocorrencias.append(ocorrencia)
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(ocorrencias, f, ensure_ascii=False, indent=2)
+            
+        # Enviar notificação se houver Telegram vinculado e medida relevante
+        medidas_ignoradas = ["Advertência Oral", "Outra", "Nenhuma medida necessária"]
+        if aluno.get('TelegramID') and medida not in medidas_ignoradas:
+            enviar_notificacao_ocorrencia(
+                aluno['TelegramID'],
+                aluno['Nome'],
+                medida,
+                texto,
+                registrado_por
+            )
+            
         return redirect(url_for('ocorrencias_aluno', codigo=codigo))
     return render_template('ocorrencia_nova.html', aluno=aluno)
 
