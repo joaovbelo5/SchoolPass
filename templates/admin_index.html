@@ -151,14 +151,21 @@
                             <i class="bi bi-arrow-counterclockwise me-2"></i>Restaurar Backup
                         </button>
                     </div>
+                    <hr>
+                    <div>
+                        <h6 class="fw-bold mb-2">Reiniciar Sistema</h6>
+                        <p class="small text-muted mb-2">Reinicia o servidor para aplicar alterações.</p>
+                        <button id="restartBtn" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-power me-2"></i>Reiniciar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modals (Preserved Logic) -->
-
+<!-- Modals -->
 <!-- Restore Modal -->
 <div class="modal fade" id="restoreModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -600,6 +607,36 @@
         var downloadBackupBtn = document.getElementById('downloadBackupBtn');
         if (downloadBackupBtn) {
             // nothing to do; href is set when backup created
+        }
+
+        // Restart button
+        var restartBtn = document.getElementById('restartBtn');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', function () {
+                if (!confirm('Tem certeza que deseja reiniciar o sistema? Isso interromperá o acesso temporariamente.')) {
+                    return;
+                }
+                restartBtn.disabled = true;
+                restartBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Reiniciando...';
+
+                fetch('/admin/restart', {
+                    method: 'POST',
+                    credentials: 'same-origin'
+                }).then(function (r) {
+                    if (r.ok) {
+                        showToast('Sistema reiniciando. A página será recarregada em instantes.', 'success');
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 5000);
+                    } else {
+                        throw new Error('Erro ao reiniciar');
+                    }
+                }).catch(function (e) {
+                    showToast('Erro ao solicitar reinício: ' + e.message, 'danger');
+                    restartBtn.disabled = false;
+                    restartBtn.innerHTML = '<i class="bi bi-power me-2"></i>Reiniciar';
+                });
+            });
         }
 
         // Global JS error handlers to surface problems to the user (helps debugging)

@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 def register_admin_routes(app):
     from flask import flash, render_template, request, session, jsonify
     from flask_login import login_required
-    import os, time
+    import os, time, sys
 
     @app.route('/admin', methods=['GET', 'POST'])
     @login_required
@@ -146,14 +146,14 @@ def register_admin_routes(app):
             logger.exception('Erro durante limpeza de dados')
             return jsonify({'ok': False, 'msg': f'Erro: {e}'}), 500
 
-    @app.route('/admin/backup', methods=['GET'])
+    @app.route('/admin/backup_api', methods=['GET'])
     @login_required
-    def admin_backup():
-        """Cria um arquivo ZIP no disco (pasta backups/) e envia para download. Mantém backups por 3 horas."""
+    def admin_backup_api():
+        """Cria um arquivo ZIP no disco (pasta backups/) e retorna JSON com URL de download. Mantém backups por 3 horas."""
         try:
             import zipfile
             from datetime import datetime
-            from flask import send_file
+            from flask import url_for
             from flask_login import current_user
 
             base_dir = os.path.dirname(__file__)
@@ -178,6 +178,7 @@ def register_admin_routes(app):
                 os.path.join(base_dir, 'chamadas'),
                 os.path.join(base_dir, 'ocorrencias'),
                 os.path.join(base_dir, 'registros'),
+                os.path.join(base_dir, 'registros_diarios'),
                 os.path.join(base_dir, 'static', 'barcodes'),
                 os.path.join(base_dir, 'static', 'fotos'),
                 os.path.join(base_dir, 'static', 'assinatura.png'),
@@ -214,11 +215,22 @@ def register_admin_routes(app):
             except Exception:
                 logger.info(f"Backup criado: {dest_path}")
 
-            # Enviar o arquivo para download sem deletar (será limpo por critério de 3 horas)
-            return send_file(dest_path, mimetype='application/zip', as_attachment=True, download_name=filename)
+            # Retornar JSON com a URL para download
+            download_url = url_for('admin_download_backup', filename=filename)
+            return jsonify({'ok': True, 'msg': 'Backup criado com sucesso.', 'download_url': download_url, 'filename': filename})
+
         except Exception as e:
             logger.exception('Erro ao criar backup')
             return jsonify({'ok': False, 'msg': f'Erro ao criar backup: {e}'}), 500
+
+    @app.route('/admin/download_backup/<path:filename>')
+    @login_required
+    def admin_download_backup(filename):
+        """Serve o arquivo de backup para download."""
+        from flask import send_from_directory
+        base_dir = os.path.dirname(__file__)
+        backups_dir = os.path.join(base_dir, 'backups')
+        return send_from_directory(backups_dir, filename, as_attachment=True)
 
     @app.route('/admin/restore', methods=['POST'])
     @login_required
@@ -268,13 +280,24 @@ def register_admin_routes(app):
             def try_replace_dir(relpath):
                 src = os.path.join(extract_dir, relpath)
                 dst = os.path.join(base_dir, relpath)
-                if os.path.exists(src):
-                    # remove destino atual se existir
-                    if os.path.exists(dst):
-                        try:
-                            shutil.rmtree(dst)
-                        except Exception as e:
-                            logger.error(f"Erro removendo destino {dst}: {e}")
+                if not os.path.exists(src):
+                    return
+
+                # Tentar remover completamente o diretório destino
+                if os.path.exists(dst):
+                    try:
+                        shutil.rmtree(dst)
+                    except Exception as e:
+                        logger.error(f"Erro removendo destino {dst}: {e}")
+                
+                # Se o destino ainda existe (remoção falhou), usar copytree com dirs_exist_ok=True
+                if os.path.exists(dst):
+                    try:
+                        shutil.copytree(src, dst, dirs_exist_ok=True)
+                        logger.info(f"Pasta restaurada (merge): {dst}")
+                    except Exception as e:
+                        logger.error(f"Erro mesclando {src} -> {dst}: {e}")
+                else:
                     try:
                         # mover pasta extraída para o local destino
                         shutil.move(src, dst)
@@ -284,7 +307,7 @@ def register_admin_routes(app):
 
             # Alvos a serem restaurados (mesma lista do backup)
             targets_dirs = [
-                'chamadas', 'ocorrencias', 'registros',
+                'chamadas', 'ocorrencias', 'registros', 'registros_diarios',
                 os.path.join('static', 'barcodes'), os.path.join('static', 'fotos')
             ]
             targets_files = [
@@ -307,9 +330,31 @@ def register_admin_routes(app):
 
             logger.info('Restauração de backup concluída pelo administrador.')
             return jsonify({'ok': True, 'msg': 'Restauração concluída.'})
+
         except Exception as e:
             logger.exception('Erro durante restauração de backup')
             return jsonify({'ok': False, 'msg': f'Erro: {e}'}), 500
+
+    @app.route('/admin/restart', methods=['POST'])
+    @login_required
+    def admin_restart():
+        """Reinicia o servidor Flask."""
+        try:
+            logger.info("Reiniciando servidor por solicitação do admin...")
+            # Reinicia o processo atual
+            # sys.executable é o interpretador Python
+            # sys.argv são os argumentos passados para o script
+            # Reinicia o processo atual
+            # Usa sys.executable e __file__ absoluto para garantir caminhos corretos
+            # Soft reboot: apenas "toca" o arquivo para acionar o reloader do Flask
+            # Isso evita problemas com os.execv em diferentes ambientes e mantém o processo rodando
+            script = os.path.abspath(__file__)
+            os.utime(script, None)
+            
+            return jsonify({'ok': True, 'msg': 'Reiniciando (Soft Reboot)...'})
+        except Exception as e:
+            logger.exception("Erro ao reiniciar servidor")
+            return jsonify({'ok': False, 'msg': f'Erro ao reiniciar: {e}'}), 500
 
 
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, g
@@ -330,6 +375,19 @@ from dotenv import load_dotenv
 import shutil
 import random
 import threading
+import re
+
+# Lock global para proteger acesso ao database.csv
+# Lock global para proteger acesso ao database.csv
+db_lock = threading.RLock()
+
+# Configuração de logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+# Adicionar handler de arquivo para debug
+file_handler = logging.FileHandler('server.log', encoding='utf-8')
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+logger.addHandler(file_handler)
 
 # Carregar variáveis do .env
 load_dotenv()
@@ -348,8 +406,124 @@ app.config['STATIC_FOLDER'] = 'static'
 app.config['DATABASE'] = 'database.csv'
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey')
 app.config['TELEGRAM_TOKEN'] = os.getenv('TELEGRAM_TOKEN', 'SEU_TOKEN_AQUI')
-app.config['TELEGRAM_API_URL'] = f'https://api.telegram.org/bot{app.config["TELEGRAM_TOKEN"]}/sendMessage'
+app.config['TELEGRAM_API_URL'] = f'https://api.telegram.org/bot{app.config["TELEGRAM_TOKEN"]}/'
 app.config['COOLDOWN_MINUTES'] = int(os.getenv('COOLDOWN_MINUTES', 5))
+
+# Cache de updates já processados para evitar mensagens duplicadas
+processed_updates = set()
+
+def normalize_phone(phone):
+    """Remove caracteres não numéricos e ignora código do país (+55)."""
+    if not phone:
+        return ""
+    # Remove tudo que não é dígito
+    nums = re.sub(r'\D', '', str(phone))
+    # Se começar com 55 e tiver mais de 11 dígitos (ex: 5561999999999), remove o 55
+    if nums.startswith('55') and len(nums) > 11:
+        nums = nums[2:]
+    return nums
+
+def telegram_bot_listener():
+    """Thread que escuta atualizações do Bot para vincular contatos."""
+    global processed_updates
+    offset = 0
+    api_url = app.config['TELEGRAM_API_URL']
+    logger.info("Iniciando listener do Telegram Bot...")
+    logger.info(f"API URL configurada: {api_url.replace(app.config['TELEGRAM_TOKEN'], '******')}")
+    
+    # Verificar se o token tem aspas extras (erro comum no .env)
+    if "'" in app.config['TELEGRAM_TOKEN'] or '"' in app.config['TELEGRAM_TOKEN']:
+        logger.warning("⚠️ AVISO: O token do Telegram parece conter aspas. Verifique o arquivo .env!")
+
+    while True:
+        try:
+            # Long polling
+            response = requests.get(f"{api_url}getUpdates", params={'offset': offset, 'timeout': 30}, timeout=40)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('result'):
+                    logger.info(f"Updates recebidos: {data['result']}")
+                for result in data.get('result', []):
+                    update_id = result['update_id']
+                    offset = update_id + 1
+                    
+                    # Verificar se já processamos este update (evita duplicatas)
+                    if update_id in processed_updates:
+                        logger.debug(f"Update {update_id} já processado, pulando...")
+                        continue
+                    
+                    message = result.get('message', {})
+                    chat_id = message.get('chat', {}).get('id')
+                    contact = message.get('contact')
+                    
+                    if contact and chat_id:
+                        phone_number = contact.get('phone_number')
+                        user_id = contact.get('user_id')
+                        
+                        # Normalizar telefone recebido
+                        normalized_received = normalize_phone(phone_number)
+                        logger.info(f"Recebido contato: {normalized_received} de {user_id}")
+                        
+                        # Buscar no banco de dados com índice otimizado
+                        alunos_encontrados = []
+                        with db_lock:
+                            alunos = read_database()
+                            
+                            # Criar índice: telefone normalizado -> lista de índices de alunos
+                            phone_index = {}
+                            for i, aluno in enumerate(alunos):
+                                stored_phone = normalize_phone(aluno.get('TelefoneResponsavel', ''))
+                                if stored_phone:
+                                    if stored_phone not in phone_index:
+                                        phone_index[stored_phone] = []
+                                    phone_index[stored_phone].append(i)
+                            
+                            # Busca otimizada O(1) no índice
+                            if normalized_received in phone_index:
+                                updated = False
+                                for idx in phone_index[normalized_received]:
+                                    aluno = alunos[idx]
+                                    aluno['TelegramID'] = str(user_id)
+                                    alunos_encontrados.append(aluno['Nome'])
+                                    updated = True
+                                    logger.info(f"MATCH! Vinculando {aluno['Nome']} ao ID {user_id}")
+                                
+                                if updated:
+                                    write_database(alunos)
+                            else:
+                                logger.info(f"Nenhum aluno encontrado com o telefone {normalized_received}")
+                        
+                        # Responder ao usuário
+                        if alunos_encontrados:
+                            nomes = ", ".join(alunos_encontrados)
+                            msg = f"✅ Vinculado com sucesso! Você receberá avisos de: {nomes}."
+                        else:
+                            msg = "❌ Número não encontrado no sistema. Peça para a escola cadastrar seu telefone."
+                            
+                        requests.post(f"{api_url}sendMessage", json={'chat_id': chat_id, 'text': msg})
+                    
+                    elif chat_id and message.get('text'):
+                        # Se o usuário mandou texto, pedimos o contato
+                        msg = "👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:"
+                        keyboard = {
+                            "keyboard": [[{"text": "📱 Compartilhar meu Contato", "request_contact": True}]],
+                            "resize_keyboard": True,
+                            "one_time_keyboard": True
+                        }
+                        requests.post(f"{api_url}sendMessage", json={'chat_id': chat_id, 'text': msg, 'reply_markup': keyboard})
+                    
+                    # Marcar update como processado
+                    processed_updates.add(update_id)
+                    
+                    # Limpar cache se ultrapassar 1000 itens (previne vazamento de memória)
+                    if len(processed_updates) > 1000:
+                        logger.info("Limpando cache de updates processados...")
+                        processed_updates.clear()
+                        
+            time.sleep(5)
+        except Exception as e:
+            logger.error(f"Erro no listener do Telegram: {e}")
+            time.sleep(5)
 
 # Configurações da instituição para carteirinhas
 CONFIG = {
@@ -373,9 +547,9 @@ BARCODE_SETTINGS = {
     'quiet_zone': 5
 }
 
-# Configuração de logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configuração de logging (REMOVIDO - JÁ CONFIGURADO NO TOPO)
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
 
 # Inicialização do Flask-Login
 login_manager = LoginManager()
@@ -598,11 +772,38 @@ def enviar_telegram(chat_id, nome, tipo_acesso):
     params = {'chat_id': chat_id, 'text': mensagem}
     def send_async():
         try:
-            response = requests.post(app.config['TELEGRAM_API_URL'], params=params, timeout=2)
+            url = f"{app.config['TELEGRAM_API_URL']}sendMessage"
+            response = requests.post(url, params=params, timeout=2)
             response.raise_for_status()
             logger.info(f"Mensagem enviada com sucesso: {response.json()}")
         except requests.exceptions.RequestException as e:
             logger.error(f"Erro ao enviar para Telegram: {e}")
+    threading.Thread(target=send_async, daemon=True).start()
+
+def enviar_notificacao_ocorrencia(chat_id, nome_aluno, medida, descricao, registrado_por):
+    """Envia notificação de ocorrência disciplinar ao Telegram."""
+    import threading
+    
+    msg = (
+        f"⚠️ *NOVA OCORRÊNCIA REGISTRADA*\n\n"
+        f"👤 *Aluno:* {nome_aluno}\n"
+        f"⚖️ *Medida:* {medida}\n"
+        f"📝 *Descrição:* {descricao}\n"
+        f"👮 *Registrado por:* {registrado_por}\n\n"
+        f"📅 {datetime.now().strftime('%d/%m/%Y às %H:%M')}"
+    )
+    
+    params = {'chat_id': chat_id, 'text': msg, 'parse_mode': 'Markdown'}
+    
+    def send_async():
+        try:
+            url = f"{app.config['TELEGRAM_API_URL']}sendMessage"
+            response = requests.post(url, params=params, timeout=5)
+            response.raise_for_status()
+            logger.info(f"Notificação de ocorrência enviada para {nome_aluno}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Erro ao enviar notificação de ocorrência: {e}")
+            
     threading.Thread(target=send_async, daemon=True).start()
 
 def verificar_usuario(username, password):
@@ -621,15 +822,17 @@ def allowed_file(filename):
 
 def read_database():
     """Lê o arquivo database.csv e retorna a lista de alunos."""
-    with open(app.config['DATABASE'], 'r', encoding='utf-8') as f:
-        return list(csv.DictReader(f))
+    with db_lock:
+        with open(app.config['DATABASE'], 'r', encoding='utf-8') as f:
+            return list(csv.DictReader(f))
 
 def write_database(data):
     """Escreve os dados no arquivo database.csv."""
-    with open(app.config['DATABASE'], 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=data[0].keys())
-        writer.writeheader()
-        writer.writerows(data)
+    with db_lock:
+        with open(app.config['DATABASE'], 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=data[0].keys())
+            writer.writeheader()
+            writer.writerows(data)
 
 
 def extract_validade_year():
@@ -840,7 +1043,8 @@ def editar(codigo):
         aluno['Turma'] = request.form['turma']
         aluno['Turno'] = request.form['turno']
         aluno['Permissao'] = request.form['permissao']
-        aluno['TelegramID'] = request.form['telegramid']
+        # aluno['TelegramID'] não é atualizado diretamente pelo form
+        aluno['TelefoneResponsavel'] = request.form.get('telefone_responsavel', '')
         
         if 'foto' in request.files:
             file = request.files['foto']
@@ -853,6 +1057,18 @@ def editar(codigo):
         return redirect(url_for('cadastro'))
     
     return render_template('upload_editar.html', aluno=aluno)
+
+@app.route('/cadastro/desvincular/<codigo>')
+@login_required
+def desvincular(codigo):
+    alunos = read_database()
+    aluno = next((a for a in alunos if a['Codigo'] == codigo), None)
+    if aluno:
+        aluno['TelegramID'] = ''
+        aluno['TelefoneResponsavel'] = ''
+        write_database(alunos)
+        flash('Telegram e telefone desvinculados com sucesso!', 'success')
+    return redirect(url_for('editar', codigo=codigo))
 
 @app.route('/cadastro/excluir/<codigo>')
 @login_required
@@ -870,7 +1086,8 @@ def novo():
         turma = request.form.get('turma', '').strip()
         turno = request.form.get('turno', '').strip()
         permissao = request.form.get('permissao', '').strip()
-        telegramid = request.form.get('telegramid', '').strip()
+        telefone_responsavel = request.form.get('telefone_responsavel', '').strip()
+        # telegramid = request.form.get('telegramid', '').strip() # Removido
         codigo_fornecido = request.form.get('codigo', '').strip()
 
         # Lê alunos atuais
@@ -918,7 +1135,8 @@ def novo():
             'Turno': turno,
             'Permissao': permissao,
             'Foto': 'semfoto.jpg',
-            'TelegramID': telegramid
+            'TelegramID': '', # Inicialmente vazio, será preenchido pelo bot
+            'TelefoneResponsavel': telefone_responsavel
         }
 
         if 'foto' in request.files:
@@ -1255,6 +1473,18 @@ def nova_ocorrencia(codigo):
         ocorrencias.append(ocorrencia)
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(ocorrencias, f, ensure_ascii=False, indent=2)
+            
+        # Enviar notificação se houver Telegram vinculado e medida relevante
+        medidas_ignoradas = ["Advertência Oral", "Outra", "Nenhuma medida necessária"]
+        if aluno.get('TelegramID') and medida not in medidas_ignoradas:
+            enviar_notificacao_ocorrencia(
+                aluno['TelegramID'],
+                aluno['Nome'],
+                medida,
+                texto,
+                registrado_por
+            )
+            
         return redirect(url_for('ocorrencias_aluno', codigo=codigo))
     return render_template('ocorrencia_nova.html', aluno=aluno)
 
@@ -1289,5 +1519,9 @@ if __name__ == '__main__':
     # Criar todos os diretórios necessários
     for directory in REQUIRED_DIRECTORIES:
         os.makedirs(directory, exist_ok=True)
+    
+    # Iniciar thread do Telegram Bot listener
+    logger.info("Iniciando thread do Telegram Bot listener...")
+    threading.Thread(target=telegram_bot_listener, daemon=True).start()
 
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
