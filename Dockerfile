@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 # Instala dependências do sistema necessárias (se houver)
 # libgl1-mesa-glx é muitas vezes necessário para bibliotecas de imagem como OpenCV/Pillow em slim
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
