@@ -51,9 +51,8 @@ A maneira mais fácil e limpa de rodar o projeto.
     git clone https://github.com/joaovbelo5/SchoolPass.git
     cd SchoolPass
     ```
-2.  **Configure o ambiente:**
-    Crie um arquivo `.env` na raiz (baseado no exemplo abaixo).
-3.  **Execute com Docker Compose:**
+
+2.  **Execute com Docker Compose:**
     ```bash
     docker-compose up -d --build
     ```
@@ -79,27 +78,6 @@ A maneira mais fácil e limpa de rodar o projeto.
     *   **Completo (Admin + Busca):** `python start_server.py`
     *   **Apenas Admin:** `python start_admin_only.py`
     *   **Apenas Busca:** `python start_search_only.py`
-
----
-
-## ⚙️ Configuração (.env)
-
-Crie um arquivo `.env` na raiz do projeto para configurar as variáveis essenciais:
-
-```ini
-# --- Telegram Bot ---
-TELEGRAM_TOKEN=seu_token_aqui
-# COOLDOWN_MINUTES=5 (opcional: tempo entre notificações repetidas)
-
-# --- Carteirinha Escolar ---
-CARTEIRINHA_ESCOLA=Nome da Escola
-CARTEIRINHA_TELEFONE=(XX) XXXX-XXXX
-CARTEIRINHA_ENDERECO=Rua, Número, Bairro
-CARTEIRINHA_VALIDADE=31/12/2025
-
-# --- Segurança ---
-SECRET_KEY=sua_chave_secreta_aqui
-```
 
 ---
 
