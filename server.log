@@ -1,0 +1,179 @@
+2025-11-21 11:20:21,789 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 11:20:21,792 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 11:23:26,709 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 11:23:26,720 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 11:24:14,683 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 11:24:14,686 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 11:24:15,217 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 11:24:15,229 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 11:24:15,808 - INFO - Updates recebidos: [{'update_id': 591125131, 'message': {'message_id': 82, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763734498, 'text': 'Oi'}}, {'update_id': 591125132, 'message': {'message_id': 83, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763734516, 'text': 'Oi'}}, {'update_id': 591125133, 'message': {'message_id': 84, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763734538, 'text': 'Oi'}}]
+2025-11-21 11:24:16,315 - INFO - Updates recebidos: [{'update_id': 591125131, 'message': {'message_id': 82, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763734498, 'text': 'Oi'}}, {'update_id': 591125132, 'message': {'message_id': 83, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763734516, 'text': 'Oi'}}, {'update_id': 591125133, 'message': {'message_id': 84, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763734538, 'text': 'Oi'}}]
+2025-11-21 11:24:33,488 - INFO - Updates recebidos: [{'update_id': 591125134, 'message': {'message_id': 91, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763735072, 'text': 'Oi'}}]
+2025-11-21 11:24:38,229 - INFO - Updates recebidos: [{'update_id': 591125134, 'message': {'message_id': 91, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763735072, 'text': 'Oi'}}]
+2025-11-21 11:24:40,701 - INFO - Updates recebidos: [{'update_id': 591125135, 'message': {'message_id': 93, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763735077, 'reply_to_message': {'message_id': 92, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763735074, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 11:24:40,702 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 11:24:40,702 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Aluno)
+2025-11-21 11:24:40,702 - INFO - Comparando: Recebido=61981952994 vs Banco=61981952994 (Nome: Eric Cartman)
+2025-11-21 11:24:40,703 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 11:24:45,520 - INFO - Updates recebidos: [{'update_id': 591125135, 'message': {'message_id': 93, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763735077, 'reply_to_message': {'message_id': 92, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763735074, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 11:24:45,521 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 11:24:45,521 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Aluno)
+2025-11-21 11:24:45,521 - INFO - Comparando: Recebido=61981952994 vs Banco=61981952994 (Nome: Eric Cartman)
+2025-11-21 11:24:45,521 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 11:25:02,770 - INFO - Mensagem enviada com sucesso: {'ok': True, 'result': {'message_id': 97, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763735102, 'text': 'O aluno Eric Cartman passou a carteirinha às 11:25'}}
+2025-11-21 11:25:28,638 - INFO - Notificação de ocorrência enviada para Eric Cartman
+2025-11-21 11:30:45,107 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 11:30:45,110 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 11:32:33,049 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 11:32:33,061 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 12:59:05,443 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 12:59:05,446 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 12:59:05,956 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 12:59:05,959 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 12:59:46,297 - INFO - Updates recebidos: [{'update_id': 591125143, 'message': {'message_id': 124, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763740783, 'reply_to_message': {'message_id': 122, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763740779, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 12:59:46,298 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 12:59:46,298 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Aluno)
+2025-11-21 12:59:46,298 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Eric Cartman)
+2025-11-21 12:59:46,299 - INFO - Comparando: Recebido=61981952994 vs Banco=61981952994 (Nome: Ana Silva)
+2025-11-21 12:59:46,299 - INFO - MATCH! Vinculando Ana Silva ao ID 8123857631
+2025-11-21 12:59:46,299 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: João Pereira)
+2025-11-21 12:59:46,299 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Maria Oliveira)
+2025-11-21 12:59:46,299 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Pedro Santos)
+2025-11-21 12:59:46,299 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Luiza Costa)
+2025-11-21 12:59:46,299 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Bruno Lima)
+2025-11-21 12:59:46,299 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Carla Mendes)
+2025-11-21 12:59:46,300 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Thiago Ramos)
+2025-11-21 12:59:48,081 - INFO - Updates recebidos: [{'update_id': 591125143, 'message': {'message_id': 124, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763740783, 'reply_to_message': {'message_id': 122, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763740779, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 12:59:48,082 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 12:59:48,082 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Aluno)
+2025-11-21 12:59:48,082 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Eric Cartman)
+2025-11-21 12:59:48,083 - INFO - Comparando: Recebido=61981952994 vs Banco=61981952994 (Nome: Ana Silva)
+2025-11-21 12:59:48,083 - INFO - MATCH! Vinculando Ana Silva ao ID 8123857631
+2025-11-21 12:59:48,083 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: João Pereira)
+2025-11-21 12:59:48,083 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Maria Oliveira)
+2025-11-21 12:59:48,083 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Pedro Santos)
+2025-11-21 12:59:48,083 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Luiza Costa)
+2025-11-21 12:59:48,083 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Bruno Lima)
+2025-11-21 12:59:48,083 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Carla Mendes)
+2025-11-21 12:59:48,084 - INFO - Comparando: Recebido=61981952994 vs Banco= (Nome: Thiago Ramos)
+2025-11-21 13:18:45,296 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 13:18:45,300 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 13:18:45,962 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 13:18:45,965 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 13:19:19,005 - INFO - Updates recebidos: [{'update_id': 591125144, 'message': {'message_id': 129, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763741958, 'text': '/start', 'entities': [{'offset': 0, 'length': 6, 'type': 'bot_command'}]}}]
+2025-11-21 13:19:19,307 - INFO - Updates recebidos: [{'update_id': 591125144, 'message': {'message_id': 129, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763741958, 'text': '/start', 'entities': [{'offset': 0, 'length': 6, 'type': 'bot_command'}]}}]
+2025-11-21 13:19:26,250 - INFO - Updates recebidos: [{'update_id': 591125145, 'message': {'message_id': 132, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763741965, 'reply_to_message': {'message_id': 131, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763741960, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 13:19:26,251 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 13:19:26,251 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 13:19:26,251 - INFO - MATCH! Vinculando Ana Silva ao ID 8123857631
+2025-11-21 13:19:26,590 - INFO - Updates recebidos: [{'update_id': 591125145, 'message': {'message_id': 132, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763741965, 'reply_to_message': {'message_id': 131, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763741960, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 13:19:26,590 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 13:19:26,599 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 13:19:26,600 - INFO - MATCH! Vinculando Ana Silva ao ID 8123857631
+2025-11-21 13:20:03,370 - INFO - Updates recebidos: [{'update_id': 591125146, 'message': {'message_id': 135, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742002, 'text': '/start', 'entities': [{'offset': 0, 'length': 6, 'type': 'bot_command'}]}}]
+2025-11-21 13:20:04,481 - INFO - Updates recebidos: [{'update_id': 591125146, 'message': {'message_id': 135, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742002, 'text': '/start', 'entities': [{'offset': 0, 'length': 6, 'type': 'bot_command'}]}}]
+2025-11-21 13:20:10,768 - INFO - Updates recebidos: [{'update_id': 591125147, 'message': {'message_id': 138, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742010, 'reply_to_message': {'message_id': 137, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742005, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 13:20:10,768 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 13:20:10,769 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 13:20:11,824 - INFO - Updates recebidos: [{'update_id': 591125147, 'message': {'message_id': 138, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742010, 'reply_to_message': {'message_id': 137, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742005, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 13:20:11,824 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 13:20:11,825 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 13:21:59,268 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 13:21:59,280 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 13:22:34,002 - INFO - Updates recebidos: [{'update_id': 591125148, 'message': {'message_id': 141, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742153, 'text': '/start', 'entities': [{'offset': 0, 'length': 6, 'type': 'bot_command'}]}}]
+2025-11-21 13:22:35,795 - INFO - Updates recebidos: [{'update_id': 591125148, 'message': {'message_id': 141, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742153, 'text': '/start', 'entities': [{'offset': 0, 'length': 6, 'type': 'bot_command'}]}}]
+2025-11-21 13:22:42,424 - INFO - Updates recebidos: [{'update_id': 591125149, 'message': {'message_id': 144, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742161, 'reply_to_message': {'message_id': 143, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742156, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 13:22:42,424 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 13:22:42,425 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 13:22:43,226 - INFO - Updates recebidos: [{'update_id': 591125149, 'message': {'message_id': 144, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742161, 'reply_to_message': {'message_id': 143, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742156, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 13:22:43,226 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 13:22:43,227 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 13:23:07,016 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 13:23:07,027 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 13:23:31,764 - INFO - Updates recebidos: [{'update_id': 591125150, 'message': {'message_id': 147, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742211, 'text': '/start', 'entities': [{'offset': 0, 'length': 6, 'type': 'bot_command'}]}}]
+2025-11-21 13:23:39,107 - INFO - Updates recebidos: [{'update_id': 591125151, 'message': {'message_id': 149, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742217, 'reply_to_message': {'message_id': 148, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742212, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 13:23:39,108 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 13:23:39,109 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 13:36:02,811 - INFO - Iniciando thread do Telegram Bot listener...
+2025-11-21 13:36:02,812 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 13:36:02,812 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 13:36:23,469 - INFO - Updates recebidos: [{'update_id': 591125152, 'message': {'message_id': 151, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742983, 'text': '/start', 'entities': [{'offset': 0, 'length': 6, 'type': 'bot_command'}]}}]
+2025-11-21 13:36:30,799 - INFO - Updates recebidos: [{'update_id': 591125153, 'message': {'message_id': 153, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742987, 'reply_to_message': {'message_id': 152, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763742984, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-11-21 13:36:30,799 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-11-21 13:36:30,799 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-11-21 13:36:41,770 - INFO - Mensagem enviada com sucesso: {'ok': True, 'result': {'message_id': 155, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1763743001, 'text': 'O aluno Eric Cartman passou a carteirinha às 13:36'}}
+2025-11-21 13:36:57,304 - INFO - Notificação de ocorrência enviada para Eric Cartman
+2025-11-21 13:37:37,242 - INFO - Reiniciando servidor por solicitação do admin...
+2025-11-21 13:40:02,596 - INFO - Iniciando thread do Telegram Bot listener...
+2025-11-21 13:40:02,597 - INFO - Iniciando listener do Telegram Bot...
+2025-11-21 13:40:02,597 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-11-21 13:40:17,462 - INFO - Limpeza de dados concluída pelo administrador.
+2025-12-07 09:55:38,080 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 09:55:38,080 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 09:55:38,081 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 10:02:06,972 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 10:02:06,972 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 10:02:06,973 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 10:02:08,067 - INFO - Updates recebidos: [{'update_id': 591125160, 'message': {'message_id': 177, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765112439, 'text': 'Oi'}}, {'update_id': 591125161, 'message': {'message_id': 178, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765112485, 'text': 'Oi'}}]
+2025-12-07 10:02:16,577 - INFO - Updates recebidos: [{'update_id': 591125162, 'message': {'message_id': 181, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765112534, 'reply_to_message': {'message_id': 180, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765112530, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-12-07 10:02:16,577 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-12-07 10:02:16,578 - INFO - MATCH! Vinculando Eric Cartman ao ID 8123857631
+2025-12-07 10:58:34,266 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 10:58:34,266 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 10:58:34,267 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:02:16,348 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:02:16,349 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:02:16,349 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:18:33,866 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:18:33,867 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:18:33,867 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:19:21,428 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:19:21,429 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:19:21,429 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:25:34,240 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:25:34,241 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:25:34,241 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:33:07,995 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:33:07,996 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:33:07,996 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:33:43,903 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:33:43,903 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:33:43,903 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:37:10,456 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:37:10,456 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:37:10,456 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:39:17,604 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:39:17,605 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:39:17,606 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:45:35,864 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:45:35,865 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:45:35,865 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:46:55,609 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:46:55,610 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:46:55,610 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:47:33,633 - INFO - Updates recebidos: [{'update_id': 591125163, 'message': {'message_id': 184, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765118853, 'text': 'Oi'}}]
+2025-12-07 11:47:40,930 - INFO - Updates recebidos: [{'update_id': 591125164, 'message': {'message_id': 186, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765118857, 'reply_to_message': {'message_id': 185, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765118854, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-12-07 11:47:40,930 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-12-07 11:47:40,931 - INFO - MATCH! Vinculando Aluno ao ID 8123857631
+2025-12-07 11:47:48,693 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 11:47:48,693 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 11:47:48,694 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 11:47:49,820 - INFO - Updates recebidos: [{'update_id': 591125164, 'message': {'message_id': 186, 'from': {'id': 8123857631, 'is_bot': False, 'first_name': 'Gordão Escolas', 'language_code': 'pt-br'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765118857, 'reply_to_message': {'message_id': 185, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765118854, 'text': '👋 Olá! Para receber os avisos da escola, preciso que você compartilhe seu contato.\n\nPor favor, clique no botão abaixo:'}, 'contact': {'phone_number': '5561981952994', 'first_name': 'Gordão Escolas', 'user_id': 8123857631}}}]
+2025-12-07 11:47:49,821 - INFO - Recebido contato: 61981952994 de 8123857631
+2025-12-07 11:47:49,821 - INFO - MATCH! Vinculando Aluno ao ID 8123857631
+2025-12-07 11:48:06,303 - INFO - Mensagem enviada com sucesso: {'ok': True, 'result': {'message_id': 189, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765118886, 'text': 'O aluno Aluno passou a carteirinha às 11:48'}}
+2025-12-07 12:06:55,420 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 12:06:55,421 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 12:06:55,421 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 12:07:23,114 - INFO - Mensagem enviada com sucesso: {'ok': True, 'result': {'message_id': 190, 'from': {'id': 7592378458, 'is_bot': True, 'first_name': 'Teste', 'username': 'gordaoescolas_bot'}, 'chat': {'id': 8123857631, 'first_name': 'Gordão Escolas', 'type': 'private'}, 'date': 1765120043, 'text': 'O aluno Aluno passou a carteirinha às 12:07'}}
+2025-12-07 12:11:21,301 - INFO - Notificação de ocorrência enviada para Aluno
+2025-12-07 12:15:33,712 - INFO - Backup criado por admin: c:\Users\joaob\Documents\GitHub\SchoolPass\backups\backup_schoolpass_20251207_121533_9018.zip
+2025-12-07 12:15:46,467 - INFO - Reiniciando servidor por solicitação do admin...
+2025-12-07 12:16:00,136 - INFO - Reiniciando servidor por solicitação do admin...
+2025-12-07 12:17:58,441 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 12:17:58,441 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 12:17:58,442 - INFO - API URL configurada: https://api.telegram.org/bot******/
+2025-12-07 12:18:27,367 - INFO - Limpeza de dados concluída pelo administrador.
+2025-12-07 12:35:12,815 - INFO - Iniciando thread do Telegram Bot listener...
+2025-12-07 12:35:12,815 - INFO - Iniciando listener do Telegram Bot...
+2025-12-07 12:35:12,815 - INFO - API URL configurada: https://api.telegram.org/bot******/

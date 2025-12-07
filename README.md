@@ -113,6 +113,24 @@ python user_creator_gui.py
 ```
 Uma janela abrirá permitindo cadastrar novos administradores.
 
+### 4. Rodar com Docker (Recomendado)
+Execute o servidor em um container isolado que reinicia automaticamente com o sistema.
+
+1.  **Pré-requisitos:** Tenha o [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado.
+2.  **Iniciar:**
+    ```bash
+    docker-compose up -d --build
+    ```
+    Isso iniciará os servidores nas portas 5000 e 5010 em segundo plano.
+3.  **Parar:**
+    ```bash
+    docker-compose down
+    ```
+4.  **Ver logs:**
+    ```bash
+    docker-compose logs -f
+    ```
+
 ---
 
 ## 📂 Estrutura do Projeto

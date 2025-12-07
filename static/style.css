@@ -1,29 +1,33 @@
-/* Modern CSS for SchoolPass */
+/* Modern CSS for SchoolPass - No Animations */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Color Palette - Modern Greens */
-    --primary-color: #15803d;
-    /* Green 700 */
-    --primary-hover: #166534;
-    /* Green 800 */
-    --secondary-color: #22c55e;
-    /* Green 500 */
-    --background-color: #f8fafc;
-    /* Slate 50 */
+    /* Color Palette - Professional & Clean */
+    --primary-color: #0f766e; /* Teal 700 */
+    --primary-hover: #115e59; /* Teal 800 */
+    --secondary-color: #64748b; /* Slate 500 */
+    
+    --background-color: #f1f5f9; /* Slate 100 */
     --surface-color: #ffffff;
-    --text-primary: #1e293b;
-    /* Slate 800 */
-    --text-secondary: #64748b;
-    /* Slate 500 */
-    --border-color: #e2e8f0;
-    /* Slate 200 */
-    --error-color: #ef4444;
-    /* Red 500 */
-    --success-color: #10b981;
-    /* Emerald 500 */
-    --warning-color: #f59e0b;
-    /* Amber 500 */
+    
+    --text-primary: #0f172a; /* Slate 900 */
+    --text-secondary: #475569; /* Slate 600 */
+    --text-muted: #94a3b8; /* Slate 400 */
+    
+    --border-color: #e2e8f0; /* Slate 200 */
+    
+    /* Status Colors */
+    --success-color: #15803d; /* Green 700 */
+    --success-bg: #dcfce7; /* Green 100 */
+    --success-text: #14532d; /* Green 900 */
+    
+    --error-color: #b91c1c; /* Red 700 */
+    --error-bg: #fee2e2; /* Red 100 */
+    --error-text: #7f1d1d; /* Red 900 */
+    
+    --warning-color: #b45309; /* Amber 700 */
+    --warning-bg: #fef3c7; /* Amber 100 */
+    --warning-text: #78350f; /* Amber 900 */
 
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -33,14 +37,13 @@
     --spacing-xl: 2rem;
 
     /* Border Radius */
-    --radius-sm: 0.375rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
 
-    /* Shadows */
+    /* Shadows - Static, no hover lift */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 * {
@@ -74,107 +77,56 @@ ul {
     padding: 0 var(--spacing-md);
 }
 
-.d-flex {
-    display: flex;
-}
-
-.flex-column {
-    flex-direction: column;
-}
-
-.align-items-center {
-    align-items: center;
-}
-
-.justify-content-between {
-    justify-content: space-between;
-}
-
-.justify-content-center {
-    justify-content: center;
-}
-
-.gap-2 {
-    gap: var(--spacing-sm);
-}
-
-.gap-4 {
-    gap: var(--spacing-md);
-}
-
-.mt-4 {
-    margin-top: var(--spacing-xl);
-}
-
-.mb-4 {
-    margin-bottom: var(--spacing-xl);
-}
-
-.w-100 {
-    width: 100%;
-}
-
 /* Typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--spacing-sm);
 }
 
-h1 {
-    font-size: 2.25rem;
-    letter-spacing: -0.025em;
-}
-
-h2 {
-    font-size: 1.875rem;
-    letter-spacing: -0.025em;
-}
-
-h3 {
-    font-size: 1.5rem;
-}
+h1 { font-size: 2rem; letter-spacing: -0.025em; }
+h2 { font-size: 1.75rem; letter-spacing: -0.025em; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1rem; font-weight: 600; }
 
 p {
     color: var(--text-secondary);
     margin-bottom: var(--spacing-md);
 }
 
-/* Components */
-
 /* Navbar */
 .navbar-custom {
-    background-color: var(--primary-color);
-    color: white;
-    padding: var(--spacing-md) 0;
-    box-shadow: var(--shadow-md);
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--spacing-sm) 0;
 }
 
 .navbar-brand {
     font-weight: 700;
     font-size: 1.25rem;
-    color: white !important;
+    color: var(--primary-color) !important;
 }
 
 .nav-link {
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: var(--text-secondary) !important;
     font-weight: 500;
     padding: var(--spacing-sm) var(--spacing-md) !important;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
 }
 
 .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white !important;
+    background-color: var(--background-color);
+    color: var(--primary-color) !important;
 }
 
 .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--primary-color);
+    color: white !important;
+}
+
+.nav-link.active:hover {
+    background-color: var(--primary-hover);
     color: white !important;
 }
 
@@ -188,30 +140,31 @@ p {
 }
 
 .card-header {
+    background-color: var(--surface-color);
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
     font-weight: 600;
-    font-size: 1.125rem;
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+}
+
+.card-body {
+    padding: var(--spacing-md);
 }
 
 /* Forms */
-.form-group {
-    margin-bottom: var(--spacing-md);
-}
-
 .form-label {
     display: block;
     font-weight: 500;
     margin-bottom: var(--spacing-xs);
     color: var(--text-primary);
+    font-size: 0.875rem;
 }
 
-.form-control,
-.form-select {
+.form-control, .form-select {
     width: 100%;
-    padding: 0.625rem 0.875rem;
-    font-size: 0.95rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     background-color: var(--surface-color);
@@ -219,11 +172,10 @@ p {
     box-shadow: var(--shadow-sm);
 }
 
-.form-control:focus,
-.form-select:focus {
+.form-control:focus, .form-select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+    box-shadow: 0 0 0 1px var(--primary-color);
 }
 
 /* Buttons */
@@ -231,9 +183,9 @@ p {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.625rem 1.25rem;
+    padding: 0.5rem 1rem;
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     border-radius: var(--radius-md);
     border: 1px solid transparent;
     cursor: pointer;
@@ -252,12 +204,12 @@ p {
 .btn-secondary {
     background-color: white;
     border-color: var(--border-color);
-    color: var(--text-primary);
+    color: var(--text-secondary);
 }
 
 .btn-secondary:hover {
-    background-color: #f1f5f9;
-    border-color: #cbd5e1;
+    background-color: var(--background-color);
+    color: var(--text-primary);
 }
 
 .btn-danger {
@@ -266,7 +218,7 @@ p {
 }
 
 .btn-danger:hover {
-    background-color: #dc2626;
+    background-color: #991b1b;
 }
 
 .btn-success {
@@ -275,38 +227,40 @@ p {
 }
 
 .btn-success:hover {
-    background-color: #059669;
+    background-color: #166534;
 }
 
 /* Tables */
 .table-responsive {
     overflow-x: auto;
-    border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
     background-color: var(--surface-color);
+    font-size: 0.875rem;
 }
 
 .table th {
-    background-color: #f8fafc;
+    background-color: var(--background-color);
     color: var(--text-secondary);
     font-weight: 600;
     text-align: left;
-    padding: var(--spacing-md);
+    padding: 0.75rem var(--spacing-md);
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.875rem;
     text-transform: uppercase;
+    font-size: 0.75rem;
     letter-spacing: 0.05em;
 }
 
 .table td {
-    padding: var(--spacing-md);
+    padding: 0.75rem var(--spacing-md);
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
+    vertical-align: middle;
 }
 
 .table tr:last-child td {
@@ -323,31 +277,53 @@ p {
     border-radius: var(--radius-md);
     margin-bottom: var(--spacing-md);
     border: 1px solid transparent;
+    font-size: 0.875rem;
 }
 
 .alert-success {
-    background-color: #ecfdf5;
-    border-color: #a7f3d0;
-    color: #065f46;
+    background-color: var(--success-bg);
+    border-color: var(--success-bg);
+    color: var(--success-text);
 }
 
 .alert-danger {
-    background-color: #fef2f2;
-    border-color: #fecaca;
-    color: #991b1b;
+    background-color: var(--error-bg);
+    border-color: var(--error-bg);
+    color: var(--error-text);
 }
 
 .alert-warning {
-    background-color: #fffbeb;
-    border-color: #fde68a;
-    color: #92400e;
+    background-color: var(--warning-bg);
+    border-color: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.bg-success-subtle {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+}
+
+.bg-danger-subtle {
+    background-color: var(--error-bg);
+    color: var(--error-text);
 }
 
 /* Carômetro Specifics */
 .carometro-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--spacing-md);
     padding: var(--spacing-md) 0;
 }
 
@@ -360,7 +336,6 @@ p {
     flex-direction: column;
     align-items: center;
     padding: var(--spacing-md);
-    box-shadow: var(--shadow-sm);
 }
 
 .carometro-photo {
@@ -368,8 +343,9 @@ p {
     aspect-ratio: 3/4;
     object-fit: cover;
     border-radius: var(--radius-md);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
     border: 1px solid var(--border-color);
+    background-color: var(--background-color);
 }
 
 .carometro-info {
@@ -380,22 +356,21 @@ p {
 .carometro-name {
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
-    font-size: 1rem;
+    margin-bottom: 2px;
+    font-size: 0.875rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .carometro-detail {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
-    margin-bottom: 2px;
 }
 
 /* Footer */
 .footer-custom {
-    background-color: #f1f5f9;
+    background-color: var(--surface-color);
     color: var(--text-secondary);
     padding: var(--spacing-lg) 0;
     margin-top: auto;
@@ -405,37 +380,17 @@ p {
 }
 
 /* Utilities */
-.text-center {
-    text-align: center;
-}
-
-.text-end {
-    text-align: right;
-}
-
-.fw-bold {
-    font-weight: 700;
-}
-
-.text-muted {
-    color: var(--text-secondary) !important;
-}
-
-.shadow-sm {
-    box-shadow: var(--shadow-sm);
-}
-
-.rounded {
-    border-radius: var(--radius-md);
-}
+.text-center { text-align: center; }
+.text-end { text-align: right; }
+.fw-bold { font-weight: 700; }
+.text-muted { color: var(--text-muted) !important; }
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.rounded { border-radius: var(--radius-md); }
+.d-none { display: none !important; }
 
 /* Print Styles */
 @media print {
-
-    .no-print,
-    .navbar,
-    .footer-custom,
-    .btn {
+    .no-print, .navbar, .footer-custom, .btn {
         display: none !important;
     }
 
@@ -456,56 +411,28 @@ p {
         padding: 0;
     }
 
-    /* Carômetro Print Optimization */
+    .carometro-grid {
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .carometro-card {
+        border: 1px solid #ccc !important;
+        padding: 5px !important;
+        break-inside: avoid;
+    }
+
+    .carometro-photo {
+        border: 1px solid #eee !important;
+    }
+    
     .carometro-print-header {
         display: block !important;
         text-align: center;
         margin-bottom: 20px;
         border-bottom: 2px solid #000;
         padding-bottom: 10px;
-    }
-
-    .carometro-print-header h1 {
-        font-size: 24px;
-        margin: 0;
-        color: #000;
-    }
-
-    .carometro-print-header h2 {
-        font-size: 18px;
-        margin: 5px 0 0 0;
-        color: #333;
-        font-weight: normal;
-    }
-
-    .carometro-grid {
-        display: grid !important;
-        grid-template-columns: repeat(5, 1fr) !important;
-        /* Force 5 columns for print */
-        gap: 10px !important;
-    }
-
-    .carometro-card {
-        border: 1px solid #ccc !important;
-        box-shadow: none !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        padding: 5px !important;
-    }
-
-    .carometro-photo {
-        border: 1px solid #eee !important;
-        margin-bottom: 5px !important;
-    }
-
-    .carometro-name {
-        font-size: 10pt !important;
-        color: #000 !important;
-    }
-
-    .carometro-detail {
-        font-size: 8pt !important;
-        color: #333 !important;
     }
 }
 

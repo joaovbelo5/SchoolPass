@@ -7,7 +7,7 @@
     <div class="row justify-content-center mb-4">
         <div class="col-lg-8 text-center">
             <h1 class="fw-bold text-primary mb-2"><i class="bi bi-search me-2"></i>Consulta de Alunos</h1>
-            <p class="text-muted">Pesquise por nome, código ou turma</p>
+            <p class="text-secondary">Pesquise por nome, código ou turma</p>
         </div>
     </div>
 
@@ -37,7 +37,7 @@
                 <div class="flex-grow-1">
                     {{ mensagem }}
                 </div>
-                <button class="btn btn-sm btn-outline-dark ms-3" onclick="window.history.back()">Voltar</button>
+                <button class="btn btn-sm btn-outline-secondary ms-3" onclick="window.history.back()">Voltar</button>
             </div>
         </div>
     </div>
@@ -53,20 +53,17 @@
                         <div class="bg-light p-3 d-flex align-items-center justify-content-center"
                             style="min-width: 120px;">
                             <img src="{{ url_for('static', filename='fotos/' ~ aluno['Foto']) }}" alt="Foto"
-                                class="rounded-circle shadow-sm border border-3 border-white"
-                                style="width: 80px; height: 80px; object-fit: cover;">
+                                class="rounded shadow-sm border" style="width: 80px; height: 80px; object-fit: cover;">
                         </div>
 
                         <!-- Info Section -->
                         <div class="p-3 flex-grow-1 d-flex flex-column justify-content-center">
-                            <h4 class="fw-bold text-dark mb-1">{{ aluno['Nome'] }}</h4>
+                            <h5 class="fw-bold text-dark mb-1">{{ aluno['Nome'] }}</h5>
                             <div class="d-flex flex-wrap gap-2">
-                                <span
-                                    class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                     <i class="bi bi-people-fill me-1"></i>{{ aluno['Turma'] }}
                                 </span>
-                                <span
-                                    class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
                                     <i class="bi bi-upc me-1"></i>{{ aluno['Codigo'] }}
                                 </span>
                             </div>
@@ -76,16 +73,16 @@
                         <div class="p-3 bg-white border-start-md d-flex flex-column justify-content-center gap-2"
                             style="min-width: 200px;">
                             <a href="{{ url_for('registros_files', filename=aluno['Turma'] ~ '/' ~ aluno['Codigo'] ~ '.txt') }}"
-                                class="btn btn-outline-primary btn-sm text-start">
+                                class="btn btn-outline-primary btn-sm text-start w-100">
                                 <i class="bi bi-file-text me-2"></i>Ver Registro
                             </a>
                             <a href="{{ url_for('ocorrencias_aluno', codigo=aluno['Codigo']) }}"
-                                class="btn btn-outline-warning btn-sm text-start text-dark">
+                                class="btn btn-outline-warning btn-sm text-start text-dark w-100">
                                 <i class="bi bi-exclamation-circle me-2"></i>Ocorrências
                             </a>
-                            <form method="POST" class="d-grid">
+                            <form method="POST" class="d-grid w-100">
                                 <input type="hidden" name="registrar_codigo" value="{{ aluno['Codigo'] }}">
-                                <button type="submit" class="btn btn-success btn-sm text-start fw-bold">
+                                <button type="submit" class="btn btn-success btn-sm text-start fw-bold w-100">
                                     <i class="bi bi-check-lg me-2"></i>Registrar Acesso
                                 </button>
                             </form>
@@ -97,4 +94,79 @@
         </div>
     </div>
 </div>
+
+<!-- Toast Container - Static, no animation classes -->
+<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 11">
+    <div id="liveToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive"
+        aria-atomic="true" data-bs-animation="false">
+        <div class="d-flex">
+            <div class="toast-body fs-6 fw-bold">
+                <!-- Message will be injected here -->
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-primary-subtle {
+        background-color: #e0f2f1;
+        color: #0f766e;
+    }
+
+    .bg-secondary-subtle {
+        background-color: #f1f5f9;
+        color: #475569;
+    }
+
+    @media (min-width: 768px) {
+        .border-start-md {
+            border-left: 1px solid var(--border-color);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const forms = document.querySelectorAll('form.d-grid');
+        const toastEl = document.getElementById('liveToast');
+        const toastBody = toastEl.querySelector('.toast-body');
+        // Disable animation in Bootstrap Toast
+        const toast = new bootstrap.Toast(toastEl, { animation: false });
+
+        forms.forEach(form => {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const formData = new FormData(form);
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.ok) {
+                            toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+                            toastEl.classList.add('bg-' + (data.tipo || 'primary'));
+
+                            toastBody.innerHTML = `<i class="bi bi-${data.tipo === 'success' ? 'check-circle' : (data.tipo === 'danger' ? 'exclamation-triangle' : 'info-circle')} me-2"></i>${data.msg}`;
+
+                            toast.show();
+                        } else {
+                            alert('Erro: ' + data.msg);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Erro ao processar a solicitação.');
+                    });
+            });
+        });
+    });
+</script>
 {% endblock %}

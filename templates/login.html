@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block title %}Login - Painel Administrativo{% endblock %}
 {% block content %}
-<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
   <div class="col-11 col-md-6 col-lg-4">
-    <div class="card shadow-lg border-0">
+    <div class="card border-0 shadow-sm">
       <div class="card-header bg-primary text-white text-center py-4 border-0 rounded-top">
         <h3 class="mb-0 text-white fw-bold"><i class="bi bi-shield-lock me-2"></i>Acesso Restrito</h3>
       </div>
@@ -16,30 +16,30 @@
         {% endif %}
 
         <form method="POST">
-          <div class="form-group mb-4">
-            <label for="username" class="form-label text-muted">Usuário</label>
+          <div class="mb-4">
+            <label for="username" class="form-label text-secondary">Usuário</label>
             <div class="input-group">
-              <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-secondary"></i></span>
               <input type="text" class="form-control border-start-0 ps-0" id="username" name="username" required
                 autofocus placeholder="Digite seu usuário">
             </div>
           </div>
 
-          <div class="form-group mb-4">
-            <label for="password" class="form-label text-muted">Senha</label>
+          <div class="mb-4">
+            <label for="password" class="form-label text-secondary">Senha</label>
             <div class="input-group">
-              <span class="input-group-text bg-light border-end-0"><i class="bi bi-key text-muted"></i></span>
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-key text-secondary"></i></span>
               <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" required
                 placeholder="Digite sua senha">
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
             ENTRAR <i class="bi bi-arrow-right ms-2"></i>
           </button>
         </form>
       </div>
-      <div class="card-footer text-center py-3 bg-light border-top-0 text-muted small">
+      <div class="card-footer text-center py-3 bg-light border-top-0 text-secondary small">
         Sistema de Portaria Escolar
       </div>
     </div>

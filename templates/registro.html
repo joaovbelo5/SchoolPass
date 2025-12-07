@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
+
+            <!-- Search Card -->
+            <div class="card mb-4 shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="POST" class="d-flex gap-3">
+                        <div class="flex-grow-1">
+                            <input type="text" name="codigo" class="form-control form-control-lg border-2"
+                                placeholder="Digite ou escaneie o código..." autofocus required autocomplete="off">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg px-4 fw-bold">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {% if mensagem %}
+            <div class="alert {% if 'Negado' in mensagem or 'não encontrado' in mensagem %}alert-danger{% else %}alert-success{% endif %} d-flex align-items-center shadow-sm mb-4"
+                role="alert">
+                <i
+                    class="bi {% if 'Negado' in mensagem or 'não encontrado' in mensagem %}bi-exclamation-circle-fill{% else %}bi-check-circle-fill{% endif %} fs-4 me-3"></i>
+                <div class="fw-medium">
+                    {{ mensagem }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if aluno %}
+            <!-- Student Info Card -->
+            <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <!-- Photo Column -->
+                        <div
+                            class="col-md-5 bg-light d-flex align-items-center justify-content-center p-4 border-end-md">
+                            <div class="ratio ratio-1x1" style="max-width: 300px; width: 100%;">
+                                <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" alt="Foto do Aluno"
+                                    class="rounded-circle shadow-sm border border-4 border-white object-fit-cover">
+                            </div>
+                        </div>
+
+                        <!-- Info Column -->
+                        <div class="col-md-7 p-4 p-lg-5 d-flex flex-column justify-content-center">
+                            <h2 class="fw-bold text-primary mb-3 text-break lh-sm">{{ aluno.Nome }}</h2>
+
+                            <div class="d-flex flex-wrap gap-2 mb-4">
+                                <span
+                                    class="badge bg-light text-dark border px-3 py-2 rounded-pill d-flex align-items-center gap-2">
+                                    <i class="bi bi-people text-secondary"></i>
+                                    <span class="fs-6">{{ aluno.Turma }}</span>
+                                </span>
+                                <span
+                                    class="badge bg-light text-dark border px-3 py-2 rounded-pill d-flex align-items-center gap-2">
+                                    <i class="bi bi-clock text-secondary"></i>
+                                    <span class="fs-6">{{ aluno.Turno }}</span>
+                                </span>
+                            </div>
+
+                            <div>
+                                {% if aluno.Permissao == 'Sim' %}
+                                <div
+                                    class="alert alert-success d-inline-flex align-items-center mb-0 px-4 py-2 border-success border-opacity-25 bg-success-subtle text-success-emphasis fw-bold rounded-pill">
+                                    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                                    <span class="fs-5">PERMITIDO</span>
+                                </div>
+                                {% else %}
+                                <div
+                                    class="alert alert-danger d-inline-flex align-items-center mb-0 px-4 py-2 border-danger border-opacity-25 bg-danger-subtle text-danger-emphasis fw-bold rounded-pill">
+                                    <i class="bi bi-x-circle-fill me-2 fs-5"></i>
+                                    <span class="fs-5">PROIBIDO</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% if alerta %}
+<audio autoplay>
+    <source src="{{ url_for('static', filename='alert.mp3') }}" type="audio/mpeg">
+</audio>
+{% endif %}
+
+<style>
+    @media (min-width: 768px) {
+        .border-end-md {
+            border-right: 1px solid var(--border-color);
+        }
+    }
+
+    .object-fit-cover {
+        object-fit: cover;
+    }
+</style>
+{% endblock %}

@@ -1,118 +1,166 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-        <!-- Search Card -->
-        <div class="card mb-3 shadow-sm">
-            <div class="card-body p-3">
-                <form method="POST" class="d-flex gap-2">
-                    <input type="text" name="codigo" class="form-control form-control-lg"
-                        placeholder="Digite ou escaneie o código..." autofocus required autocomplete="off">
-                    <button type="submit" class="btn btn-primary btn-lg px-4">
-                        <i class="bi bi-check-lg"></i>
-                    </button>
-                </form>
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold text-primary">Dashboard</h1>
+            <p class="text-secondary">Visão geral do sistema</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Total de Alunos -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary-subtle p-3 rounded me-3">
+                            <i class="bi bi-people fs-3 text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="card-title text-secondary mb-0">Total de Alunos</h6>
+                            <h2 class="fw-bold mb-0">{{ total_alunos }}</h2>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        {% if mensagem %}
-        <div
-            class="alert {% if 'Negado' in mensagem or 'não encontrado' in mensagem %}alert-danger{% else %}alert-success{% endif %} text-center mb-3 shadow-sm py-2">
-            <i
-                class="bi {% if 'Negado' in mensagem or 'não encontrado' in mensagem %}bi-exclamation-circle{% else %}bi-check-circle{% endif %} me-2"></i>
-            {{ mensagem }}
-        </div>
-        {% endif %}
-
-        {% if aluno %}
-        <!-- Student Info Card -->
-        <div class="card mb-3 border-0 shadow-md overflow-hidden">
-            <div class="card-body p-0">
-                <div class="row g-0">
-                    <div class="col-md-4 bg-light d-flex align-items-center justify-content-center p-3">
-                        <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}" alt="Foto do Aluno"
-                            class="rounded-circle shadow-sm border border-4 border-white"
-                            style="width: 130px; height: 130px; object-fit: cover;">
-                    </div>
-                    <div class="col-md-8 p-3 d-flex flex-column justify-content-center">
-                        <h3 class="fw-bold text-primary mb-1">{{ aluno.Nome }}</h3>
-
-                        <div class="d-flex flex-wrap gap-2 mb-2">
-                            <span class="badge bg-light text-dark border px-2 py-1 rounded-pill">
-                                <i class="bi bi-people me-1"></i> {{ aluno.Turma }}
-                            </span>
-                            <span class="badge bg-light text-dark border px-2 py-1 rounded-pill">
-                                <i class="bi bi-clock me-1"></i> {{ aluno.Turno }}
-                            </span>
+        <!-- Presentes Hoje -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success-subtle p-3 rounded me-3">
+                            <i class="bi bi-person-check fs-3 text-success"></i>
                         </div>
-
                         <div>
-                            {% if aluno.Permissao == 'Sim' %}
-                            <div
-                                class="d-inline-flex align-items-center px-3 py-1 rounded-pill bg-success text-white fw-bold small">
-                                <i class="bi bi-check-circle-fill me-2"></i> PERMITIDO
-                            </div>
+                            <h6 class="card-title text-secondary mb-0">Presentes Hoje</h6>
+                            <h2 class="fw-bold mb-0">{{ presentes_hoje }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total de Turmas -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-warning-subtle p-3 rounded me-3">
+                            <i class="bi bi-grid fs-3 text-warning"></i>
+                        </div>
+                        <div>
+                            <h6 class="card-title text-secondary mb-0">Turmas</h6>
+                            <h2 class="fw-bold mb-0">{{ total_turmas }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acesso Rápido -->
+        <div class="col-md-3">
+            <a href="{{ url_for('registro') }}" class="text-decoration-none">
+                <div class="card h-100 bg-primary text-white border-0">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="card-title mb-1 text-white">Registrar Acesso</h5>
+                            <p class="card-text text-white-50 small mb-0">Ir para leitura</p>
+                        </div>
+                        <i class="bi bi-arrow-right fs-3"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Telegram Status Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <i class="bi bi-telegram fs-1 text-primary"></i>
+                    </div>
+                    <div>
+                        <h5 class="card-title mb-1">Status do Bot Telegram</h5>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            {% if telegram_status == 'Online' %}
+                            <span class="badge bg-success-subtle text-success">ONLINE</span>
+                            <span class="fw-bold small">{{ telegram_bot_name }}</span>
                             {% else %}
-                            <div
-                                class="d-inline-flex align-items-center px-3 py-1 rounded-pill bg-danger text-white fw-bold small">
-                                <i class="bi bi-x-circle-fill me-2"></i> PROIBIDO
-                            </div>
+                            <span class="badge bg-danger-subtle text-danger">OFFLINE</span>
+                            <span class="text-muted small">Verifique o token</span>
                             {% endif %}
                         </div>
+                        <p class="card-text text-secondary mb-0 small">
+                            <strong>{{ total_linked }}</strong> alunos vinculados.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-        {% endif %}
 
-        <!-- Counters -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-3">
-                <div class="row text-center g-0">
-                    <div class="col border-end">
-                        <div class="text-muted small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Manhã</div>
-                        <div class="h4 mb-0 text-primary" id="contador-manha">0</div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <i class="bi bi-database fs-1 text-secondary"></i>
                     </div>
-                    <div class="col border-end">
-                        <div class="text-muted small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Tarde</div>
-                        <div class="h4 mb-0 text-primary" id="contador-tarde">0</div>
+                    <div>
+                        <h5 class="card-title mb-1">Banco de Dados</h5>
+                        <p class="card-text mb-1 small text-secondary">
+                            Arquivo: <code>database.csv</code>
+                        </p>
+                        <p class="text-muted small mb-0">
+                            Última atualização: {{ db_last_update }}
+                        </p>
                     </div>
-                    <div class="col border-end">
-                        <div class="text-muted small text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Noite</div>
-                        <div class="h4 mb-0 text-primary" id="contador-noite">0</div>
-                    </div>
-                    <div class="col bg-light rounded-end">
-                        <div class="text-muted small text-uppercase fw-bold mb-1 pt-1" style="font-size: 0.7rem;">Total
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-pie-chart me-2"></i>Alunos por Turno</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        {% for turno, count in por_turno.items() %}
+                        <div class="col-4 border-end last-border-none">
+                            <h6 class="text-secondary text-uppercase small fw-bold">{{ turno }}</h6>
+                            <h3 class="fw-bold text-primary mb-0">{{ count }}</h3>
                         </div>
-                        <div class="h4 mb-0 text-success" id="contador-total">0</div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
-<script>
-    function atualizarContadores() {
-        fetch('/get_contadores')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('contador-manha').textContent = data.contadores['Manhã'] || 0;
-                document.getElementById('contador-tarde').textContent = data.contadores['Tarde'] || 0;
-                document.getElementById('contador-noite').textContent = data.contadores['Noite'] || 0;
-                document.getElementById('contador-total').textContent = data.total || 0;
-            })
-            .catch(err => console.error('Erro ao atualizar contadores:', err));
+<style>
+    .bg-primary-subtle {
+        background-color: #e0f2f1;
     }
-    setInterval(atualizarContadores, 1000);
-    atualizarContadores();
-</script>
 
-{% if alerta %}
-<audio autoplay>
-    <source src="{{ url_for('static', filename='alert.mp3') }}" type="audio/mpeg">
-</audio>
-{% endif %}
+    /* Light Teal */
+    .bg-success-subtle {
+        background-color: #dcfce7;
+    }
+
+    .bg-warning-subtle {
+        background-color: #fef3c7;
+    }
+
+    .last-border-none:last-child {
+        border-right: none !important;
+    }
+</style>
 {% endblock %}

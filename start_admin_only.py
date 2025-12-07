@@ -357,7 +357,7 @@ def register_admin_routes(app):
             return jsonify({'ok': False, 'msg': f'Erro ao reiniciar: {e}'}), 500
 
 
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, g
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, g, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import csv
 import os
@@ -780,6 +780,18 @@ def enviar_telegram(chat_id, nome, tipo_acesso):
             logger.error(f"Erro ao enviar para Telegram: {e}")
     threading.Thread(target=send_async, daemon=True).start()
 
+def enviar_mensagem_generica(chat_id, texto):
+    """Envia uma mensagem genérica ao Telegram de forma síncrona."""
+    try:
+        url = f"{app.config['TELEGRAM_API_URL']}sendMessage"
+        params = {'chat_id': chat_id, 'text': texto}
+        response = requests.post(url, params=params, timeout=5)
+        response.raise_for_status()
+        return True
+    except Exception as e:
+        logger.error(f"Erro ao enviar mensagem genérica para {chat_id}: {e}")
+        return False
+
 def enviar_notificacao_ocorrencia(chat_id, nome_aluno, medida, descricao, registrado_por):
     """Envia notificação de ocorrência disciplinar ao Telegram."""
     import threading
@@ -932,8 +944,9 @@ def logout():
     return redirect(url_for('login'))
 
 # Rotas de registro de acesso
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/registro', methods=['GET', 'POST'])
+@login_required
+def registro():
     mensagem = ""
     aluno = None
     alerta = False
@@ -962,11 +975,67 @@ def index():
             erro = True
             mensagem = "⚠️ Código não encontrado!"
 
-    return render_template('index.html', 
+    return render_template('registro.html', 
                           mensagem=mensagem, 
                           aluno=aluno, 
                           alerta=alerta, 
                           erro=erro)
+
+@app.route('/', methods=['GET'])
+@login_required
+def index():
+    # Calcular estatísticas para o dashboard
+    alunos = read_database()
+    total_alunos = len(alunos)
+    
+    # Contar turmas únicas
+    turmas = set(a['Turma'] for a in alunos if a.get('Turma'))
+    total_turmas = len(turmas)
+    
+    # Presentes hoje (total de acessos únicos)
+    # A variável global 'alunos_registrados_hoje' contém (codigo, data)
+    # Precisamos filtrar pela data de hoje, mas a variável já é limpa diariamente
+    # Então basta contar o tamanho do set
+    ensure_current_day()
+    presentes_hoje = len(alunos_registrados_hoje)
+    
+    # Breakdown por turno (usando contadores globais)
+    por_turno = dict(contadores)
+
+    # Status do Telegram e Alunos Vinculados
+    telegram_status = 'Offline'
+    telegram_bot_name = ''
+    total_linked = sum(1 for a in alunos if a.get('TelegramID'))
+    
+    try:
+        # Check rápido de conexão (timeout curto)
+        url = f"{app.config['TELEGRAM_API_URL']}getMe"
+        resp = requests.get(url, timeout=2)
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get('ok'):
+                telegram_status = 'Online'
+                telegram_bot_name = data['result'].get('first_name', 'Bot')
+    except Exception as e:
+        logger.error(f"Erro ao verificar status do Telegram: {e}")
+
+    # Última atualização do banco de dados
+    db_last_update = ''
+    try:
+        mtime = os.path.getmtime(app.config['DATABASE'])
+        db_last_update = datetime.fromtimestamp(mtime).strftime('%d/%m/%Y %H:%M')
+    except Exception:
+        pass
+    
+    return render_template('index.html',
+                          total_alunos=total_alunos,
+                          total_turmas=total_turmas,
+                          presentes_hoje=presentes_hoje,
+                          por_turno=por_turno,
+                          telegram_status=telegram_status,
+                          telegram_bot_name=telegram_bot_name,
+                          total_linked=total_linked,
+                          db_last_update=db_last_update)
 
 @app.route('/consulta', methods=['GET', 'POST'])
 @login_required
@@ -996,18 +1065,26 @@ def consulta():
                     ultimo = ultimo_registro.get(codigo)
                     if ultimo and (now - ultimo['hora']) < timedelta(minutes=app.config['COOLDOWN_MINUTES']):
                         mensagem = "⏳ Aguarde antes de registrar novamente."
+                        tipo = "warning"
                     else:
                         registrar_acesso(aluno['Codigo'], aluno['Nome'], aluno['Turma'], "Acesso")
                         if aluno['TelegramID']:
                             enviar_telegram(aluno['TelegramID'], aluno['Nome'], "Acesso")
                         ultimo_registro[codigo] = {'hora': now}
                         mensagem = "✅ Acesso Registrado com Sucesso!"
+                        tipo = "success"
                 else:
                     alerta = True
                     mensagem = "⛔ Acesso Negado!"
+                    tipo = "danger"
             else:
                 erro = True
                 mensagem = "⚠️ Código não encontrado!"
+                tipo = "danger"
+            
+            # Se for requisição AJAX, retorna JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'ok': True, 'msg': mensagem, 'tipo': tipo})
 
     return render_template('consulta.html', 
                            resultados=resultados, 
@@ -1017,6 +1094,7 @@ def consulta():
                            erro=erro)
 
 @app.route('/get_contadores')
+@login_required
 def get_contadores():
     # Garantir que os contadores reflitam o dia atual
     try:
@@ -1502,6 +1580,91 @@ def excluir_ocorrencia(codigo):
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(ocorrencias, f, ensure_ascii=False, indent=2)
     return redirect(url_for('ocorrencias_aluno', codigo=codigo))
+
+# --- ROTA DE MENSAGENS EM MASSA ---
+@app.route('/mensagens', methods=['GET', 'POST'])
+@login_required
+def mensagens():
+    historico_path = 'mensagens_historico.json'
+    
+    # Carregar histórico
+    historico = []
+    if os.path.exists(historico_path):
+        try:
+            with open(historico_path, 'r', encoding='utf-8') as f:
+                historico = json.load(f)
+                # Ordenar por data (mais recente primeiro)
+                historico.reverse()
+        except Exception as e:
+            logger.error(f"Erro ao ler histórico de mensagens: {e}")
+
+    # Carregar turmas para o filtro
+    alunos = read_database()
+    turmas = sorted(list(set(a['Turma'] for a in alunos if a.get('Turma'))))
+
+    if request.method == 'POST':
+        turma_alvo = request.form.get('turma')
+        mensagem_template = request.form.get('mensagem')
+        
+        if not mensagem_template:
+            flash('A mensagem não pode estar vazia.', 'error')
+            return redirect(url_for('mensagens'))
+
+        # Filtrar destinatários
+        destinatarios = []
+        for aluno in alunos:
+            # Verifica se tem Telegram vinculado
+            if not aluno.get('TelegramID'):
+                continue
+            
+            # Verifica filtro de turma
+            if turma_alvo != 'todos' and aluno.get('Turma') != turma_alvo:
+                continue
+                
+            destinatarios.append(aluno)
+
+        if not destinatarios:
+            flash('Nenhum destinatário encontrado com Telegram vinculado para a seleção atual.', 'warning')
+            return redirect(url_for('mensagens'))
+
+        # Enviar mensagens
+        enviados_count = 0
+        
+        for aluno in destinatarios:
+            # Personalizar mensagem
+            msg_final = mensagem_template.replace('{nome}', aluno['Nome'])
+            
+            # Enviar
+            if enviar_mensagem_generica(aluno['TelegramID'], msg_final):
+                enviados_count += 1
+        
+        # Salvar no histórico
+        novo_registro = {
+            'data': datetime.now().strftime('%d/%m/%Y %H:%M'),
+            'mensagem': mensagem_template,
+            'total_enviados': enviados_count,
+            'sucesso': True
+        }
+        
+        # Adicionar ao histórico
+        try:
+            current_hist = []
+            if os.path.exists(historico_path):
+                with open(historico_path, 'r', encoding='utf-8') as f:
+                    current_hist = json.load(f)
+            
+            current_hist.append(novo_registro)
+            
+            with open(historico_path, 'w', encoding='utf-8') as f:
+                json.dump(current_hist, f, ensure_ascii=False, indent=2)
+                
+        except Exception as e:
+            logger.error(f"Erro ao salvar histórico de mensagens: {e}")
+
+        flash(f'Mensagens enviadas para {enviados_count} pessoas!', 'success')
+        return redirect(url_for('mensagens'))
+
+    return render_template('mensagens.html', turmas=turmas, historico=historico)
 
 # Lista de diretórios necessários para o funcionamento do sistema
 REQUIRED_DIRECTORIES = [

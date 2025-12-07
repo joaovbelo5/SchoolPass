@@ -1,0 +1,15 @@
+services:
+  schoolpass:
+    build: .
+    container_name: schoolpass_server
+    ports:
+      - "5000:5000"
+      - "5010:5010"
+    volumes:
+      # Mapeia o diretório atual para /app no container para persistir dados
+      - .:/app
+    environment:
+      - TZ=America/Sao_Paulo
+    restart: unless-stopped
+    # 'unless-stopped' garante que o container inicie junto com o Docker (e o sistema)
+    # a menos que tenha sido parado manualmente

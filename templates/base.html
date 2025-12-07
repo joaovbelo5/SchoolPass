@@ -19,14 +19,15 @@
 <body class="d-flex flex-column min-vh-100">
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-custom no-print">
+    <nav class="navbar navbar-expand-xl navbar-custom no-print">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="/">
                 <i class="bi bi-shield-check"></i>
-                <span id="brasilia-clock">--:--</span>
+                <span>SchoolPass</span>
+                <span id="brasilia-clock" class="fw-normal fs-6 text-secondary ms-2">--:--</span>
             </a>
 
-            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse"
+            <button class="navbar-toggler border-0 text-secondary" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
                 aria-label="Toggle navigation">
                 <i class="bi bi-list fs-2"></i>
@@ -34,17 +35,18 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-1">
-                    <li class="nav-item"><a class="nav-link" href="/">Registro</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/registro">Registro</a></li>
                     <li class="nav-item"><a class="nav-link" href="/consulta">Consulta</a></li>
                     <li class="nav-item"><a class="nav-link" href="/cadastro">Cadastro</a></li>
                     <li class="nav-item"><a class="nav-link" href="/emissao">Carteirinhas</a></li>
                     <li class="nav-item"><a class="nav-link" href="/historico">Histórico</a></li>
                     <li class="nav-item"><a class="nav-link" href="/carometro">Carômetro</a></li>
                     <li class="nav-item"><a class="nav-link" href="/chamada">Chamada</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/mensagens">Mensagens</a></li>
                     <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
                     <li class="nav-item ms-lg-2"><a
                             class="nav-link btn btn-danger text-white px-3 py-1 mt-2 mt-lg-0 d-inline-block"
-                            href="/logout" style="background-color: rgba(220, 38, 38, 0.8) !important;">Sair</a></li>
+                            href="/logout">Sair</a></li>
                 </ul>
             </div>
         </div>
