@@ -1,154 +1,132 @@
-# SchoolPass
+# SchoolPass 🎓
 
-O **SchoolPass** é um sistema completo de gerenciamento de acesso e segurança escolar. Ele moderniza o controle de entrada e saída de alunos, oferece carteirinhas digitais, integrações com Telegram para notificações em tempo real e ferramentas administrativas robustas para gestão de dados e usuários.
+> Sistema moderno de gerenciamento de acesso escolar, segurança e carteirinhas digitais.
 
-## ✨ Funcionalidades Principais
-
-### 🏢 Painel Administrativo (`start_admin_only.py`)
-O coração do sistema para a equipe da escola.
-*   **Monitoramento em Tempo Real**: Visualize entradas e saídas conforme elas acontecem.
-*   **Registro Manual**: Registre acessos manualmente caso o aluno esqueça a carteirinha.
-*   **Gestão de Dados**: Ferramentas para backup (ZIP), restauração e limpeza segura do banco de dados.
-*   **Carômetro**: Visualização rápida de todos os alunos por turma com fotos.
-*   **Histórico Completo**: Logs detalhados de acesso de cada aluno.
-
-### 🔍 Portal de Consulta (`start_search_only.py`)
-Interface pública ou restrita para alunos e responsáveis.
-*   **Busca de Alunos**: Encontre alunos por código e turma.
-*   **Carteirinha Digital**: Visualize e imprima a carteirinha estudantil com código de barras.
-*   **Histórico de Acesso**: Consulte os registros de entrada e saída do aluno.
-*   **Integração Telegram**: Vincule um ID do Telegram para receber notificações.
-
-### 📱 Notificações via Telegram
-*   **Alertas em Tempo Real**: Os responsáveis recebem uma mensagem instantânea no Telegram sempre que o aluno entra ou sai da escola.
-*   **Cadastro Fácil**: Interface dedicada para vincular o usuário do Telegram ao perfil do aluno.
-
-### 👥 Gerenciador de Usuários (`user_creator_gui.py`)
-Uma ferramenta gráfica (GUI) para gerenciar quem tem acesso ao sistema.
-*   **Interface Amigável**: Janela desktop simples para adicionar, remover e editar usuários.
-*   **Segurança**: As senhas são armazenadas com hash seguro.
+O **SchoolPass** é uma solução completa para escolas que desejam modernizar o controle de entrada e saída de alunos. Com foco em segurança e facilidade de uso, o sistema oferece monitoramento em tempo real, emissão de carteirinhas com código de barras, e uma integração poderosa com o Telegram para notificar pais e responsáveis instantaneamente.
 
 ---
 
-## 🚀 Instalação
+## ✨ Funcionalidades Principais
 
-### Pré-requisitos
-*   Python 3.8 ou superior
-*   Git
+### 🚀 Controle de Acesso & Monitoramento
+*   **Painel Administrativo (`start_admin_only.py`)**: Visão geral em tempo real de quem entra e sai da escola.
+*   **Registro Automático & Manual**: Suporte para leitura de código de barras ou registro manual em caso de esquecimento da carteirinha.
+*   **Carômetro Digital**: Visualização rápida dos alunos por turma com fotos para fácil identificação.
+*   **Histórico Detalhado**: Logs individuais de acesso mantidos para cada aluno.
 
-### Passo a Passo
+### 📱 Integração com Telegram
+*   **Notificações Instantâneas**: Pais recebem mensagens no momento exato em que o aluno entra ou sai da escola.
+*   **Bot Interativo**: Sistema fácil para vincular o contato do responsável ao cadastro do aluno.
+*   **Alertas de Ocorrências**: Envio de advertências ou comunicados disciplinares diretamente pelo app.
+
+### 💳 Carteirinhas Digitais
+*   **Gerador Integrado**: Crie e imprima carteirinhas estudantis personalizadas automaticamente.
+*   **Código de Barras**: Padrão Code128 para leitura rápida e eficiente.
+*   **Personalizável**: Configure logo, assinatura, e dados da escola via painel.
+
+### 🛡️ Segurança & Gestão
+*   **Gestão de Usuários (`user_creator_gui.py`)**: Controle quem acessa o sistema com senhas criptografadas.
+*   **Backup & Restore**: Ferramentas robustas para salvar e restaurar todos os dados do sistema (ZIP).
+*   **Limpeza de Dados**: Função segura para virada de ano letivo ou manutenção.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+*   **Backend**: Python 3 (Flask)
+*   **Frontend**: HTML5, CSS3 (Design Responsivo), JavaScript
+*   **Banco de Dados**: CSV (Simples, portável e eficiente para o escopo)
+*   **Containerização**: Docker & Docker Compose
+*   **Bibliotecas Chave**: `pandas` (dados), `python-barcode` (carteirinhas), `Pillow` (imagens).
+
+---
+
+## 🚀 Como Iniciar
+
+### Opção 1: Docker (Recomendada) 🐳
+A maneira mais fácil e limpa de rodar o projeto.
 
 1.  **Clone o repositório:**
     ```bash
     git clone https://github.com/joaovbelo5/SchoolPass.git
     cd SchoolPass
     ```
+2.  **Configure o ambiente:**
+    Crie um arquivo `.env` na raiz (baseado no exemplo abaixo).
+3.  **Execute com Docker Compose:**
+    ```bash
+    docker-compose up -d --build
+    ```
+    *   **Painel Admin**: [http://localhost:5000](http://localhost:5000)
+    *   **Portal de Busca**: [http://localhost:5010](http://localhost:5010)
 
-2.  **Crie e ative um ambiente virtual:**
-    *   Windows:
-        ```bash
-        python -m venv venv
-        venv\Scripts\activate
-        ```
-    *   Linux/Mac:
-        ```bash
-        python3 -m venv venv
-        source venv/bin/activate
-        ```
+### Opção 2: Instalação Manual 🐍
 
+1.  **Pré-requisitos:** Python 3.8+ instalado.
+2.  **Crie um ambiente virtual:**
+    ```bash
+    python -m venv venv
+    # Windows:
+    venv\Scripts\activate
+    # Linux/Mac:
+    source venv/bin/activate
+    ```
 3.  **Instale as dependências:**
     ```bash
     pip install -r requirements.txt
     ```
+4.  **Inicie os servidores:**
+    *   **Completo (Admin + Busca):** `python start_server.py`
+    *   **Apenas Admin:** `python start_admin_only.py`
+    *   **Apenas Busca:** `python start_search_only.py`
 
 ---
 
-## ⚙️ Configuração
+## ⚙️ Configuração (.env)
 
-Crie um arquivo `.env` na raiz do projeto para configurar as variáveis de ambiente. Você pode usar o arquivo `.env.example` (se existir) como base.
+Crie um arquivo `.env` na raiz do projeto para configurar as variáveis essenciais:
 
-**Exemplo de `.env`:**
 ```ini
-# Configurações do Telegram
-TELEGRAM_BOT_TOKEN=seu_token_do_bot_aqui
+# --- Telegram Bot ---
+TELEGRAM_TOKEN=seu_token_aqui
+# COOLDOWN_MINUTES=5 (opcional: tempo entre notificações repetidas)
 
-# Configurações da Carteirinha
-CARTEIRINHA_ESCOLA=Nome da Sua Escola
-CARTEIRINHA_TELEFONE=(XX) XXXXX-XXXX
-CARTEIRINHA_ENDERECO=Rua Exemplo, 123
+# --- Carteirinha Escolar ---
+CARTEIRINHA_ESCOLA=Nome da Escola
+CARTEIRINHA_TELEFONE=(XX) XXXX-XXXX
+CARTEIRINHA_ENDERECO=Rua, Número, Bairro
 CARTEIRINHA_VALIDADE=31/12/2025
 
-# Outras Configurações
-SECRET_KEY=sua_chave_secreta_flask
+# --- Segurança ---
+SECRET_KEY=sua_chave_secreta_aqui
 ```
 
 ---
 
-## 🖥️ Como Usar
+## 👥 Gerenciando Usuários Admin
 
-### 1. Iniciar o Servidor Completo
-Para rodar tanto o painel administrativo quanto a busca simultaneamente (recomendado para testes ou servidores unificados):
-```bash
-python start_server.py
-```
-*   **Admin:** `http://localhost:5000`
-*   **Busca:** `http://localhost:5010`
+O sistema possui uma ferramenta gráfica dedicada para criar usuários administrativos.
 
-### 2. Rodar Módulos Separadamente
-Se preferir rodar serviços em portas ou máquinas diferentes:
-
-*   **Apenas Admin:**
+1.  Execute o script:
     ```bash
-    python start_admin_only.py
+    python user_creator_gui.py
     ```
-*   **Apenas Busca:**
-    ```bash
-    python start_search_only.py
-    ```
-
-### 3. Gerenciar Usuários do Sistema
-Para criar logins para o painel administrativo, execute a ferramenta gráfica:
-```bash
-python user_creator_gui.py
-```
-Uma janela abrirá permitindo cadastrar novos administradores.
-
-### 4. Rodar com Docker (Recomendado)
-Execute o servidor em um container isolado que reinicia automaticamente com o sistema.
-
-1.  **Pré-requisitos:** Tenha o [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado.
-2.  **Iniciar:**
-    ```bash
-    docker-compose up -d --build
-    ```
-    Isso iniciará os servidores nas portas 5000 e 5010 em segundo plano.
-3.  **Parar:**
-    ```bash
-    docker-compose down
-    ```
-4.  **Ver logs:**
-    ```bash
-    docker-compose logs -f
-    ```
+2.  Utilize a interface para **Adicionar**, **Remover** ou **Listar** usuários que poderão acessar o painel administrativo.
 
 ---
 
 ## 📂 Estrutura do Projeto
 
-*   `start_admin_only.py`: Servidor Flask do painel administrativo.
-*   `start_search_only.py`: Servidor Flask da busca pública.
-*   `user_creator_gui.py`: Interface Tkinter para gestão de usuários (`usuarios.csv`).
-*   `database.csv`: Banco de dados principal com informações dos alunos.
-*   `usuarios.csv`: Banco de dados de usuários do sistema (admin).
-*   `registros/`: Pasta onde são salvos os logs de acesso individuais (`.txt`).
-*   `backups/`: Pasta para armazenamento de backups gerados pelo sistema.
-*   `templates/`: Arquivos HTML (Jinja2).
-*   `static/`: Arquivos CSS, JS e imagens.
+*   `chamadas/`: Listas de chamadas por turma.
+*   `registros/`: Logs individuais de entrada/saída por aluno.
+*   `registros_diarios/`: Logs agrupados por dia (JSON).
+*   `database.csv`: Cadastro principal de alunos.
+*   `usuarios.csv`: Cadastro de administradores (hash).
+*   `backups/`: Armazenamento de backups gerados.
+*   `static/` & `templates/`: Arquivos do Frontend (Web).
 
-## 🛠️ Tecnologias
+---
 
-*   **Backend:** Python (Flask)
-*   **Frontend:** HTML5, CSS3, JavaScript
-*   **Dados:** CSV (Pandas)
-*   **GUI Desktop:** Tkinter
-*   **Outros:** `python-barcode`, `Pillow` (processamento de imagem)
+## 📄 Licença
+
+Este projeto é distribuído sob a licença MIT. Sinta-se livre para usar e modificar.
