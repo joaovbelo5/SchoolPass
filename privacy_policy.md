@@ -69,7 +69,7 @@ Conforme o Art. 18 da LGPD, você tem direito a:
 *   **Confirmação e Acesso:** Saber se tratamos seus dados e ter acesso a eles.
 *   **Correção:** Solicitar a correção de dados incompletos, inexatos ou desatualizados.
 *   **Eliminação:** Solicitar a exclusão de dados desnecessários ou tratados em desconformidade com a lei (respeitando-se os prazos legais de guarda).
-*   **Revogação do Consentimento:** Desvincular sua conta do Telegram a qualquer momento através das opções do aplicativo ou solicitando à escola.
+*   **Revogação do Consentimento:** Desvincular sua conta do Telegram a qualquer momento solicitando à escola.
 
 Para exercer seus direitos, entre em contato diretamente com a secretaria ou administração da escola.
 
