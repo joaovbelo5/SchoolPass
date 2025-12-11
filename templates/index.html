@@ -2,142 +2,252 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="display-5 fw-bold text-primary">Dashboard</h1>
-            <p class="text-secondary">Visão geral do sistema</p>
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-6 fw-bold text-primary mb-1">Dashboard</h1>
+            <p class="text-secondary mb-0">Visão geral e controle do sistema</p>
+        </div>
+        <div class="text-end d-none d-md-block">
+            <h5 class="fw-bold mb-0 text-dark" id="current-date">--/--/----</h5>
+            <small class="text-muted" id="current-time">--:--</small>
         </div>
     </div>
 
-    <div class="row g-4 mb-5">
-        <!-- Total de Alunos -->
-        <div class="col-md-3">
-            <div class="card h-100">
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+        <!-- Presence Card -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary-subtle p-3 rounded me-3">
-                            <i class="bi bi-people fs-3 text-primary"></i>
+                        <div class="bg-primary-subtle p-3 rounded-circle me-3">
+                            <i class="bi bi-people-fill fs-4 text-primary"></i>
                         </div>
                         <div>
-                            <h6 class="card-title text-secondary mb-0">Total de Alunos</h6>
-                            <h2 class="fw-bold mb-0">{{ total_alunos }}</h2>
+                            <h6 class="text-secondary mb-0">Presença Hoje</h6>
+                            <h3 class="fw-bold mb-0">{{ presentes_hoje }} <span class="fs-6 text-muted fw-normal">/ {{
+                                    total_alunos }}</span></h3>
                         </div>
+                    </div>
+                    <!-- ProgressBar -->
+                    {% set presence_pct = (presentes_hoje / total_alunos * 100) if total_alunos > 0 else 0 %}
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ presence_pct }}%">
+                        </div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">{{ "%.1f"|format(presence_pct) }}% dos alunos
+                        presentes</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telegram Card -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info-subtle p-3 rounded-circle me-3">
+                            <i class="bi bi-telegram fs-4 text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-secondary mb-0">Telegram Vinculado</h6>
+                            <h3 class="fw-bold mb-0">{{ total_linked }} <span class="fs-6 text-muted fw-normal">/ {{
+                                    total_alunos }}</span></h3>
+                        </div>
+                    </div>
+                    <!-- ProgressBar -->
+                    {% set linked_pct = (total_linked / total_alunos * 100) if total_alunos > 0 else 0 %}
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ linked_pct }}%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted">{{ "%.1f"|format(linked_pct) }}% conectados</small>
+                        {% if telegram_status == 'Online' %}
+                        <span
+                            class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Online</span>
+                        {% else %}
+                        <span
+                            class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Offline</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Presentes Hoje -->
-        <div class="col-md-3">
-            <div class="card h-100">
+        <!-- System Status Card -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="bg-success-subtle p-3 rounded me-3">
-                            <i class="bi bi-person-check fs-3 text-success"></i>
+                        <div class="bg-warning-subtle p-3 rounded-circle me-3">
+                            <i class="bi bi-database-fill fs-4 text-warning"></i>
                         </div>
                         <div>
-                            <h6 class="card-title text-secondary mb-0">Presentes Hoje</h6>
-                            <h2 class="fw-bold mb-0">{{ presentes_hoje }}</h2>
+                            <h6 class="text-secondary mb-0">Sistema</h6>
+                            <h3 class="fw-bold mb-0">{{ total_turmas }} <span
+                                    class="fs-6 text-muted fw-normal">Turmas</span></h3>
                         </div>
+                    </div>
+                    <div class="mt-3">
+                        <p class="mb-0 text-muted small"><i class="bi bi-clock-history me-1"></i> Atualizado: <strong>{{
+                                db_last_update }}</strong></p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Total de Turmas -->
-        <div class="col-md-3">
-            <div class="card h-100">
+    <!-- Quick Actions -->
+    <h5 class="fw-bold text-secondary mb-3">Acesso Rápido</h5>
+    <!-- Grid of 5 columns -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mb-5">
+        <div class="col">
+            <a href="{{ url_for('registro') }}"
+                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
                 <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-warning-subtle p-3 rounded me-3">
-                            <i class="bi bi-grid fs-3 text-warning"></i>
-                        </div>
-                        <div>
-                            <h6 class="card-title text-secondary mb-0">Turmas</h6>
-                            <h2 class="fw-bold mb-0">{{ total_turmas }}</h2>
-                        </div>
+                    <div class="mb-3">
+                        <i class="bi bi-person-badge fs-1 text-primary"></i>
                     </div>
+                    <h6 class="fw-bold text-dark">Registro</h6>
+                    <small class="text-muted">Entrada/Saída</small>
                 </div>
-            </div>
+            </a>
         </div>
-
-        <!-- Acesso Rápido -->
-        <div class="col-md-3">
-            <a href="{{ url_for('registro') }}" class="text-decoration-none">
-                <div class="card h-100 bg-primary text-white border-0">
-                    <div class="card-body d-flex align-items-center justify-content-between">
-                        <div>
-                            <h5 class="card-title mb-1 text-white">Registrar Acesso</h5>
-                            <p class="card-text text-white-50 small mb-0">Ir para leitura</p>
-                        </div>
-                        <i class="bi bi-arrow-right fs-3"></i>
+        <div class="col">
+            <a href="{{ url_for('cadastro') }}"
+                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-person-plus-fill fs-1 text-success"></i>
                     </div>
+                    <h6 class="fw-bold text-dark">Cadastro</h6>
+                    <small class="text-muted">Gerenciar Alunos</small>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="{{ url_for('emissao') }}"
+                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-printer-fill fs-1 text-warning"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark">Carteirinhas</h6>
+                    <small class="text-muted">Emitir crachás</small>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="{{ url_for('chamada') }}"
+                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-calendar-check-fill fs-1 text-info"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark">Chamada</h6>
+                    <small class="text-muted">Relatório Mensal</small>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="{{ url_for('mensagens') }}"
+                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-chat-dots-fill fs-1 text-danger"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark">Mensagens</h6>
+                    <small class="text-muted">Enviar avisos</small>
                 </div>
             </a>
         </div>
     </div>
 
-    <!-- Telegram Status Row -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                        <i class="bi bi-telegram fs-1 text-primary"></i>
-                    </div>
-                    <div>
-                        <h5 class="card-title mb-1">Status do Bot Telegram</h5>
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            {% if telegram_status == 'Online' %}
-                            <span class="badge bg-success-subtle text-success">ONLINE</span>
-                            <span class="fw-bold small">{{ telegram_bot_name }}</span>
-                            {% else %}
-                            <span class="badge bg-danger-subtle text-danger">OFFLINE</span>
-                            <span class="text-muted small">Verifique o token</span>
-                            {% endif %}
+    <!-- Bottom Content Grid -->
+    <div class="row g-4">
+        <!-- Turnos Chart/Data -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+                    <h5 class="fw-bold mb-0">Alunos por Turno</h5>
+                </div>
+                <div class="card-body px-4">
+                    {% for turno, count in por_turno.items() %}
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-semibold text-secondary">{{ turno }}</span>
+                            <span class="fw-bold">{{ count }}</span>
                         </div>
-                        <p class="card-text text-secondary mb-0 small">
-                            <strong>{{ total_linked }}</strong> alunos vinculados.
-                        </p>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                style="width: {{ (count / total_alunos * 100) if total_alunos > 0 else 0 }}%"></div>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="flex-shrink-0 me-3">
-                        <i class="bi bi-database fs-1 text-secondary"></i>
-                    </div>
-                    <div>
-                        <h5 class="card-title mb-1">Banco de Dados</h5>
-                        <p class="card-text mb-1 small text-secondary">
-                            Arquivo: <code>database.csv</code>
-                        </p>
-                        <p class="text-muted small mb-0">
-                            Última atualização: {{ db_last_update }}
-                        </p>
-                    </div>
+        <!-- Recent Activity Feed -->
+        <div class="col-lg-8">
+            <div class="card h-100 border-0 shadow-sm">
+                <div
+                    class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Atividade Recente</h5>
+                    <a href="{{ url_for('historico') }}" class="btn btn-sm btn-light text-muted">Ver Histórico</a>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-pie-chart me-2"></i>Alunos por Turno</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        {% for turno, count in por_turno.items() %}
-                        <div class="col-4 border-end last-border-none">
-                            <h6 class="text-secondary text-uppercase small fw-bold">{{ turno }}</h6>
-                            <h3 class="fw-bold text-primary mb-0">{{ count }}</h3>
-                        </div>
-                        {% endfor %}
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-secondary">
+                                <tr>
+                                    <th class="ps-4 border-0">Aluno</th>
+                                    <th class="border-0">Turma</th>
+                                    <th class="border-0">Horário</th>
+                                    <th class="border-0 text-end pe-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_logs %}
+                                {% for log in recent_logs %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center"
+                                                style="width: 32px; height: 32px; overflow: hidden;">
+                                                {% if log.foto and log.foto != 'semfoto.jpg' %}
+                                                <img src="{{ url_for('static', filename='fotos/' + log.foto) }}" alt=""
+                                                    class="img-fluid">
+                                                {% else %}
+                                                <i class="bi bi-person text-secondary"></i>
+                                                {% endif %}
+                                            </div>
+                                            <span class="fw-medium">{{ log.nome }}</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border">{{ log.turma }}</span></td>
+                                    <td class="text-muted small">{{ log.data_hora.split(' ')[1] }}</td>
+                                    <td class="text-end pe-4">
+                                        {% if 'Acesso' in log.tipo_acesso %}
+                                        <span class="badge bg-success-subtle text-success rounded-pill">Entrada</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill">{{
+                                            log.tipo_acesso }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                        Nenhuma atividade registrada hoje.
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -150,17 +260,56 @@
         background-color: #e0f2f1;
     }
 
-    /* Light Teal */
-    .bg-success-subtle {
-        background-color: #dcfce7;
+    .bg-info-subtle {
+        background-color: #e0f7fa;
     }
 
     .bg-warning-subtle {
-        background-color: #fef3c7;
+        background-color: #fff8e1;
     }
 
-    .last-border-none:last-child {
-        border-right: none !important;
+    .bg-success-subtle {
+        background-color: #e8f5e9;
+    }
+
+    .bg-danger-subtle {
+        background-color: #ffebee;
+    }
+
+    .hover-scale {
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+    .hover-scale:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+    }
+
+    .avatar-sm img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 </style>
+
+<script>
+    function updateDateTime() {
+        const now = new Date();
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+        // Format PT-BR
+        const dateStr = now.toLocaleDateString('pt-BR', dateOptions);
+        const timeStr = now.toLocaleTimeString('pt-BR', timeOptions);
+
+        // Capitalize first letter of date
+        const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+        document.getElementById('current-date').textContent = formattedDate;
+        document.getElementById('current-time').textContent = timeStr;
+    }
+
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+</script>
 {% endblock %}

@@ -731,22 +731,45 @@ def registrar_acesso(codigo, nome, turma, tipo_acesso):
     data_hora = now.strftime("%d/%m/%Y %H:%M:%S")
     registro = f"{data_hora} - {tipo_acesso}"
     
+
     pasta_turma = os.path.join('registros', turma)
     os.makedirs(pasta_turma, exist_ok=True)
         
-    arquivo_path = os.path.join(pasta_turma, f"{codigo}.txt")
-    arquivo_existe = os.path.exists(arquivo_path)
+    arquivo_path = os.path.join(pasta_turma, f"{codigo}.json")
     
-    with open(arquivo_path, 'a', encoding='utf-8') as f:
-        if not arquivo_existe:
-            aluno = buscar_aluno(codigo)
-            f.write(f"Nome: {nome}\n")
-            f.write(f"Turma: {turma}\n")
-            f.write(f"Turno: {aluno['Turno']}\n")
-            f.write(f"Código: {codigo}\n")
-            f.write("\nREGISTRO DE ACESSOS:\n")
-            f.write("-" * 30 + "\n")
-        f.write(f"{registro}\n")
+    # Estrutura base do registro
+    data_registro = {
+        'codigo': codigo,
+        'nome': nome,
+        'turma': turma,
+        'turno': buscar_aluno(codigo).get('Turno', ''),
+        'historico': []
+    }
+    
+    # Carregar existente ou criar novo
+    if os.path.exists(arquivo_path):
+        try:
+            with open(arquivo_path, 'r', encoding='utf-8') as f:
+                data_registro = json.load(f)
+        except Exception as e:
+            logger.error(f"Erro ao ler JSON existente {arquivo_path}: {e}")
+            # Se der erro, tenta manter os dados básicos
+            pass
+            
+    # Adicionar novo registro ao histórico
+    novo_historico = {
+        'data_hora': data_hora,
+        'tipo': tipo_acesso,
+        'timestamp': now.timestamp()
+    }
+    data_registro['historico'].append(novo_historico)
+    
+    # Salvar
+    try:
+        with open(arquivo_path, 'w', encoding='utf-8') as f:
+            json.dump(data_registro, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Erro ao salvar registro JSON {arquivo_path}: {e}")
     
     aluno = buscar_aluno(codigo)
     if aluno:
@@ -920,6 +943,23 @@ def gerar_codigo_barras(codigo):
         logger.error(f"Erro na geração do código de barras: {str(e)}")
         return None
 
+# Rotas públicas
+@app.route('/termos')
+def termos():
+    import markdown
+    
+    def read_md(filename):
+        path = os.path.join(os.path.dirname(__file__), filename)
+        if os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f:
+                return markdown.markdown(f.read())
+        return "<p>Conteúdo não disponível.</p>"
+
+    terms_html = read_md('terms_of_service.md')
+    privacy_html = read_md('privacy_policy.md')
+    
+    return render_template('termos.html', terms_html=terms_html, privacy_html=privacy_html)
+
 # Rotas de login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -1027,6 +1067,20 @@ def index():
     except Exception:
         pass
     
+    # Recent Activity (from daily JSON log)
+    recent_logs = []
+    try:
+        today_date = datetime.now().strftime('%Y-%m-%d')
+        daily_log_path = os.path.join('registros_diarios', f"{today_date}.json")
+        if os.path.exists(daily_log_path):
+            with open(daily_log_path, 'r', encoding='utf-8') as f:
+                logs = json.load(f)
+                # Sort by reverse order (assuming they are appended, so last is newest)
+                # But to be safe, we reverse the list
+                recent_logs = logs[::-1][:10] # Get last 10 entries
+    except Exception as e:
+        logger.error(f"Erro ao ler logs recentes: {e}")
+
     return render_template('index.html',
                           total_alunos=total_alunos,
                           total_turmas=total_turmas,
@@ -1035,7 +1089,8 @@ def index():
                           telegram_status=telegram_status,
                           telegram_bot_name=telegram_bot_name,
                           total_linked=total_linked,
-                          db_last_update=db_last_update)
+                          db_last_update=db_last_update,
+                          recent_logs=recent_logs)
 
 @app.route('/consulta', methods=['GET', 'POST'])
 @login_required
@@ -1324,8 +1379,38 @@ def emitir():
 @login_required
 def registros_files(filename):
     """Serve files from the 'registros' directory."""
-    registros_dir = os.path.join('registros')
+    """Serve files from the 'registros' directory."""
+    registros_dir = os.path.abspath('registros')
     return send_from_directory(registros_dir, filename)
+
+
+@app.route('/api/aluno/<turma>/<codigo>/historico')
+@login_required
+def api_aluno_historico(turma, codigo):
+    """API para retornar o histórico de um aluno."""
+    arquivo_path = os.path.join('registros', turma, f"{codigo}.json")
+    if os.path.exists(arquivo_path):
+        try:
+            with open(arquivo_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify({'ok': True, 'data': data})
+        except Exception as e:
+            return jsonify({'ok': False, 'msg': f'Erro ao ler dados: {e}'})
+    else:
+        # Se não existir arquivo, retorna dados básicos do aluno com histórico vazio
+        aluno = buscar_aluno(codigo)
+        if aluno:
+             return jsonify({
+                'ok': True, 
+                'data': {
+                    'codigo': codigo,
+                    'nome': aluno['Nome'],
+                    'turma': aluno['Turma'],
+                    'turno': aluno['Turno'],
+                    'historico': []
+                }
+            })
+        return jsonify({'ok': False, 'msg': 'Registro não encontrado'})
 
 
 

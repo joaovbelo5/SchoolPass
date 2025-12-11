@@ -204,9 +204,16 @@
             btnCapture.classList.add('d-none');
             btnRetake.classList.remove('d-none');
 
+            // Generate timestamped filename
+            const now = new Date();
+            const pad = (num) => String(num).padStart(2, '0');
+            const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+            const timeStr = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+            const filename = `camera_capture_${dateStr}_${timeStr}.jpg`;
+
             // Convert canvas to file and update input
             canvas.toBlob(blob => {
-                const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
+                const file = new File([blob], filename, { type: "image/jpeg" });
                 const container = new DataTransfer();
                 container.items.add(file);
                 fotoInput.files = container.files;

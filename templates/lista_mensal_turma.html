@@ -4,165 +4,289 @@
 
 {% block content %}
 <style>
-    /* Print Styles */
+    /* Online View Styles */
+    .table-container {
+        max-height: 70vh;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+    }
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        z-index: 20;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .sticky-col {
+        position: sticky;
+        left: 0;
+        background-color: white;
+        z-index: 10;
+        border-right: 2px solid #e5e7eb !important;
+    }
+
+    thead th.sticky-col {
+        z-index: 30;
+    }
+
+    /* Form Styles */
+    .filter-card {
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    /* Print Styles - High Contrast & Ink Saving */
     @media print {
-        .no-print {
-            display: none !important;
-        }
-
-        .print-header {
-            display: block !important;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .print-header h4,
-        .print-header h5,
-        .print-header h6 {
-            margin: 0;
-            color: black !important;
-        }
-
-        .table {
-            font-size: 10pt !important;
-            width: 100% !important;
-            border-collapse: collapse !important;
-        }
-
-        .table th,
-        .table td {
-            padding: 4px !important;
-            border: 1px solid #000 !important;
-        }
-
-        .badge-dot {
-            color: black !important;
-            font-size: 14pt !important;
-        }
-
         @page {
             size: A4 landscape;
-            margin: 1cm;
+            margin: 0.5cm;
         }
 
         body {
             background: white !important;
+            color: black !important;
+            font-family: 'Times New Roman', serif;
+            /* Serif is often better for print tables */
+            font-size: 10pt;
         }
 
+        /* Hide non-print elements */
+        .no-print,
+        nav,
+        footer,
+        .btn,
+        .filter-card,
+        .page-header {
+            display: none !important;
+        }
+
+        /* Container Reset */
+        .container,
         .container-fluid {
+            width: 100% !important;
+            max-width: 100% !important;
             padding: 0 !important;
+            margin: 0 !important;
         }
 
-        .card {
+        /* Table Reset */
+        .table-container {
+            max-height: none !important;
+            overflow: visible !important;
             border: none !important;
-            shadow: none !important;
+        }
+
+        .table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            border: 1px solid black !important;
+            margin-bottom: 0 !important;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid black !important;
+            padding: 2px 4px !important;
+            color: black !important;
+            background: transparent !important;
+            /* Remove all backgrounds */
+            text-align: center;
+        }
+
+        .table th {
+            font-weight: bold;
+            border-bottom: 2px solid black !important;
+        }
+
+        /* Sticky Reset */
+        .sticky-col,
+        thead th {
+            position: static !important;
+            box-shadow: none !important;
+            border-right: 1px solid black !important;
+        }
+
+        /* Left align name in print */
+        .text-start-print {
+            text-align: left !important;
+        }
+
+        /* Print Header */
+        .print-header {
+            display: block !important;
+            margin-bottom: 10px;
+            border-bottom: 2px solid black;
+            padding-bottom: 5px;
+        }
+
+        .print-footer {
+            display: flex !important;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 9pt;
+        }
+
+        /* Ensure cells are not empty */
+        .empty-cell:after {
+            content: ".";
+            visibility: hidden;
         }
     }
 </style>
 
 <div class="container-fluid py-4">
-    <!-- Print Header -->
+
+    <!-- Print Header (Hidden on Screen) -->
     <div class="print-header d-none">
-        <h4>{{ escola_nome }}</h4>
-        <h5>Lista de Chamada - {{ turma_selecionada }}</h5>
-        <h6>{{ mes_formatado }}</h6>
+        <div class="d-flex justify-content-between align-items-end">
+            <div>
+                <h2 style="margin: 0; font-weight: bold; text-transform: uppercase;">{{ escola_nome }}</h2>
+                <h4 style="margin: 5px 0 0 0;">Relatório Mensal de Frequência</h4>
+            </div>
+            <div class="text-end">
+                <div><strong>Turma:</strong> {{ turma_selecionada }}</div>
+                <div><strong>Mês/Ano:</strong> {{ mes_formatado }}</div>
+            </div>
+        </div>
     </div>
 
-    <div class="text-center mb-4 no-print">
-        <h1 class="fw-bold text-primary mb-2">
+    <!-- Page Header (Screen Only) -->
+    <div class="d-flex flex-column align-items-center mb-4 no-print page-header">
+        <h1 class="fw-bold text-primary mb-1">
             <i class="bi bi-calendar-check me-2"></i>Lista de Chamada
         </h1>
-        <p class="text-muted">Consulte a frequência mensal por turma</p>
+        <p class="text-secondary">Selecione a turma e o mês para visualizar ou imprimir.</p>
     </div>
 
-    <!-- Filter Form -->
+    <!-- Filter Form (Screen Only) -->
     <div class="row justify-content-center mb-4 no-print">
-        <div class="col-lg-10">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <form method="POST" class="row g-3 align-items-end justify-content-center">
-                        <div class="col-md-4">
-                            <label for="turma" class="form-label fw-bold text-secondary">Turma</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-people"></i></span>
-                                <select name="turma" id="turma" class="form-select" required>
-                                    {% for turma in turmas %}
-                                    <option value="{{ turma }}" {% if turma==turma_selecionada %}selected{% endif %}>{{
-                                        turma }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="mes" class="form-label fw-bold text-secondary">Mês de Referência</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-calendar-month"></i></span>
-                                <input type="month" id="mes" name="mes" class="form-control"
-                                    value="{{ mes_selecionado }}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-auto d-flex gap-2">
-                            <button type="submit" class="btn btn-primary fw-bold px-4">
-                                <i class="bi bi-search me-2"></i>Visualizar
-                            </button>
-                            <button type="button" onclick="window.print();"
-                                class="btn btn-outline-secondary fw-bold px-4">
-                                <i class="bi bi-printer me-2"></i>Imprimir
-                            </button>
-                        </div>
-                    </form>
-                </div>
+        <div class="col-md-10 col-lg-8">
+            <div class="filter-card p-4">
+                <form method="POST" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label for="turma" class="form-label fw-bold small text-uppercase text-secondary">Turma</label>
+                        <select name="turma" id="turma" class="form-select" required>
+                            {% for turma in turmas %}
+                            <option value="{{ turma }}" {% if turma==turma_selecionada %}selected{% endif %}>{{ turma }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="mes" class="form-label fw-bold small text-uppercase text-secondary">Mês de
+                            Referência</label>
+                        <input type="month" id="mes" name="mes" class="form-control" value="{{ mes_selecionado }}"
+                            required>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary fw-bold w-100">
+                            <i class="bi bi-search me-2"></i>Buscar
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Results Table -->
-    <div id="secao-impressao">
-        {% if dados_chamada %}
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover mb-0 text-center align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="text-start ps-3 py-3" style="min-width: 250px;">ALUNO</th>
-                                {% for dia in dias_do_mes %}
-                                <th style="width: 35px;" class="small">{{ dia }}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for aluno in dados_chamada %}
-                            <tr>
-                                <td class="text-start fw-bold ps-3 text-nowrap">{{ aluno.nome }}</td>
-                                {% for presenca in aluno.presencas %}
-                                <td class="p-1">
-                                    {% if presenca %}
-                                    <i class="bi bi-circle-fill text-success badge-dot d-print-none"
-                                        style="font-size: 0.6rem;"></i>
-                                    <span class="d-none d-print-inline badge-dot">•</span>
-                                    {% endif %}
-                                </td>
-                                {% endfor %}
-                            </tr>
+    <!-- Action Bar (Screen Only) -->
+    {% if dados_chamada %}
+    <div class="row justify-content-center mb-3 no-print">
+        <div class="col-md-10 col-lg-12 text-end">
+            <button onclick="window.print()" class="btn btn-dark">
+                <i class="bi bi-printer-fill me-2"></i>Imprimir Lista
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Data Table -->
+    <div class="row justify-content-center">
+        <div class="col-12 px-0 px-md-3">
+            {% if dados_chamada %}
+            <div class="table-container bg-white">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <!-- 220px / 1200px approx 18% -->
+                            <th class="sticky-col ps-3 text-start-print" style="width: 220px; min-width: 220px;">NOME DO
+                                ALUNO</th>
+                            {% for dia in dias_do_mes %}
+                            <!-- 24px for days -->
+                            <th class="text-center" style="width: 24px; min-width: 24px;">{{ dia }}</th>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                            <!-- Totals Column -->
+                            <th class="text-center"
+                                style="width: 35px; min-width: 35px; border-left: 2px solid #dee2e6;">T</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aluno in dados_chamada %}
+                        <tr>
+                            <td class="sticky-col ps-3 fw-bold text-start-print text-nowrap">{{ aluno.nome }}</td>
+                            {% set ns = namespace(total=0) %}
+                            {% for presenca in aluno.presencas %}
+                            <td class="text-center p-0 align-middle">
+                                {% if presenca %}
+                                {% set ns.total = ns.total + 1 %}
+                                <!-- Screen: Dot / Print: X -->
+                                <span class="d-none d-print-block fw-bold" style="font-size: 8pt;">X</span>
+                                <i class="bi bi-circle-fill text-success d-print-none" style="font-size: 0.5rem;"></i>
+                                {% else %}
+                                <!-- Screen: Faint Dot / Print: Empty -->
+                                <span class="d-none d-print-block empty-cell">&nbsp;</span>
+                                <i class="bi bi-circle-fill text-muted opacity-25 d-print-none"
+                                    style="font-size: 0.4rem;"></i>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                            <td class="text-center fw-bold" style="border-left: 2px solid #dee2e6;">{{ ns.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Print Footer -->
+            <div class="print-footer d-none">
+                <div>
+                    _______________________________________<br>
+                    Assinatura do Professor(a)
+                </div>
+                <div>
+                    _______________________________________<br>
+                    Coordenação Pedagógica
+                </div>
+                <div>
+                    Impresso em: <span id="print-date"></span>
                 </div>
             </div>
-        </div>
-        {% else %}
-        <div class="row justify-content-center no-print">
-            <div class="col-lg-8">
-                <div class="alert alert-warning d-flex align-items-center shadow-sm" role="alert">
-                    <i class="bi bi-exclamation-circle-fill fs-4 me-3"></i>
-                    <div>
-                        Nenhum registro encontrado para a turma e mês selecionados.
-                    </div>
+
+            {% else %}
+            <!-- No Data State -->
+            <div class="text-center py-5 no-print">
+                <div class="mb-3">
+                    <i class="bi bi-clipboard-x fs-1 text-muted"></i>
                 </div>
+                <h5 class="text-secondary">Nenhum registro encontrado</h5>
+                <p class="text-muted">Selecione uma turma e mês válidos para visualizar.</p>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
+
+<script>
+    // Set print date
+    document.addEventListener('DOMContentLoaded', function () {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('pt-BR');
+        const span = document.getElementById('print-date');
+        if (span) span.textContent = dateStr;
+    });
+</script>
 {% endblock %}

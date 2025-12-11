@@ -13,18 +13,24 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            min-height: 100vh;
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
                 <div class="text-center mb-5">
-                    <h1 class="fw-bold text-primary mb-2">
+                    <h1 class="fw-bold text-white mb-2">
                         <i class="bi bi-telegram me-2"></i>Vincular Telegram
                     </h1>
-                    <p class="text-muted">Receba notificações de entrada e saída diretamente no seu celular</p>
+                    <p class="text-white-50">Receba notificações de entrada e saída diretamente no seu celular</p>
                 </div>
 
                 <div class="card shadow-sm border-0 mb-4">
@@ -51,19 +57,26 @@
                             <i class="bi bi-info-circle me-1"></i>Ao abrir o bot, clique em <strong>INICIAR</strong> e
                             depois no botão para compartilhar seu contato.
                         </div>
-                    </div>
-                </div>
 
-                <div class="text-center">
-                    <a href="/" class="btn btn-link text-decoration-none text-muted">
-                        <i class="bi bi-arrow-left me-1"></i>Voltar para Início
-                    </a>
+                        <div class="mt-3 text-muted" style="font-size: 0.85rem;">
+                            Ao utilizar o sistema de mensagens do SchoolPass, você aceita os
+                            <a href="/termos" target="_blank" class="text-decoration-none text-success fw-bold">Termos
+                                de Serviço</a> e a
+                            <a href="/termos#privacidade" target="_blank"
+                                class="text-decoration-none text-success fw-bold">Política de Privacidade</a>.
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="/" class="btn btn-link text-decoration-none text-white-50">
+                            <i class="bi bi-arrow-left me-1"></i>Voltar para Início
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

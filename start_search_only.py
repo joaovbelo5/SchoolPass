@@ -27,22 +27,36 @@ def load_user_data(codigo, turma):
 
 def get_registros(codigo, turma):
     try:
-        # Construir o caminho para o arquivo de registro do aluno
-        arquivo_path = os.path.join('registros', turma, f"{codigo}.txt")
+        # Construir o caminho para o arquivo de registro do aluno (JSON)
+        arquivo_path = os.path.join('registros', turma, f"{codigo}.json")
         print(f"Tentando ler arquivo: {arquivo_path}")
         
         if os.path.exists(arquivo_path):
-            print(f"Arquivo encontrado: {arquivo_path}")
             with open(arquivo_path, 'r', encoding='utf-8') as f:
-                conteudo = f.read()
-                print(f"Conteúdo lido: {len(conteudo)} caracteres")
-                return conteudo
+                data = json.load(f)
+                return data # Retorna o objeto completo do histórico
         else:
             print(f"Arquivo não encontrado: {arquivo_path}")
-        return ""
+        return None
     except Exception as e:
         print(f"Error getting registros: {str(e)}")
-        return ""
+        return None
+
+@app.route('/termos')
+def termos():
+    import markdown
+    
+    def read_md(filename):
+        path = os.path.join(os.path.dirname(__file__), filename)
+        if os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f:
+                return markdown.markdown(f.read())
+        return "<p>Conteúdo não disponível.</p>"
+
+    terms_html = read_md('terms_of_service.md')
+    privacy_html = read_md('privacy_policy.md')
+    
+    return render_template('termos.html', terms_html=terms_html, privacy_html=privacy_html)
 
 @app.route('/', methods=['GET', 'POST'])
 def public_consulta():

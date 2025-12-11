@@ -4,169 +4,401 @@
 
 {% block content %}
 <div class="container py-4">
-    <div class="row justify-content-center mb-4">
-        <div class="col-lg-8 text-center">
-            <h1 class="fw-bold text-primary mb-2"><i class="bi bi-search me-2"></i>Consulta de Alunos</h1>
-            <p class="text-secondary">Pesquise por nome, código ou turma</p>
-        </div>
+    <!-- Header Section -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-primary mb-2">
+            <i class="bi bi-search me-2"></i>Consulta de Alunos
+        </h1>
+        <p class="text-secondary fw-medium">Pesquise por nome, código ou turma</p>
     </div>
 
+    <!-- Search Section -->
     <div class="row justify-content-center mb-5">
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-2">
-                    <form method="POST" class="d-flex gap-2">
-                        <input type="text" name="termo" class="form-control form-control-lg border-0 bg-light"
-                            placeholder="Digite sua busca..." value="{{ termo }}" autofocus>
-                        <button type="submit" class="btn btn-primary px-4 fw-bold">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {% if mensagem %}
-    <div class="row justify-content-center mb-4">
-        <div class="col-lg-8">
-            <div class="alert {% if alerta or erro %}alert-danger{% else %}alert-success{% endif %} d-flex align-items-center shadow-sm"
-                role="alert">
-                <i
-                    class="bi {% if alerta or erro %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} fs-4 me-3"></i>
-                <div class="flex-grow-1">
-                    {{ mensagem }}
-                </div>
-                <button class="btn btn-sm btn-outline-secondary ms-3" onclick="window.history.back()">Voltar</button>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            {% for aluno in resultados %}
-            <div class="card border-0 shadow-sm mb-3 overflow-hidden">
-                <div class="card-body p-0">
-                    <div class="d-flex flex-column flex-md-row">
-                        <!-- Photo Section -->
-                        <div class="bg-light p-3 d-flex align-items-center justify-content-center"
-                            style="min-width: 120px;">
-                            <img src="{{ url_for('static', filename='fotos/' ~ aluno['Foto']) }}" alt="Foto"
-                                class="rounded shadow-sm border" style="width: 80px; height: 80px; object-fit: cover;">
-                        </div>
-
-                        <!-- Info Section -->
-                        <div class="p-3 flex-grow-1 d-flex flex-column justify-content-center">
-                            <h5 class="fw-bold text-dark mb-1">{{ aluno['Nome'] }}</h5>
-                            <div class="d-flex flex-wrap gap-2">
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                                    <i class="bi bi-people-fill me-1"></i>{{ aluno['Turma'] }}
-                                </span>
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
-                                    <i class="bi bi-upc me-1"></i>{{ aluno['Codigo'] }}
-                                </span>
+            <div class="card border-0 mb-3">
+                <!-- Added border-0 here? No, remove border-0, allow default card border -->
+                <div class="card">
+                    <div class="card-body p-3">
+                        <form method="POST" class="d-flex gap-2">
+                            <div class="position-relative flex-grow-1">
+                                <i
+                                    class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary fs-5"></i>
+                                <input type="text" name="termo" class="form-control form-control-lg ps-5"
+                                    placeholder="Digite sua busca..." value="{{ termo }}" autofocus>
                             </div>
-                        </div>
-
-                        <!-- Actions Section -->
-                        <div class="p-3 bg-white border-start-md d-flex flex-column justify-content-center gap-2"
-                            style="min-width: 200px;">
-                            <a href="{{ url_for('registros_files', filename=aluno['Turma'] ~ '/' ~ aluno['Codigo'] ~ '.txt') }}"
-                                class="btn btn-outline-primary btn-sm text-start w-100">
-                                <i class="bi bi-file-text me-2"></i>Ver Registro
-                            </a>
-                            <a href="{{ url_for('ocorrencias_aluno', codigo=aluno['Codigo']) }}"
-                                class="btn btn-outline-warning btn-sm text-start text-dark w-100">
-                                <i class="bi bi-exclamation-circle me-2"></i>Ocorrências
-                            </a>
-                            <form method="POST" class="d-grid w-100">
-                                <input type="hidden" name="registrar_codigo" value="{{ aluno['Codigo'] }}">
-                                <button type="submit" class="btn btn-success btn-sm text-start fw-bold w-100">
-                                    <i class="bi bi-check-lg me-2"></i>Registrar Acesso
-                                </button>
-                            </form>
-                        </div>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-            {% endfor %}
         </div>
-    </div>
-</div>
 
-<!-- Toast Container - Static, no animation classes -->
-<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 11">
-    <div id="liveToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive"
-        aria-atomic="true" data-bs-animation="false">
-        <div class="d-flex">
-            <div class="toast-body fs-6 fw-bold">
-                <!-- Message will be injected here -->
+        <!-- Alerts (Flash Messages) -->
+        {% if mensagem %}
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-8">
+                <div class="alert {% if alerta or erro %}alert-danger{% else %}alert-success{% endif %} d-flex align-items-center"
+                    role="alert">
+                    <div
+                        class="p-2 rounded-circle me-3 {% if alerta or erro %}bg-danger-subtle text-danger{% else %}bg-success-subtle text-success{% endif %}">
+                        <i
+                            class="bi {% if alerta or erro %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} fs-4"></i>
+                    </div>
+                    <div class="flex-grow-1 fw-bold">
+                        {{ mensagem }}
+                    </div>
+                    <button class="btn btn-sm btn-light border" onclick="window.history.back()">Voltar</button>
+                </div>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <!-- Results List -->
+        <div class="row justify-content-center g-3">
+            <div class="col-lg-10">
+                {% for aluno in resultados %}
+                <div class="card mb-3">
+                    <div class="card-body p-3">
+                        <div class="row align-items-center gy-3">
+
+                            <!-- Col 1: Photo & ID (Mobile: Top) -->
+                            <div class="col-auto mx-auto mx-md-0">
+                                <div class="position-relative">
+                                    <img src="{{ url_for('static', filename='fotos/' ~ aluno['Foto']) }}" alt="Foto"
+                                        class="rounded-circle object-fit-cover border"
+                                        style="width: 80px; height: 80px;"
+                                        onerror="this.src='{{ url_for('static', filename='fotos/semfoto.jpg') }}'">
+                                    <span
+                                        class="position-absolute bottom-0 start-50 translate-middle-x badge bg-secondary border text-dark"
+                                        style="font-size: 0.75rem;">
+                                        {{ aluno['Codigo'] }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Col 2: Info (Name & Badges) -->
+                            <div class="col text-center text-md-start">
+                                <h5 class="fw-bold text-dark mb-2">{{ aluno['Nome'] }}</h5>
+                                <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
+                                    <span class="badge bg-light text-primary border">
+                                        <i class="bi bi-people-fill me-1"></i>{{ aluno['Turma'] }}
+                                    </span>
+                                    <!-- Add Turno if available in search results, otherwise omit -->
+                                </div>
+                            </div>
+
+                            <!-- Col 3: Actions -->
+                            <div class="col-12 col-md-auto">
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <!-- View Access Log -->
+                                    <button type="button"
+                                        onclick="openHistoryModal('{{ aluno['Turma'] }}', '{{ aluno['Codigo'] }}', '{{ aluno['Nome'] }}')"
+                                        class="btn btn-light text-primary border d-flex align-items-center justify-content-center"
+                                        style="width: 48px; height: 48px;" title="Ver Registro">
+                                        <i class="bi bi-file-earmark-text-fill fs-5"></i>
+                                    </button>
+
+                                    <!-- View Occurrences -->
+                                    <a href="{{ url_for('ocorrencias_aluno', codigo=aluno['Codigo']) }}"
+                                        class="btn btn-light text-warning border d-flex align-items-center justify-content-center"
+                                        style="width: 48px; height: 48px;" title="Ocorrências">
+                                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                    </a>
+
+                                    <!-- Register Access (AJAX Form) -->
+                                    <form method="POST" class="d-grid w-auto ajax-form">
+                                        <input type="hidden" name="registrar_codigo" value="{{ aluno['Codigo'] }}">
+                                        <button type="submit"
+                                            class="btn btn-success border d-flex align-items-center justify-content-center"
+                                            style="width: 48px; height: 48px;" title="Registrar Acesso Agora">
+                                            <i class="bi bi-check-lg fs-4 fw-bold"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
-</div>
 
-<style>
-    .bg-primary-subtle {
-        background-color: #e0f2f1;
-        color: #0f766e;
-    }
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 9999">
+        <div id="liveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive"
+            aria-atomic="true" data-bs-delay="3000">
+            <div class="d-flex p-2">
+                <div class="toast-body fs-6 fw-bold text-white d-flex align-items-center gap-2">
+                    <!-- Icon & Text injected by JS -->
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 
-    .bg-secondary-subtle {
-        background-color: #f1f5f9;
-        color: #475569;
-    }
-
-    @media (min-width: 768px) {
-        .border-start-md {
-            border-left: 1px solid var(--border-color);
+    <style>
+        .object-fit-cover {
+            object-fit: cover;
         }
-    }
-</style>
+    </style>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const forms = document.querySelectorAll('form.d-grid');
-        const toastEl = document.getElementById('liveToast');
-        const toastBody = toastEl.querySelector('.toast-body');
-        // Disable animation in Bootstrap Toast
-        const toast = new bootstrap.Toast(toastEl, { animation: false });
 
-        forms.forEach(form => {
-            form.addEventListener('submit', function (event) {
-                event.preventDefault();
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-primary" id="historyModalTitle">Histórico de Acessos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="text-muted small mb-3" id="historyModalSubtitle">Carregando...</p>
+                    <div id="historyModalContent">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" onclick="printHistory()">
+                        <i class="bi bi-printer me-2"></i>Imprimir
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                const formData = new FormData(form);
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const forms = document.querySelectorAll('.ajax-form');
+            const toastEl = document.getElementById('liveToast');
+            const toastBody = toastEl.querySelector('.toast-body');
+            const toast = new bootstrap.Toast(toastEl, { animation: false }); // Disable animation
 
-                fetch(window.location.href, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.ok) {
-                            toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning');
-                            toastEl.classList.add('bg-' + (data.tipo || 'primary'));
+            forms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
 
-                            toastBody.innerHTML = `<i class="bi bi-${data.tipo === 'success' ? 'check-circle' : (data.tipo === 'danger' ? 'exclamation-triangle' : 'info-circle')} me-2"></i>${data.msg}`;
+                    const formData = new FormData(form);
 
-                            toast.show();
-                        } else {
-                            alert('Erro: ' + data.msg);
+                    // Add spin effect to button
+                    const btn = form.querySelector('button');
+                    const originalContent = btn.innerHTML;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                    btn.disabled = true;
+
+                    fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
                         }
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Erro ao processar a solicitação.');
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            // Reset Button
+                            btn.innerHTML = originalContent;
+                            btn.disabled = false;
+
+                            if (data.ok) {
+                                // Map older backend types to Bootstrap colors
+                                let bgColor = 'bg-primary';
+                                if (data.tipo === 'success') bgColor = 'bg-success';
+                                else if (data.tipo === 'danger' || data.tipo === 'error') bgColor = 'bg-danger';
+                                else if (data.tipo === 'warning') bgColor = 'bg-warning text-dark';
+
+                                toastEl.className = `toast align-items-center border-0 shadow-none ${bgColor}`; // flat toast
+
+                                let icon = 'info-circle-fill';
+                                if (data.tipo === 'success') icon = 'check-circle-fill';
+                                else if (data.tipo === 'danger' || data.tipo === 'error') icon = 'x-circle-fill';
+
+                                toastBody.innerHTML = `<i class="bi bi-${icon} fs-5"></i><span>${data.msg}</span>`;
+                                toast.show();
+                            } else {
+                                alert('Erro: ' + data.msg);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            btn.innerHTML = originalContent;
+                            btn.disabled = false;
+                            alert('Erro ao processar a solicitação.');
+                        });
+                });
             });
         });
-    });
-</script>
-{% endblock %}
+
+        // History Modal Logic
+        let historyModal;
+        const modalTitle = document.getElementById('historyModalTitle');
+        const modalSubtitle = document.getElementById('historyModalSubtitle');
+        const modalContent = document.getElementById('historyModalContent');
+
+        function initModal() {
+            if (!historyModal) {
+                try {
+                    historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+                } catch (e) {
+                    console.warn('Bootstrap not loaded yet, deferring init', e);
+                }
+            }
+        }
+
+        // Attempt init on load
+        window.addEventListener('load', initModal);
+
+        function openHistoryModal(turma, codigo, nome) {
+            initModal(); // Ensure init
+
+            if (historyModal) {
+                // Update content
+                modalTitle.textContent = nome;
+                modalSubtitle.textContent = `Turma: ${turma} | Código: ${codigo}`;
+                modalContent.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>`;
+
+                historyModal.show();
+            } else {
+                console.error("Modal initialization failed (bootstrap missing?)");
+                // If it fails, maybe try one last time?
+                try {
+                    historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+                    historyModal.show();
+                } catch (e) {
+                    alert("Erro ao abrir modal: biblioteca não carregada.");
+                    return;
+                }
+            }
+
+            fetch(`/api/aluno/${turma}/${codigo}/historico`)
+                .then(r => r.json())
+                .then(json => {
+                    if (json.ok) {
+                        renderModalHistory(json.data);
+                    } else {
+                        modalContent.innerHTML = `<div class="alert alert-danger">${json.msg}</div>`;
+                    }
+                })
+                .catch(e => {
+                    modalContent.innerHTML = `<div class="alert alert-danger">Erro de conexão: ${e}</div>`;
+                });
+        }
+
+        function renderModalHistory(data) {
+            if (!data || !data.historico || data.historico.length === 0) {
+                modalContent.innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-calendar-x fs-1 mb-2 d-block"></i>
+                        Nenhum registro encontrado.
+                    </div>`;
+                return;
+            }
+
+            const reversed = [...data.historico].reverse();
+            let html = '<ul class="list-group list-group-flush">';
+
+            reversed.forEach(reg => {
+                const isEntry = reg.tipo.toLowerCase().includes('entrada') || reg.tipo.toLowerCase().includes('acesso');
+                const icon = isEntry ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger';
+
+                html += `
+                <li class="list-group-item px-0 py-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="bi ${icon} fs-4 me-3"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">${reg.tipo}</h6>
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>${reg.data_hora.split(' ')[1]}</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">${reg.data_hora.split(' ')[0]}</small>
+                        </div>
+                    </div>
+                </li>`;
+            });
+            html += '</ul>';
+            modalContent.innerHTML = html;
+        }
+
+        function printHistory() {
+            const printWindow = window.open('', '_blank');
+            const studentName = modalTitle.textContent;
+            const studentInfo = modalSubtitle.textContent;
+            const historyContent = modalContent.innerHTML;
+
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Histórico - ${studentName}</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
+                    <style>
+                        @page { margin: 1cm; size: A4; }
+                        body { padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt; background: white !important; }
+                        h1 { font-size: 14pt; color: #000; margin-bottom: 2px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 2px; }
+                        h2 { font-size: 10pt; color: #555; margin-bottom: 10px; padding-bottom: 5px; font-weight: normal; }
+                        
+                        /* Layout Optimization */
+                        .list-group { 
+                            display: block; 
+                            column-count: 2; 
+                            column-gap: 20px; 
+                            column-rule: 1px solid #eee;
+                        }
+                        
+                        .list-group-item { 
+                            border: none; 
+                            border-bottom: 1px dotted #ccc; 
+                            padding: 2px 0 !important; 
+                            break-inside: avoid;
+                            background: transparent !important;
+                            margin-bottom: 0 !important;
+                        }
+
+                        /* Compact content */
+                        .list-group-item .d-flex { align-items: center !important; }
+                        .list-group-item i.fs-4 { font-size: 1rem !important; margin-right: 8px !important; }
+                        .list-group-item h6 { font-size: 0.9rem !important; margin: 0; display: inline-block; }
+                        .list-group-item small { font-size: 0.8rem !important; color: #666; }
+                        
+                        /* Reduce whitespace in the item structure */
+                        .list-group-item > div { padding: 0 !important; }
+                        
+                        /* Hide things that waste ink/space */
+                        .spinner-border { display: none; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${studentName}</h1>
+                    <h2>${studentInfo} - Impresso em: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</h2>
+                    ${historyContent}
+                    <script>
+                        window.onload = function() { 
+                            setTimeout(function() {
+                                window.print(); 
+                                window.close(); 
+                            }, 500);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // Expose globally
+        window.openHistoryModal = openHistoryModal;
+        window.printHistory = printHistory;
+    </script>
+    {% endblock %}

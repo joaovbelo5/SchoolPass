@@ -19,22 +19,24 @@
 <body class="d-flex flex-column min-vh-100">
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-xl navbar-custom no-print">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-                <i class="bi bi-shield-check"></i>
-                <span>SchoolPass</span>
-                <span id="brasilia-clock" class="fw-normal fs-6 text-secondary ms-2">--:--</span>
+    <nav class="navbar navbar-custom no-print" data-bs-theme="dark">
+        <div class="container position-relative">
+            <!-- Clock Brand (No Text) -->
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <span id="brasilia-clock" class="fw-bold fs-4 text-white">--:--</span>
             </a>
 
-            <button class="navbar-toggler border-0 text-secondary" type="button" data-bs-toggle="collapse"
+            <!-- Hamburger Toggler (Always Visible) -->
+            <button class="navbar-toggler border-0 text-white ms-auto" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
                 aria-label="Toggle navigation">
-                <i class="bi bi-list fs-2"></i>
+                <i class="bi bi-list fs-1"></i>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-1">
+            <!-- Collapsible Menu -->
+            <div class="collapse navbar-collapse w-100 mt-3" id="navbarNav">
+                <ul class="navbar-nav navbar-grid">
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="/registro">Registro</a></li>
                     <li class="nav-item"><a class="nav-link" href="/consulta">Consulta</a></li>
                     <li class="nav-item"><a class="nav-link" href="/cadastro">Cadastro</a></li>
@@ -44,9 +46,9 @@
                     <li class="nav-item"><a class="nav-link" href="/chamada">Chamada</a></li>
                     <li class="nav-item"><a class="nav-link" href="/mensagens">Mensagens</a></li>
                     <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
-                    <li class="nav-item ms-lg-2"><a
-                            class="nav-link btn btn-danger text-white px-3 py-1 mt-2 mt-lg-0 d-inline-block"
-                            href="/logout">Sair</a></li>
+                    <li class="nav-item">
+                        <a class="btn btn-danger btn-sm text-white w-100" href="/logout">Sair</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -60,8 +62,7 @@
     <!-- Footer -->
     <footer class="footer-custom no-print">
         <div class="container">
-            <p class="mb-0">&copy; {{ config['escola'] if config and config['escola'] else 'Escola' }} - Sistema de
-                Portaria</p>
+            <p class="mb-0">&copy; 2026 SchoolPass. Todos os direitos reservados.</p>
         </div>
     </footer>
 
