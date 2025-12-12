@@ -414,3 +414,76 @@ h3 {
         background: transparent;
     }
 }
+
+/* Print Optimization */
+@media print {
+
+    /* Hide non-essential elements */
+    .no-print,
+    .navbar-custom,
+    .footer-custom,
+    .btn,
+    .d-print-none {
+        display: none !important;
+    }
+
+    /* Print Header Visibility */
+    .carometro-print-header {
+        display: block !important;
+    }
+
+    /* Container adjustments */
+    .container-fluid,
+    .container {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Grid Optimization for Print */
+    .carometro-grid {
+        display: grid !important;
+        /* Smaller columns for print to fit more */
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+        gap: 0.5rem !important;
+    }
+
+    /* Card Optimization */
+    .carometro-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        padding: 0.25rem !important;
+    }
+
+    .carometro-photo {
+        /* Reduce photo size slightly if needed, but aspect-ratio handles it */
+        margin-bottom: 0.25rem !important;
+        border-radius: 2px !important;
+    }
+
+    /* Text resizing */
+    .carometro-name {
+        font-size: 0.8rem !important;
+        margin-bottom: 0 !important;
+    }
+
+    .carometro-detail {
+        font-size: 0.7rem !important;
+        line-height: 1.2 !important;
+        color: #000 !important;
+    }
+
+    /* Hide background colors to save ink and clarity */
+    body {
+        background-color: white !important;
+    }
+
+    /* Reset text colors */
+    h1,
+    h2 {
+        color: black !important;
+    }
+}

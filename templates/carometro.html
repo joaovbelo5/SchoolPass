@@ -4,7 +4,7 @@
 <div class="container-fluid py-4">
 
     <!-- Print Header (Visible only in print) -->
-    <div class="carometro-print-header text-center mb-4">
+    <div class="carometro-print-header text-center mb-4 d-none d-print-block">
         <h1 class="fw-bold">{{ config['escola'] }}</h1>
         <h2 class="text-muted">Carômetro - {{ turma_selecionada if turma_selecionada else 'Todas as Turmas' }}</h2>
     </div>
