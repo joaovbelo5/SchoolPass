@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Arquivamento e Legado{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="text-secondary"><i class="fas fa-archive"></i> Arquivamento e Legado</h2>
+        <p class="text-muted">Gerencie o arquivamento de dados de anos anteriores. Os dados arquivados tornam-se somente
+            leitura e não aparecem na busca pública.</p>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="row">
+    <!-- Lista de Anos Arquivados -->
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-history"></i> Anos Arquivados</h5>
+            </div>
+            <div class="card-body">
+                {% if years %}
+                <div class="list-group">
+                    {% for year in years %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <div class="d-flex align-items-center">
+                            <span class="fs-4 fw-bold text-dark me-3">{{ year }}</span>
+                            <span class="badge bg-light text-dark border">Arquivado</span>
+                        </div>
+                        <div class="btn-group">
+                            <a href="{{ url_for('admin_legacy_view', year=year) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i> Visualizar
+                            </a>
+                            <form action="{{ url_for('admin_legacy_delete', year=year) }}" method="POST"
+                                class="d-inline"
+                                onsubmit="return confirm('ATENÇÃO: Exclusão PERMANENTE do ano {{ year }}. Continuar?');">
+                                <button type="submit" class="btn btn-danger btn-sm ms-1"
+                                    title="Excluir Definitivamente">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-box-open fa-3x mb-3"></i>
+                    <p>Nenhum ano arquivado encontrado.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Novo Arquivamento -->
+    <div class="col-md-4">
+        <div class="card shadow-sm bg-light border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-file-export"></i> Arquivar Ano</h5>
+            </div>
+            <div class="card-body">
+                <p class="small text-danger"><strong>Atenção:</strong> Esta ação move os dados do ano selecionado para o
+                    arquivo morto e os remove do sistema ativo.</p>
+                <form method="POST" action="{{ url_for('admin_legacy_index') }}"
+                    onsubmit="return confirm('Tem certeza que deseja arquivar este ano? Esta ação move arquivos e não pode ser facilmente desfeita pelo painel.');">
+                    <div class="mb-3">
+                        <label for="year" class="form-label">Ano para Arquivar</label>
+                        <input type="number" class="form-control" id="year" name="year" placeholder="Ex: 2024" required
+                            min="2020" max="2099">
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="fas fa-archive"></i> Arquivar Agora
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="{{ url_for('admin_index') }}" class="btn btn-outline-secondary w-100">
+                <i class="fas fa-arrow-left"></i> Voltar ao Painel
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

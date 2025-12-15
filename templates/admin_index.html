@@ -117,6 +117,19 @@
         <!-- Right Column -->
         <div class="col-12 col-lg-4">
 
+            <!-- Arquivamento e Legado -->
+            <div class="card mb-4 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-archive-fill me-2"></i>Arquivamento</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">Gerencie dados de anos anteriores e acesse o histórico.</p>
+                    <a href="{{ url_for('admin_legacy_index') }}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-clock-history me-2"></i>Acessar Arquivo Morto
+                    </a>
+                </div>
+            </div>
+
             <!-- Danger Zone -->
             <div class="card mb-4 border-danger">
                 <div class="card-header bg-danger text-white">

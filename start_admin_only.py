@@ -7,6 +7,12 @@ def register_admin_routes(app):
     from flask import flash, render_template, request, session, jsonify
     from flask_login import login_required
     import os, time, sys
+    try:
+        import archive_manager
+    except ImportError:
+        # Fallback caso o arquivo ainda não esteja no path ou erro de importação
+        print("Erro ao importar archive_manager")
+
 
     @app.route('/admin', methods=['GET', 'POST'])
     @login_required
@@ -355,6 +361,172 @@ def register_admin_routes(app):
         except Exception as e:
             logger.exception("Erro ao reiniciar servidor")
             return jsonify({'ok': False, 'msg': f'Erro ao reiniciar: {e}'}), 500
+
+    @app.route('/admin/legacy', methods=['GET', 'POST'])
+    @login_required
+    def admin_legacy_index():
+        """Painel principal de Legado/Arquivamento."""
+        if request.method == 'POST':
+            year = request.form.get('year')
+            if not year or not year.isdigit():
+                flash('Ano inválido.', 'error')
+            else:
+                try:
+                    if archive_manager.archive_year(year):
+                        flash(f'Ano {year} arquivado com sucesso!', 'success')
+                    else:
+                        flash(f'Erro ao arquivar ano {year}. Verifique os logs.', 'error')
+                except Exception as e:
+                    logger.exception(f"Erro ao arquivar {year}: {e}")
+                    flash(f'Erro crítico ao arquivar: {e}', 'error')
+        
+        years = archive_manager.get_available_years()
+        return render_template('legacy_index.html', years=years)
+
+    @app.route('/admin/legacy/delete/<year>', methods=['POST'])
+    @login_required
+    def admin_legacy_delete(year):
+        """Exclui um arquivo de ano legado."""
+        if not year.isdigit():
+            flash('Ano inválido.', 'error')
+            return redirect(url_for('admin_legacy_index'))
+        
+        target_dir = os.path.join(os.path.dirname(__file__), 'legacy', str(year))
+        
+        if os.path.exists(target_dir):
+            try:
+                import shutil
+                shutil.rmtree(target_dir)
+                flash(f'Arquivo do ano {year} excluído permanentemente.', 'success')
+            except Exception as e:
+                logger.error(f"Erro ao excluir legacy {year}: {e}")
+                flash(f'Erro ao excluir arquivo: {e}', 'error')
+        else:
+            flash(f'Arquivo do ano {year} não encontrado.', 'error')
+            
+        return redirect(url_for('admin_legacy_index'))
+
+    @app.route('/admin/legacy/view/<year>')
+    @login_required
+    def admin_legacy_view(year):
+        """Visualização de dados históricos (Read-Only)."""
+        # Validar se o ano existe
+        target_dir = os.path.join(os.path.dirname(__file__), 'legacy', str(year))
+        if not os.path.exists(target_dir):
+            flash(f'Arquivo do ano {year} não encontrado.', 'error')
+            return redirect(url_for('admin_index'))
+            
+        return render_template('legacy_view.html', year=year)
+
+    @app.route('/admin/legacy/api/<year>/search')
+    @login_required
+    def admin_legacy_search_api(year):
+        """API de busca para o modo legado."""
+        query = request.args.get('q', '').lower()
+        if not query:
+            return jsonify([])
+        
+        target_dir = os.path.join(os.path.dirname(__file__), 'legacy', str(year))
+        db_path = os.path.join(target_dir, 'database.csv')
+        
+        results = []
+        if os.path.exists(db_path):
+            try:
+                import csv
+                with open(db_path, 'r', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        # Busca por nome ou código
+                        if query in row['Nome'].lower() or query in row['Codigo'].lower():
+                            # Buscar histórico
+                            turma = row['Turma']
+                            codigo = row['Codigo']
+                            hist_path = os.path.join(target_dir, 'registros', turma, f"{codigo}.json")
+                            historico = []
+                            if os.path.exists(hist_path):
+                                try:
+                                    import json
+                                    with open(hist_path, 'r', encoding='utf-8') as hf:
+                                        hdata = json.load(hf)
+                                        historico = hdata.get('historico', [])
+                                except:
+                                    pass
+                            
+                            results.append({
+                                'Nome': row['Nome'],
+                                'Codigo': row['Codigo'],
+                                'Turma': row['Turma'],
+                                'Foto': row.get('Foto', ''),
+                                'Historico': historico
+                            })
+                            if len(results) > 20: # Limite de resultados
+                                break
+            except Exception as e:
+                logger.error(f"Erro na busca legado: {e}")
+        
+        return jsonify(results)
+
+    @app.route('/admin/legacy/image/<year>/<filename>')
+    @login_required
+    def admin_legacy_image(year, filename):
+        """Serve imagens do arquivo legado."""
+        from flask import send_from_directory
+        # Caminho: base_dir/legacy/{year}/fotos/
+        base_dir = os.path.dirname(__file__)
+        img_dir = os.path.join(base_dir, 'legacy', str(year), 'fotos')
+        return send_from_directory(img_dir, filename)
+
+    @app.route('/admin/legacy/print/<year>/<turma>/<codigo>')
+    @login_required
+    def admin_legacy_print(year, turma, codigo):
+        """Gera relatório de impressão para aluno arquivado."""
+        import csv
+        import json
+        
+        target_dir = os.path.join(os.path.dirname(__file__), 'legacy', str(year))
+        
+        # 1. Carregar Aluno do Database Legacy
+        aluno = None
+        db_path = os.path.join(target_dir, 'database.csv')
+        if os.path.exists(db_path):
+            try:
+                with open(db_path, 'r', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        if row['Codigo'] == codigo:
+                            aluno = row
+                            break
+            except Exception as e:
+                logger.error(f"Erro ao ler database legacy: {e}")
+        
+        if not aluno:
+             return f"Aluno {codigo} não encontrado no arquivo de {year}", 404
+
+        # 2. Carregar Histórico
+        historico = []
+        hist_path = os.path.join(target_dir, 'registros', turma, f"{codigo}.json")
+        if os.path.exists(hist_path):
+            try:
+                with open(hist_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    historico = data.get('historico', [])
+            except:
+                pass
+
+        # 3. Carregar Ocorrências
+        ocorrencias = []
+        oco_path = os.path.join(target_dir, 'ocorrencias', f"{codigo}.json")
+        if os.path.exists(oco_path):
+             try:
+                with open(oco_path, 'r', encoding='utf-8') as f:
+                    ocorrencias = json.load(f)
+             except:
+                pass
+        
+        return render_template('legacy_print.html', aluno=aluno, historico=historico, ocorrencias=ocorrencias, year=year)
+
+
+
 
 
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, g, jsonify
@@ -1092,61 +1264,38 @@ def index():
                           db_last_update=db_last_update,
                           recent_logs=recent_logs)
 
-@app.route('/consulta', methods=['GET', 'POST'])
+@app.route('/api/registrar_acesso', methods=['POST'])
 @login_required
-def consulta():
-    resultados = []
-    termo = ''
-    mensagem = ''
-    alerta = False
-    erro = False
+def api_registrar_acesso():
+    """Registra acesso manualmente via API (substitui antiga /consulta)."""
+    try:
+        data = request.get_json() or request.form
+        codigo = str(data.get('registrar_codigo', '')).strip()
+        
+        if not codigo:
+             return jsonify({'ok': False, 'msg': 'Código não informado!', 'tipo': 'danger'})
 
-    if request.method == 'POST':
-        if 'termo' in request.form:
-            termo = request.form.get('termo', '').lower()
-            with open(app.config['DATABASE'], 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                resultados = [row for row in reader if (
-                    termo in row['Nome'].lower() or
-                    termo == row['Codigo'] or
-                    termo in row['Turma'].lower()
-                )]
-        elif 'registrar_codigo' in request.form:
-            codigo = request.form.get('registrar_codigo', '').strip()
-            aluno = buscar_aluno(codigo)
-            if aluno:
-                if aluno['Permissao'].lower() == 'sim':
-                    now = datetime.now()
-                    ultimo = ultimo_registro.get(codigo)
-                    if ultimo and (now - ultimo['hora']) < timedelta(minutes=app.config['COOLDOWN_MINUTES']):
-                        mensagem = "⏳ Aguarde antes de registrar novamente."
-                        tipo = "warning"
-                    else:
-                        registrar_acesso(aluno['Codigo'], aluno['Nome'], aluno['Turma'], "Acesso")
-                        if aluno['TelegramID']:
-                            enviar_telegram(aluno['TelegramID'], aluno['Nome'], "Acesso")
-                        ultimo_registro[codigo] = {'hora': now}
-                        mensagem = "✅ Acesso Registrado com Sucesso!"
-                        tipo = "success"
+        aluno = buscar_aluno(codigo)
+        if aluno:
+            if aluno['Permissao'].lower() == 'sim':
+                now = datetime.now()
+                ultimo = ultimo_registro.get(codigo)
+                if ultimo and (now - ultimo['hora']) < timedelta(minutes=app.config['COOLDOWN_MINUTES']):
+                    return jsonify({'ok': True, 'msg': "⏳ Aguarde antes de registrar novamente.", 'tipo': 'warning'})
                 else:
-                    alerta = True
-                    mensagem = "⛔ Acesso Negado!"
-                    tipo = "danger"
+                    registrar_acesso(aluno['Codigo'], aluno['Nome'], aluno['Turma'], "Acesso")
+                    if aluno['TelegramID']:
+                        enviar_telegram(aluno['TelegramID'], aluno['Nome'], "Acesso")
+                    ultimo_registro[codigo] = {'hora': now}
+                    return jsonify({'ok': True, 'msg': "✅ Acesso Registrado com Sucesso!", 'tipo': 'success'})
             else:
-                erro = True
-                mensagem = "⚠️ Código não encontrado!"
-                tipo = "danger"
+                 return jsonify({'ok': True, 'msg': "⛔ Acesso Negado!", 'tipo': 'danger'})
+        else:
+             return jsonify({'ok': False, 'msg': "⚠️ Código não encontrado!", 'tipo': 'danger'})
             
-            # Se for requisição AJAX, retorna JSON
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({'ok': True, 'msg': mensagem, 'tipo': tipo})
-
-    return render_template('consulta.html', 
-                           resultados=resultados, 
-                           termo=termo, 
-                           mensagem=mensagem, 
-                           alerta=alerta, 
-                           erro=erro)
+    except Exception as e:
+        logger.exception("Erro ao registrar acesso via API")
+        return jsonify({'ok': False, 'msg': f"Erro interno: {e}", 'tipo': 'error'}), 500
 
 @app.route('/get_contadores')
 @login_required

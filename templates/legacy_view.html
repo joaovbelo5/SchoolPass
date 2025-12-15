@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Arquivo Morto - {{ year }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilo "Sépia" para indicar modo histórico/legado */
+    body {
+        background-color: #f4ecd8 !important;
+    }
+
+    .card {
+        background-color: #fffbf0;
+        border-color: #dcbfa5;
+    }
+
+    .legacy-banner {
+        background-color: #5d4037;
+        color: #f4ecd8;
+        padding: 10px;
+        text-align: center;
+        border-bottom: 3px solid #3e2723;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="legacy-banner">
+    <h3><i class="fas fa-history"></i> MODO ARQUIVO HISTÓRICO: {{ year }}</h3>
+    <p class="mb-0 small">Você está visualizando dados arquivados. Nenhuma alteração é permitida.</p>
+</div>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <h4 class="text-brown"><i class="fas fa-search"></i> Consultar Aluno ({{ year }})</h4>
+            <a href="{{ url_for('admin_legacy_index') }}" class="btn btn-secondary btn-sm"><i
+                    class="fas fa-arrow-left"></i> Voltar</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="input-group mb-4">
+                <input type="text" id="searchInput" class="form-control form-control-lg"
+                    placeholder="Digite o nome ou código do aluno...">
+                <button class="btn btn-outline-secondary" type="button" id="btnSearch"><i class="fas fa-search"></i>
+                    Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultsArea" class="row">
+        <!-- Resultados serão injetados aqui via JS -->
+        <div class="col-12 text-center text-muted mt-5">
+            <p>Utilize a barra de busca acima para encontrar alunos neste arquivo.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        const btnSearch = document.getElementById('btnSearch');
+        const resultsArea = document.getElementById('resultsArea');
+        const year = "{{ year }}";
+
+        // Caminho relativo para fotos (assumindo que start_admin_only.py serve static corretamente ou criaremos rota)
+        // No archive_manager, copiamos para legacy/{year}/fotos. 
+        // Start_server provavelmente não serve legacy/ folder como static automaticamente.
+        // O ideal seria criar uma rota para servir imagens do legado ou usar path relativo se servido.
+        // VOU USAR UMA ROTA DE IMAGEM DEDICADA NO FUTURO, por enquanto vamos tentar path direto se o flask servir
+        // ou ajustar no JS para pedir ao backend a imagem base64 ou link correto.
+        // Como não criei rota de imagem legacy, as imagens podem quebrar. 
+        // FIX: Vou criar uma rota de imagem legacy rapidinho no próximo passo se precisar.
+
+        function performSearch() {
+            const query = searchInput.value;
+            if (query.length < 2) return;
+
+            resultsArea.innerHTML = '<div class="col-12 text-center"><div class="spinner-border" role="status"></div></div>';
+
+            fetch(`/admin/legacy/api/${year}/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultsArea.innerHTML = '';
+                    if (data.length === 0) {
+                        resultsArea.innerHTML = '<div class="col-12 text-center text-muted">Nenhum aluno encontrado.</div>';
+                        return;
+                    }
+
+                    data.forEach(aluno => {
+                        // Construir HTML do Card
+                        let historicoHtml = '';
+                        if (aluno.Historico && aluno.Historico.length > 0) {
+                            historicoHtml = '<ul class="list-group list-group-flush small" style="max-height: 150px; overflow-y: auto;">';
+                            aluno.Historico.slice().reverse().forEach(h => {
+                                historicoHtml += `<li class="list-group-item bg-transparent py-1">${h.data_hora} - ${h.tipo}</li>`;
+                            });
+                            historicoHtml += '</ul>';
+                        } else {
+                            historicoHtml = '<p class="text-muted small p-2">Sem histórico registrado neste ano.</p>';
+                        }
+
+                        // Ajuste da imagem: Como as imagens estão em legacy/{year}/fotos, precisamos de uma rota para servi-las
+                        // ou assumir que o server estático pega. Por padrão Flask pega 'static'. 
+                        // Vou assumir que o endpoint de imagem precisa ser criado.
+                        // Placeholder temporário.
+                        let imgPath = '/static/img/sem_foto.png';
+                        if (aluno.Foto && aluno.Foto !== 'semfoto.jpg') {
+                            // Vamos usar uma rota admin especial que vou criar: /admin/legacy/image/<year>/<filename>
+                            imgPath = `/admin/legacy/image/${year}/${aluno.Foto}`;
+                        }
+
+                        const card = `
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="row g-0 h-100">
+                                    <div class="col-4 d-flex align-items-center justify-content-center bg-light">
+                                        <img src="${imgPath}" class="img-fluid rounded-start m-1" style="max-height: 150px; object-fit: cover;" alt="${aluno.Nome}" onerror="this.src='/static/img/sem_foto.png'">
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="card-body py-2">
+                                            <h6 class="card-title fw-bold mb-1 text-truncate" title="${aluno.Nome}">${aluno.Nome}</h6>
+                                            <p class="card-text small mb-1">
+                                                <span class="badge bg-secondary">${aluno.Turma}</span> 
+                                                <span class="text-muted">#${aluno.Codigo}</span>
+                                            </p>
+                                            <hr class="my-2">
+                                            <p class="mb-1 small fw-bold">Histórico ({{ year }}):</p>
+                                            ${historicoHtml}
+                                            <div class="mt-3 text-end d-grid">
+                                                <a href="/admin/legacy/print/${year}/${aluno.Turma}/${aluno.Codigo}" target="_blank" class="btn btn-sm btn-outline-dark">
+                                                    <i class="fas fa-print"></i> Imprimir Relatório
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                        resultsArea.innerHTML += card;
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    resultsArea.innerHTML = '<div class="col-12 text-center text-danger">Erro ao buscar dados.</div>';
+                });
+        }
+
+        btnSearch.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') performSearch();
+        });
+    });
+</script>
+{% endblock %}

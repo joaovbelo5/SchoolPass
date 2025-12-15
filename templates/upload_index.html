@@ -87,11 +87,36 @@
                             </div>
                         </div>
 
-                        <!-- Col 3: Actions (Desktop: Right, Mobile: Bottom Full Width) -->
+                        <!-- Col 3: Actions -->
                         <div class="col-12 col-md-auto">
-                            <div class="d-flex gap-2 justify-content-center">
-                                <a href="{{ url_for('editar', codigo=aluno.Codigo) }}"
+                            <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                <!-- Register Access (AJAX Form) -->
+                                <button type="button" 
+                                    onclick="registrarAcesso('{{ aluno.Codigo }}', this)"
+                                    class="btn btn-success border d-flex align-items-center justify-content-center"
+                                    style="width: 42px; height: 42px;" title="Registrar Acesso Agora">
+                                    <i class="bi bi-check-lg fs-5 fw-bold"></i>
+                                </button>
+
+                                <!-- View Access Log -->
+                                <button type="button"
+                                    onclick="openHistoryModal('{{ aluno.Turma }}', '{{ aluno.Codigo }}', '{{ aluno.Nome }}')"
                                     class="btn btn-light text-primary border d-flex align-items-center justify-content-center"
+                                    style="width: 42px; height: 42px;" title="Ver Histórico">
+                                    <i class="bi bi-file-earmark-text-fill fs-5"></i>
+                                </button>
+
+                                <!-- View Occurrences -->
+                                <a href="{{ url_for('ocorrencias_aluno', codigo=aluno.Codigo) }}"
+                                    class="btn btn-light text-warning border d-flex align-items-center justify-content-center"
+                                    style="width: 42px; height: 42px;" title="Ocorrências">
+                                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                </a>
+
+                                <div class="vr mx-1 d-none d-md-block"></div>
+
+                                <a href="{{ url_for('editar', codigo=aluno.Codigo) }}"
+                                    class="btn btn-light text-secondary border d-flex align-items-center justify-content-center"
                                     style="width: 42px; height: 42px;" title="Editar">
                                     <i class="bi bi-pencil-fill fs-5"></i>
                                 </a>
@@ -100,7 +125,7 @@
                                     <input type="hidden" name="tipo_emissao" value="unitaria">
                                     <input type="hidden" name="codigo" value="{{ aluno.Codigo }}">
                                     <button type="submit"
-                                        class="btn btn-light text-success border d-flex align-items-center justify-content-center"
+                                        class="btn btn-light text-info border d-flex align-items-center justify-content-center"
                                         style="width: 42px; height: 42px;" title="Emitir Carteirinha">
                                         <i class="bi bi-printer-fill fs-5"></i>
                                     </button>
@@ -130,6 +155,241 @@
         {% endfor %}
     </div>
 </div>
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 9999">
+    <div id="liveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive"
+        aria-atomic="true" data-bs-delay="3000">
+        <div class="d-flex p-2">
+            <div class="toast-body fs-6 fw-bold text-white d-flex align-items-center gap-2">
+                <!-- Icon & Text injected by JS -->
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<!-- History Modal -->
+<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary" id="historyModalTitle">Histórico de Acessos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted small mb-3" id="historyModalSubtitle">Carregando...</p>
+                <div id="historyModalContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" onclick="printHistory()">
+                    <i class="bi bi-printer me-2"></i>Imprimir
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Access Registration Logic
+    function registrarAcesso(codigo, btnElement) {
+        // Add spin effect to button
+        const originalContent = btnElement.innerHTML;
+        btnElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+        btnElement.disabled = true;
+
+        const formData = new FormData();
+        formData.append('registrar_codigo', codigo);
+
+        fetch('/api/registrar_acesso', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset Button
+            btnElement.innerHTML = originalContent;
+            btnElement.disabled = false;
+            
+            showToast(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            btnElement.innerHTML = originalContent;
+            btnElement.disabled = false;
+            alert('Erro ao processar solicitação.');
+        });
+    }
+
+    function showToast(data) {
+        const toastEl = document.getElementById('liveToast');
+        const toastBody = toastEl.querySelector('.toast-body');
+        const toast = new bootstrap.Toast(toastEl, { animation: false });
+
+        if (data.ok) {
+            let bgColor = 'bg-primary';
+            if (data.tipo === 'success') bgColor = 'bg-success';
+            else if (data.tipo === 'danger' || data.tipo === 'error') bgColor = 'bg-danger';
+            else if (data.tipo === 'warning') bgColor = 'bg-warning text-dark';
+
+            toastEl.className = `toast align-items-center border-0 shadow-none ${bgColor}`;
+
+            let icon = 'info-circle-fill';
+            if (data.tipo === 'success') icon = 'check-circle-fill';
+            else if (data.tipo === 'danger' || data.tipo === 'error') icon = 'x-circle-fill';
+
+            toastBody.innerHTML = `<i class="bi bi-${icon} fs-5"></i><span>${data.msg}</span>`;
+            toast.show();
+        } else {
+             // Fallback for hard errors
+             alert(data.msg || 'Erro desconhecido');
+        }
+    }
+
+    // History Modal Logic
+    let historyModal;
+    const modalTitle = document.getElementById('historyModalTitle');
+    const modalSubtitle = document.getElementById('historyModalSubtitle');
+    const modalContent = document.getElementById('historyModalContent');
+
+    function initModal() {
+        if (!historyModal) {
+            try {
+                historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+            } catch (e) {
+                console.warn('Bootstrap not loaded yet', e);
+            }
+        }
+    }
+
+    window.addEventListener('load', initModal);
+
+    function openHistoryModal(turma, codigo, nome) {
+        initModal(); 
+        if (!historyModal) {
+             // Try lazy init again
+             try {
+                historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+             } catch(e) {
+                 alert("Erro: Bootstrap Modal não inicializado.");
+                 return;
+             }
+        }
+
+        modalTitle.textContent = nome;
+        modalSubtitle.textContent = `Turma: ${turma} | Código: ${codigo}`;
+        modalContent.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>`;
+
+        historyModal.show();
+
+        fetch(`/api/aluno/${turma}/${codigo}/historico`)
+            .then(r => r.json())
+            .then(json => {
+                if (json.ok) {
+                    renderModalHistory(json.data);
+                } else {
+                    modalContent.innerHTML = `<div class="alert alert-danger">${json.msg}</div>`;
+                }
+            })
+            .catch(e => {
+                modalContent.innerHTML = `<div class="alert alert-danger">Erro de conexão: ${e}</div>`;
+            });
+    }
+
+    function renderModalHistory(data) {
+        if (!data || !data.historico || data.historico.length === 0) {
+            modalContent.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-calendar-x fs-1 mb-2 d-block"></i>
+                    Nenhum registro encontrado.
+                </div>`;
+            return;
+        }
+
+        const reversed = [...data.historico].reverse();
+        let html = '<ul class="list-group list-group-flush">';
+
+        reversed.forEach(reg => {
+            const isEntry = reg.tipo.toLowerCase().includes('entrada') || reg.tipo.toLowerCase().includes('acesso');
+            const icon = isEntry ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger';
+
+            html += `
+            <li class="list-group-item px-0 py-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi ${icon} fs-4 me-3"></i>
+                        <div>
+                            <h6 class="mb-0 fw-bold text-dark">${reg.tipo}</h6>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i>${reg.data_hora.split(' ')[1]}</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted d-block">${reg.data_hora.split(' ')[0]}</small>
+                    </div>
+                </div>
+            </li>`;
+        });
+        html += '</ul>';
+        modalContent.innerHTML = html;
+    }
+
+    function printHistory() {
+        const printWindow = window.open('', '_blank');
+        const studentName = modalTitle.textContent;
+        const studentInfo = modalSubtitle.textContent;
+        const historyContent = modalContent.innerHTML;
+
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Histórico - ${studentName}</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
+                <style>
+                    @page { margin: 1cm; size: A4; }
+                    body { padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt; background: white !important; }
+                    h1 { font-size: 14pt; color: #000; margin-bottom: 2px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 2px; }
+                    h2 { font-size: 10pt; color: #555; margin-bottom: 10px; padding-bottom: 5px; font-weight: normal; }
+                    .list-group-item { border-bottom: 1px dotted #ccc !important; padding: 2px 0 !important; }
+                    .spinner-border { display: none; }
+                </style>
+            </head>
+            <body>
+                <h1>${studentName}</h1>
+                <h2>${studentInfo} - Impresso em: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</h2>
+                ${historyContent}
+                <script>
+                    window.onload = function() { 
+                        setTimeout(function() {
+                            window.print(); 
+                            window.close(); 
+                        }, 500);
+                    }
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+
+    // Expose globally
+    window.openHistoryModal = openHistoryModal;
+    window.printHistory = printHistory;
+</script>
 
 <style>
     .object-fit-cover {
