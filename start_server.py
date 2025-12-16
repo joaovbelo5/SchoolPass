@@ -1,40 +1,93 @@
 import subprocess
 import sys
 import time
+import os
+import signal
+from datetime import datetime
 
-def start_servers():
-    processes = []
-    scripts = ["start_admin_only.py", "start_search_only.py"]
+# ANSI Colors for friendly output
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
 
-    print("Iniciando servidores...")
+def log(message, color=Colors.ENDC, prefix="SYSTEM"):
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    print(f"{Colors.BLUE}[{timestamp}]{Colors.ENDC} {color}[{prefix}] {message}{Colors.ENDC}")
 
-    for script in scripts:
-        try:
-            # Usa o mesmo interpretador Python que está executando este script
-            p = subprocess.Popen([sys.executable, script])
-            processes.append(p)
-            print(f"Iniciado: {script} (PID: {p.pid})")
-        except Exception as e:
-            print(f"Erro ao iniciar {script}: {e}")
+def print_banner():
+    print(f"{Colors.GREEN}{Colors.BOLD}")
+    print("  /$$$$$$            /$$                         /$$ /$$$$$$$                            ")
+    print(" /$$__  $$          | $$                        | $$| $$__  $$                           ")
+    print("| $$  \\__/  /$$$$$$$| $$$$$$$   /$$$$$$   /$$$$$$ | $$| $$  \\ $$ /$$$$$$   /$$$$$$$ /$$$$$$$")
+    print("|  $$$$$$  /$$_____/| $$__  $$ /$$__  $$ /$$__  $$| $$| $$$$$$$/|____  $$ /$$_____//$$_____/")
+    print(" \\____  $$| $$      | $$  \\ $$| $$  \\ $$| $$  \\ $$| $$| $$____/  /$$$$$$$|  $$$$$$|  $$$$$$")
+    print(" /$$  \\ $$| $$      | $$  | $$| $$  | $$| $$  | $$| $$| $$      /$$__  $$ \\____  $$\\____  $$")
+    print("|  $$$$$$/|  $$$$$$$| ??  | $$|  $$$$$$/|  $$$$$$/| $$| $$     |  $$$$$$$ /$$$$$$$//$$$$$$$/")
+    print(" \\______/  \\_______/|__/  |__/ \\______/  \\______/ |__/|__/      \\_______/|_______/|_______/ ")
+    print(f"{Colors.ENDC}")
+    print(f"{Colors.CYAN}================================================================================{Colors.ENDC}")
+    print(f" {Colors.BOLD}Sistema Iniciado e Pronto para Uso{Colors.ENDC}")
+    print(f"{Colors.CYAN}================================================================================{Colors.ENDC}")
+    log(f"Painel Administrativo: {Colors.BOLD}http://localhost:5000{Colors.ENDC} (Login/Config)", Colors.GREEN)
+    log(f"Consulta Pública:      {Colors.BOLD}http://localhost:5010{Colors.ENDC} (Alunos/Pais)", Colors.GREEN)
+    print(f"{Colors.CYAN}================================================================================{Colors.ENDC}\n")
+
+PROCESSES = {}
+SCRIPTS = {
+    "start_admin_only.py": "ADMIN",
+    "start_search_only.py": "SEARCH"
+}
+
+def start_process(script_name):
+    """Inicia um processo e o registra."""
+    try:
+        # Usa sys.executable para garantir que usamos o mesmo python
+        p = subprocess.Popen([sys.executable, script_name])
+        PROCESSES[script_name] = p
+        log(f"Iniciado: {SCRIPTS[script_name]} (PID: {p.pid})", Colors.GREEN)
+    except Exception as e:
+        log(f"Falha ao iniciar {script_name}: {e}", Colors.FAIL)
+
+def stop_all():
+    """Encerra todos os processos filhos."""
+    print("\n")
+    log("Encerrando serviços...", Colors.WARNING)
+    for script, p in PROCESSES.items():
+        if p.poll() is None:
+            p.terminate()
+            log(f"Processo {SCRIPTS[script]} parado.", Colors.WARNING)
+    log("Sistema encerrado.", Colors.FAIL)
+    sys.exit(0)
+
+def main():
+    # Habilitar cores ANSI no Windows terminal legacy se necessário
+    os.system('') 
+
+    print_banner()
+
+    # Iniciar processos
+    for script in SCRIPTS:
+        start_process(script)
 
     try:
-        # Mantém o script principal rodando para monitorar os processos
         while True:
-            time.sleep(1)
-            for p in processes:
+            time.sleep(2)
+            for script, p in list(PROCESSES.items()):
+                # Verifica se o processo morreu
                 if p.poll() is not None:
-                    print(f"Processo {p.pid} terminou inesperadamente.")
-                    # Se um processo cair, encerra o outro e sai
-                    for proc in processes:
-                        if proc.poll() is None:
-                            proc.terminate()
-                    return
+                    log(f"ALERTA: O serviço {SCRIPTS[script]} parou inesperadamente.", Colors.FAIL)
+                    log(f"Reiniciando {SCRIPTS[script]} em 1 segundo...", Colors.WARNING)
+                    time.sleep(1)
+                    start_process(script)
+                    
     except KeyboardInterrupt:
-        print("\nEncerrando servidores...")
-        for p in processes:
-            if p.poll() is None:
-                p.terminate()
-        print("Servidores encerrados.")
+        stop_all()
 
 if __name__ == "__main__":
-    start_servers()
+    main()

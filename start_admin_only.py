@@ -16,6 +16,7 @@ def register_admin_routes(app):
 
     @app.route('/admin', methods=['GET', 'POST'])
     @login_required
+    @admin_required
     def admin_index():
         from dotenv import set_key
         env_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -73,11 +74,17 @@ def register_admin_routes(app):
         except Exception:
             clear_token = ''
             math_question = ''
+            math_question = ''
+
+        if request.form and 'TELEGRAM_TOKEN' not in request.form and 'CARTEIRINHA_ESCOLA' not in request.form and not request.files:
+            # Se não é POST de config, nada a fazer
+            pass
 
         return render_template('admin_index.html', config=config, token=token, clear_token=clear_token, math_question=math_question)
 
     @app.route('/admin/clear_data', methods=['POST'])
     @login_required
+    @admin_required
     def admin_clear_data():
         """Executa a limpeza dos dados após validação tripla: token, resposta matemática e frase fixa."""
         try:
@@ -154,6 +161,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/backup_api', methods=['GET'])
     @login_required
+    @admin_required
     def admin_backup_api():
         """Cria um arquivo ZIP no disco (pasta backups/) e retorna JSON com URL de download. Mantém backups por 3 horas."""
         try:
@@ -231,6 +239,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/download_backup/<path:filename>')
     @login_required
+    @admin_required
     def admin_download_backup(filename):
         """Serve o arquivo de backup para download."""
         from flask import send_from_directory
@@ -240,6 +249,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/restore', methods=['POST'])
     @login_required
+    @admin_required
     def admin_restore():
         """Restaura um backup enviado (arquivo ZIP). O upload deve ser o ZIP gerado pelo sistema.
         A requisição deve enviar o arquivo em campo 'backup_file' e a frase de confirmação 'RESTAURAR BACKUP'.
@@ -343,6 +353,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/restart', methods=['POST'])
     @login_required
+    @admin_required
     def admin_restart():
         """Reinicia o servidor Flask."""
         try:
@@ -364,6 +375,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/legacy', methods=['GET', 'POST'])
     @login_required
+    @admin_required
     def admin_legacy_index():
         """Painel principal de Legado/Arquivamento."""
         if request.method == 'POST':
@@ -385,6 +397,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/legacy/delete/<year>', methods=['POST'])
     @login_required
+    @admin_required
     def admin_legacy_delete(year):
         """Exclui um arquivo de ano legado."""
         if not year.isdigit():
@@ -408,6 +421,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/legacy/view/<year>')
     @login_required
+    @admin_required
     def admin_legacy_view(year):
         """Visualização de dados históricos (Read-Only)."""
         # Validar se o ano existe
@@ -420,6 +434,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/legacy/api/<year>/search')
     @login_required
+    @admin_required
     def admin_legacy_search_api(year):
         """API de busca para o modo legado."""
         query = request.args.get('q', '').lower()
@@ -468,6 +483,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/legacy/image/<year>/<filename>')
     @login_required
+    @admin_required
     def admin_legacy_image(year, filename):
         """Serve imagens do arquivo legado."""
         from flask import send_from_directory
@@ -478,6 +494,7 @@ def register_admin_routes(app):
 
     @app.route('/admin/legacy/print/<year>/<turma>/<codigo>')
     @login_required
+    @admin_required
     def admin_legacy_print(year, turma, codigo):
         """Gera relatório de impressão para aluno arquivado."""
         import csv
@@ -697,6 +714,7 @@ def telegram_bot_listener():
             logger.error(f"Erro no listener do Telegram: {e}")
             time.sleep(5)
 
+
 # Configurações da instituição para carteirinhas
 CONFIG = {
     'escola': os.getenv('CARTEIRINHA_ESCOLA', 'CE NOVO FUTURO'),
@@ -706,6 +724,43 @@ CONFIG = {
     'assinatura': os.getenv('CARTEIRINHA_ASSINATURA', 'assinatura.png'),
     'logo': os.getenv('CARTEIRINHA_LOGO', 'logo.svg')
 }
+
+from functools import wraps
+from flask import abort
+
+
+# Inicialização do Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+class User(UserMixin):
+    def __init__(self, id, role='professor'):
+        self.id = id
+        self.role = role
+
+@login_manager.user_loader
+def load_user(user_id):
+    # Buscar role no CSV
+    role = 'professor' # Default
+    if os.path.exists('usuarios.csv'):
+        with open('usuarios.csv', 'r') as f:
+            reader = csv.reader(f)
+            next(reader, None)
+            for row in reader:
+                if row and row[0] == user_id:
+                    role = row[2] if len(row) > 2 else 'admin' # Fallback para admin se não tiver role definido (legado)
+                    break
+    return User(user_id, role)
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            flash('Acesso negado. Apenas administradores podem acessar esta página.', 'error')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Registrar rotas administrativas após definição do app
 register_admin_routes(app)
@@ -723,18 +778,9 @@ BARCODE_SETTINGS = {
 # logging.basicConfig(level=logging.INFO)
 # logger = logging.getLogger(__name__)
 
-# Inicialização do Flask-Login
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
 
-class User(UserMixin):
-    def __init__(self, id):
-        self.id = id
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
+
 
 # Variáveis globais para registro de acessos
 TURNOS = ['Manhã', 'Tarde', 'Noite']
@@ -1140,7 +1186,17 @@ def login():
         password = request.form['password']
         
         if verificar_usuario(username, password):
-            user = User(username)
+            # Carregar role
+            role = 'professor'
+            with open('usuarios.csv', 'r') as f:
+                reader = csv.reader(f)
+                next(reader, None)
+                for row in reader:
+                    if row and row[0] == username:
+                        role = row[2] if len(row) > 2 else 'admin'
+                        break
+            
+            user = User(username, role)
             login_user(user)
             next_page = request.args.get('next')
             return redirect(next_page or url_for('index'))
@@ -1158,6 +1214,7 @@ def logout():
 # Rotas de registro de acesso
 @app.route('/registro', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def registro():
     mensagem = ""
     aluno = None
@@ -1266,6 +1323,7 @@ def index():
 
 @app.route('/api/registrar_acesso', methods=['POST'])
 @login_required
+@admin_required
 def api_registrar_acesso():
     """Registra acesso manualmente via API (substitui antiga /consulta)."""
     try:
@@ -1316,6 +1374,7 @@ def cadastro():
 
 @app.route('/cadastro/editar/<codigo>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def editar(codigo):
     alunos = read_database()
     aluno = next((a for a in alunos if a['Codigo'] == codigo), None)
@@ -1342,6 +1401,7 @@ def editar(codigo):
 
 @app.route('/cadastro/desvincular/<codigo>')
 @login_required
+@admin_required
 def desvincular(codigo):
     alunos = read_database()
     aluno = next((a for a in alunos if a['Codigo'] == codigo), None)
@@ -1354,6 +1414,7 @@ def desvincular(codigo):
 
 @app.route('/cadastro/excluir/<codigo>')
 @login_required
+@admin_required
 def excluir(codigo):
     alunos = read_database()
     alunos = [a for a in alunos if a['Codigo'] != codigo]
@@ -1362,6 +1423,7 @@ def excluir(codigo):
 
 @app.route('/cadastro/novo', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def novo():
     if request.method == 'POST':
         nome = request.form.get('nome', '').strip()
@@ -1437,6 +1499,7 @@ def novo():
 # Rotas de emissão de carteirinhas (protegidas)
 @app.route('/emissao')
 @login_required
+@admin_required
 def emissao():
     try:
         turmas = set()
@@ -1453,6 +1516,7 @@ def emissao():
 
 @app.route('/emitir', methods=['POST'])
 @login_required
+@admin_required
 def emitir():
     try:
         # Recarregar variáveis do .env em tempo real
@@ -1803,6 +1867,7 @@ def nova_ocorrencia(codigo):
 # ROTA PARA EXCLUIR OCORRÊNCIA
 @app.route('/ocorrencias/<codigo>/excluir', methods=['POST'])
 @login_required
+@admin_required
 def excluir_ocorrencia(codigo):
     indice = request.form.get('indice', type=int)
     path = ocorrencias_path(codigo)
@@ -1818,6 +1883,7 @@ def excluir_ocorrencia(codigo):
 # --- ROTA DE MENSAGENS EM MASSA ---
 @app.route('/mensagens', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def mensagens():
     historico_path = 'mensagens_historico.json'
     

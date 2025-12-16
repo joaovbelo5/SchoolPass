@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Sistema de Portaria{% endblock %}</title>
+    <title>{% block title %}SchoolPass{% endblock %}</title>
     <!-- Preconnect for Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,15 +37,19 @@
             <div class="collapse navbar-collapse w-100 mt-3" id="navbarNav">
                 <ul class="navbar-nav navbar-grid">
                     <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/registro">Registro</a></li>
-
                     <li class="nav-item"><a class="nav-link" href="/cadastro">Cadastro</a></li>
+                    {% if current_user.role == 'admin' %}
+                    <li class="nav-item"><a class="nav-link" href="/registro">Registro</a></li>
                     <li class="nav-item"><a class="nav-link" href="/emissao">Carteirinhas</a></li>
+                    {% endif %}
                     <li class="nav-item"><a class="nav-link" href="/historico">Histórico</a></li>
                     <li class="nav-item"><a class="nav-link" href="/carometro">Carômetro</a></li>
                     <li class="nav-item"><a class="nav-link" href="/chamada">Chamada</a></li>
+
+                    {% if current_user.role == 'admin' %}
                     <li class="nav-item"><a class="nav-link" href="/mensagens">Mensagens</a></li>
                     <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="btn btn-danger btn-sm text-white w-100" href="/logout">Sair</a>
                     </li>

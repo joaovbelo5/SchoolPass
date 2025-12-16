@@ -102,6 +102,7 @@
     <h5 class="fw-bold text-secondary mb-3">Acesso Rápido</h5>
     <!-- Grid of 5 columns -->
     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mb-5">
+        {% if current_user.role == 'admin' %}
         <div class="col">
             <a href="{{ url_for('registro') }}"
                 class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
@@ -111,18 +112,6 @@
                     </div>
                     <h6 class="fw-bold text-dark">Registro</h6>
                     <small class="text-muted">Entrada/Saída</small>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="{{ url_for('cadastro') }}"
-                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <i class="bi bi-person-plus-fill fs-1 text-success"></i>
-                    </div>
-                    <h6 class="fw-bold text-dark">Cadastro</h6>
-                    <small class="text-muted">Gerenciar Alunos</small>
                 </div>
             </a>
         </div>
@@ -138,6 +127,20 @@
                 </div>
             </a>
         </div>
+        {% endif %}
+
+        <div class="col">
+            <a href="{{ url_for('cadastro') }}"
+                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-person-plus-fill fs-1 text-success"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark">Cadastro</h6>
+                    <small class="text-muted">Gerenciar Alunos</small>
+                </div>
+            </a>
+        </div>
         <div class="col">
             <a href="{{ url_for('chamada') }}"
                 class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
@@ -150,6 +153,7 @@
                 </div>
             </a>
         </div>
+        {% if current_user.role == 'admin' %}
         <div class="col">
             <a href="{{ url_for('mensagens') }}"
                 class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
@@ -162,6 +166,7 @@
                 </div>
             </a>
         </div>
+        {% endif %}
     </div>
 
     <!-- Bottom Content Grid -->

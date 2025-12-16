@@ -12,10 +12,12 @@
             </h1>
             <p class="text-secondary mb-0 fw-medium">Consulte, edite ou adicione novos alunos</p>
         </div>
+        {% if current_user.role == 'admin' %}
         <a href="{{ url_for('novo') }}" class="btn btn-success btn-lg fw-bold px-4 d-flex align-items-center gap-2">
             <i class="bi bi-plus-lg fs-5"></i>
             <span>Novo Aluno</span>
         </a>
+        {% endif %}
     </div>
 
     <!-- Search Section -->
@@ -91,11 +93,13 @@
                         <div class="col-12 col-md-auto">
                             <div class="d-flex gap-2 justify-content-center flex-wrap">
                                 <!-- Register Access (AJAX Form) -->
+                                {% if current_user.role == 'admin' %}
                                 <button type="button" onclick="registrarAcesso('{{ aluno.Codigo }}', this)"
                                     class="btn btn-success border d-flex align-items-center justify-content-center"
                                     style="width: 42px; height: 42px;" title="Registrar Acesso Agora">
-                                    <i class="bi bi-check-lg fs-5 fw-bold"></i>
+                                    <i class="bi bi-check-lg fw-bold"></i>
                                 </button>
+                                {% endif %}
 
                                 <!-- View Access Log -->
                                 <button type="button"
@@ -112,6 +116,7 @@
                                     <i class="bi bi-exclamation-triangle-fill fs-5"></i>
                                 </a>
 
+                                {% if current_user.role == 'admin' %}
                                 <div class="vr mx-1 d-none d-md-block"></div>
 
                                 <a href="{{ url_for('editar', codigo=aluno.Codigo) }}"
@@ -136,6 +141,7 @@
                                     onclick="return confirm('Tem certeza que deseja excluir o aluno {{ aluno.Nome }}?');">
                                     <i class="bi bi-trash-fill fs-5"></i>
                                 </a>
+                                {% endif %}
                             </div>
                         </div>
 

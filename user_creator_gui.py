@@ -1,165 +1,347 @@
-from werkzeug.security import generate_password_hash
+import tkinter as tk
+from tkinter import ttk, messagebox, simpledialog
 import csv
 import os
-import tkinter as tk
-from tkinter import messagebox, simpledialog, ttk
+from werkzeug.security import generate_password_hash
 
-class CadastroUsuariosGUI:
+class UserCreatorGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Cadastro de Usuários")
-        self.arquivo_usuarios = 'usuarios.csv'
-        self.setup_csv()
-        self.create_widgets()
-        self.listar_usuarios()
+        self.root.title("SchoolPass Users")
+        self.root.geometry("500x650")
+        self.root.configure(bg="#f8f9fa")  # Fundo suave
+        self.filename = 'usuarios.csv'
+        
+        self.ensure_csv_exists()
+        self.setup_styles()
+        self.setup_ui()
+        self.load_users()
 
-    def setup_csv(self):
-        if not os.path.exists(self.arquivo_usuarios):
-            with open(self.arquivo_usuarios, 'w', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(["username", "password_hash"])
+    def ensure_csv_exists(self):
+        """Garante a existência do CSV e verifica cabeçalho."""
+        if not os.path.exists(self.filename):
+            try:
+                with open(self.filename, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(['username', 'password_hash', 'role'])
+            except Exception as e:
+                messagebox.showerror("Erro Crítico", f"Não foi possível criar o arquivo de banco de dados: {e}")
+                self.root.destroy()
+                return
 
-    def usuario_existe(self, username):
-        if os.path.exists(self.arquivo_usuarios):
-            with open(self.arquivo_usuarios, 'r') as file:
-                reader = csv.reader(file)
-                next(reader, None)
+        # Verificar migração simples
+        try:
+            rows = []
+            with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+                reader = csv.reader(f)
+                rows = list(reader)
+            
+            if rows and len(rows[0]) == 2:
+                rows[0].append('role')
+                for i in range(1, len(rows)):
+                    rows[i].append('admin')
+                
+                with open(self.filename, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(rows)
+        except Exception as e:
+            messagebox.showwarning("Aviso", f"Possível erro na verificação do banco de dados: {e}")
+
+    def setup_styles(self):
+        style = ttk.Style()
+        style.theme_use('clam')  # Base theme for better customization
+
+        # Cores Minimalistas
+        bg_color = "#f8f9fa"
+        primary_color = "#2c3e50"
+        accent_color = "#3498db"
+        text_color = "#2c3e50"
+        white = "#ffffff"
+
+        style.configure(".", background=bg_color, foreground=text_color, font=("Segoe UI", 10))
+        
+        # Labels
+        style.configure("Header.TLabel", font=("Segoe UI", 18, "bold"), foreground=primary_color, background=bg_color)
+        style.configure("SubHeader.TLabel", font=("Segoe UI", 10, "bold"), foreground="#7f8c8d", background=bg_color)
+
+        # Buttons (Flat & Modern)
+        style.configure("Accent.TButton",
+                        foreground=white,
+                        background=accent_color,
+                        font=("Segoe UI", 10, "bold"),
+                        borderwidth=0,
+                        focuscolor=accent_color,
+                        padding=(15, 8))
+        style.map("Accent.TButton",
+                  background=[('active', "#2980b9")])  # Darker blue on hover
+
+        style.configure("Danger.TButton",
+                        foreground=white,
+                        background="#e74c3c",
+                        font=("Segoe UI", 10),
+                        borderwidth=0,
+                        focuscolor="#e74c3c",
+                        padding=(15, 8))
+        style.map("Danger.TButton",
+                  background=[('active', "#c0392b")])
+
+        style.configure("Ghost.TButton",
+                        foreground=primary_color,
+                        background="#ecf0f1",
+                        font=("Segoe UI", 10),
+                        borderwidth=0,
+                        focuscolor="#bdc3c7",
+                        padding=(15, 8))
+        style.map("Ghost.TButton",
+                  background=[('active', "#bdc3c7")])
+
+        # Entry
+        style.configure("Card.TFrame", background=white, relief="flat")
+        
+        # Treeview
+        style.configure("Treeview", 
+                        background=white,
+                        foreground=text_color,
+                        fieldbackground=white,
+                        borderwidth=0,
+                        font=("Segoe UI", 10),
+                        rowheight=30)
+        style.configure("Treeview.Heading", 
+                        background=bg_color, 
+                        foreground=primary_color, 
+                        font=("Segoe UI", 9, "bold"),
+                        borderwidth=0)
+        style.map("Treeview", background=[('selected', accent_color)])
+
+    def setup_ui(self):
+        # Container Principal com Padding
+        main_container = ttk.Frame(self.root, padding=25)
+        main_container.pack(fill=tk.BOTH, expand=True)
+
+        # Cabeçalho
+        header_frame = ttk.Frame(main_container)
+        header_frame.pack(fill=tk.X, pady=(0, 25))
+        
+        ttk.Label(header_frame, text="Usuários", style="Header.TLabel").pack(side=tk.LEFT)
+        ttk.Label(header_frame, text="Gerenciamento de Acesso", style="SubHeader.TLabel").pack(side=tk.LEFT, padx=(10,0), pady=(8,0))
+
+        # Card de Formulário (Fundo Branco com Sombra simulada por borda sutil)
+        form_card = ttk.Frame(main_container, style="Card.TFrame", padding=20)
+        form_card.pack(fill=tk.X, pady=(0, 25))
+        
+        # Título do Card
+        ttk.Label(form_card, text="NOVO USUÁRIO", font=("Segoe UI", 8, "bold"), foreground="#95a5a6", background="#ffffff").pack(anchor="w", pady=(0, 15))
+
+        # Inputs Grid
+        input_frame = ttk.Frame(form_card, style="Card.TFrame")
+        input_frame.pack(fill=tk.X)
+
+        # Usuário
+        lbl_user = ttk.Label(input_frame, text="Nome de Usuário", background="#ffffff", font=("Segoe UI", 9))
+        lbl_user.grid(row=0, column=0, sticky="w", padx=(0, 10))
+        self.ent_username = ttk.Entry(input_frame, width=25, font=("Segoe UI", 10))
+        self.ent_username.grid(row=1, column=0, sticky="ew", padx=(0, 10), pady=(0, 15))
+
+        # Senha
+        lbl_pass = ttk.Label(input_frame, text="Senha", background="#ffffff", font=("Segoe UI", 9))
+        lbl_pass.grid(row=0, column=1, sticky="w")
+        self.ent_password = ttk.Entry(input_frame, width=25, show="•", font=("Segoe UI", 10))
+        self.ent_password.grid(row=1, column=1, sticky="ew", pady=(0, 15))
+        
+        input_frame.columnconfigure(0, weight=1)
+        input_frame.columnconfigure(1, weight=1)
+
+        # Permissão (Radio Buttons estilizados seriam complexos, usando padrão limpo)
+        radio_frame = ttk.Frame(form_card, style="Card.TFrame")
+        radio_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        ttk.Label(radio_frame, text="Permissão", background="#ffffff", font=("Segoe UI", 9)).pack(anchor="w", pady=(0, 5))
+        
+        self.var_role = tk.StringVar(value="professor")
+        
+        s_radio = ttk.Style()
+        s_radio.configure("BW.TRadiobutton", background="#ffffff", font=("Segoe UI", 10))
+        
+        r1 = ttk.Radiobutton(radio_frame, text="Professor (Acesso Restrito)", variable=self.var_role, value="professor", style="BW.TRadiobutton")
+        r1.pack(anchor="w")
+        r2 = ttk.Radiobutton(radio_frame, text="Administrador (Acesso Total)", variable=self.var_role, value="admin", style="BW.TRadiobutton")
+        r2.pack(anchor="w")
+
+        # Botão Adicionar (Full Width no Card)
+        btn_add = ttk.Button(form_card, text="Adicionar Usuário", style="Accent.TButton", command=self.add_user)
+        btn_add.pack(fill=tk.X, pady=(10, 0))
+
+        # Botões de Ação Globais (Ao fundo, antes da lista)
+        actions_frame = ttk.Frame(main_container)
+        actions_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(20, 0))
+        
+        btn_exit = ttk.Button(actions_frame, text="Sair", style="Ghost.TButton", command=self.root.quit)
+        btn_exit.pack(side=tk.RIGHT)
+
+        btn_pass = ttk.Button(actions_frame, text="Alterar Senha", style="Ghost.TButton", command=self.change_password)
+        btn_pass.pack(side=tk.LEFT, padx=(0, 10))
+        
+        btn_del = ttk.Button(actions_frame, text="Excluir", style="Danger.TButton", command=self.delete_user)
+        btn_del.pack(side=tk.LEFT)
+
+        # Lista (Preenche o resto)
+        tree_frame = ttk.Frame(main_container)
+        tree_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        
+        columns = ("username", "role")
+        self.tree = ttk.Treeview(tree_frame, columns=columns, show="headings", selectmode="browse")
+        
+        self.tree.heading("username", text="USUÁRIO", anchor="w")
+        self.tree.heading("role", text="FUNÇÃO", anchor="w")
+        
+        self.tree.column("username", width=200, anchor="w")
+        self.tree.column("role", width=100, anchor="w")
+        
+        # Scrollbar minimalista
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.tree.yview)
+        # Hack para esconder scrollbar se não necessário ou estilizar (tkinter padrão é difícil estilizar scrollbar)
+        
+        self.tree.configure(yscroll=scrollbar.set)
+        
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    def load_users(self):
+        # Limpar
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        
+        try:
+            with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
                 for row in reader:
-                    if row and row[0] == username:
-                        return True
-        return False
+                    self.tree.insert("", tk.END, values=(row['username'], row.get('role', 'N/A')))
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao carregar usuários: {e}")
 
-    def adicionar_usuario(self):
-        username = self.entry_username.get().strip()
-        password = self.entry_password.get().strip()
+    def add_user(self):
+        username = self.ent_username.get().strip()
+        password = self.ent_password.get().strip()
+        role = self.var_role.get()
 
         if not username or not password:
-            messagebox.showerror("Erro", "Por favor, preencha todos os campos!")
+            messagebox.showwarning("Aviso", "Preencha usuário e senha.")
             return
 
-        if self.usuario_existe(username):
-            messagebox.showerror("Erro", "Usuário já existe!")
+        # Check exista
+        if self.user_exists(username):
+            messagebox.showerror("Erro", "Usuário já existe.")
             return
 
-        hashed_password = generate_password_hash(password)
-        with open(self.arquivo_usuarios, 'a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([username, hashed_password])
+        pass_hash = generate_password_hash(password)
 
-        messagebox.showinfo("Sucesso", "Usuário cadastrado com sucesso!")
-        self.entry_username.delete(0, tk.END)
-        self.entry_password.delete(0, tk.END)
-        self.listar_usuarios()
-
-    def listar_usuarios(self):
-        self.listbox_usuarios.delete(0, tk.END)
-        if not os.path.exists(self.arquivo_usuarios):
-            return
-        with open(self.arquivo_usuarios, 'r') as file:
-            reader = csv.reader(file)
-            next(reader, None)
-            for row in reader:
-                if row:
-                    self.listbox_usuarios.insert(tk.END, row[0])
-
-    def excluir_usuario(self):
-        selecionado = self.listbox_usuarios.curselection()
-        if not selecionado:
-            messagebox.showerror("Erro", "Selecione um usuário para excluir!")
-            return
-        username = self.listbox_usuarios.get(selecionado[0])
-        if not self.usuario_existe(username):
-            messagebox.showerror("Erro", "Usuário não encontrado!")
-            return
         try:
-            usuarios = []
-            with open(self.arquivo_usuarios, 'r') as file:
-                reader = csv.reader(file)
-                next(reader, None)
-                usuarios = [row for row in reader if row and row[0] != username]
-            with open(self.arquivo_usuarios, 'w', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(["username", "password_hash"])
-                writer.writerows(usuarios)
-            messagebox.showinfo("Sucesso", "Usuário excluído com sucesso!")
-            self.listar_usuarios()
+            with open(self.filename, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                writer.writerow([username, pass_hash, role])
+            
+            messagebox.showinfo("Sucesso", f"Usuário {username} adicionado.")
+            self.ent_username.delete(0, tk.END)
+            self.ent_password.delete(0, tk.END)
+            self.load_users()
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao excluir usuário: {str(e)}")
+            messagebox.showerror("Erro", f"Falha ao salvar: {e}")
 
+    def delete_user(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning("Aviso", "Selecione um usuário para excluir.")
+            return
 
-    def alterar_senha(self):
-        selecionado = self.listbox_usuarios.curselection()
-        if not selecionado:
-            messagebox.showerror("Erro", "Selecione um usuário para alterar a senha!")
+        item = self.tree.item(selected[0])
+        username = item['values'][0]
+
+        if not messagebox.askyesno("Confirmar", f"Excluir usuário '{username}'?"):
             return
-        username = self.listbox_usuarios.get(selecionado[0])
-        if not self.usuario_existe(username):
-            messagebox.showerror("Erro", "Usuário não encontrado!")
-            return
-        nova_senha = simpledialog.askstring("Alterar Senha", f"Digite a nova senha para '{username}':", show='*', parent=self.root)
-        if not nova_senha:
-            messagebox.showerror("Erro", "A senha não pode ser vazia!")
-            return
+
         try:
-            usuarios = []
-            with open(self.arquivo_usuarios, 'r') as file:
-                reader = csv.reader(file)
-                next(reader, None)
+            rows = []
+            with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+                reader = csv.reader(f)
+                rows = list(reader)
+
+            new_rows = [rows[0]]
+            for row in rows[1:]:
+                if row[0] != username:
+                    new_rows.append(row)
+
+            with open(self.filename, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                writer.writerows(new_rows)
+            
+            messagebox.showinfo("Sucesso", "Usuário excluído.")
+            self.load_users()
+
+        except Exception as e:
+            messagebox.showerror("Erro", f"Falha ao excluir: {e}")
+
+    def change_password(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning("Aviso", "Selecione um usuário para alterar a senha.")
+            return
+
+        item = self.tree.item(selected[0])
+        username = item['values'][0]
+
+        new_pass = simpledialog.askstring("Alterar Senha", f"Nova senha para '{username}':", show='*')
+        if not new_pass:
+            return
+
+        try:
+            rows = []
+            with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+                reader = csv.reader(f)
+                rows = list(reader)
+
+            header = rows[0]
+            idx_user = 0
+            idx_pass = 1
+            
+            # Localizar índices
+            if 'username' in header: idx_user = header.index('username')
+            if 'password_hash' in header: idx_pass = header.index('password_hash')
+
+            updated = False
+            for row in rows[1:]:
+                if row[idx_user] == username:
+                    row[idx_pass] = generate_password_hash(new_pass)
+                    updated = True
+                    break
+
+            if updated:
+                with open(self.filename, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(rows)
+                messagebox.showinfo("Sucesso", f"Senha de '{username}' alterada.")
+            else:
+                messagebox.showerror("Erro", "Usuário não encontrado no arquivo.")
+
+        except Exception as e:
+            messagebox.showerror("Erro", f"Falha ao alterar senha: {e}")
+
+    def user_exists(self, username):
+        try:
+            with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
                 for row in reader:
-                    if row and row[0] == username:
-                        row[1] = generate_password_hash(nova_senha)
-                    usuarios.append(row)
-            with open(self.arquivo_usuarios, 'w', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(["username", "password_hash"])
-                writer.writerows(usuarios)
-            messagebox.showinfo("Sucesso", "Senha alterada com sucesso!")
-        except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao alterar senha: {str(e)}")
+                    if row['username'] == username:
+                        return True
+        except:
+            pass
+        return False
 
-    def create_widgets(self):
-        self.root.configure(bg="#f6fff6")
-        frame = ttk.Frame(self.root, padding=18)
-        frame.pack(padx=10, pady=10, fill="both", expand=True)
+# Adicionar helper para margins no pack (tkinter < 8.7 não suporta mt/mb/ml/mr no pack, temos que usar pady/padx)
+# Vou corrigir isso no código final abaixo, substituindo os mt=... por pady=(...)
 
-        title = ttk.Label(frame, text="Cadastro de Usuários", font=("Segoe UI", 16, "bold"), foreground="#14532d")
-        title.grid(row=0, column=0, columnspan=2, pady=(0,12))
-
-        ttk.Label(frame, text="Nome de Usuário:").grid(row=1, column=0, sticky="e", padx=2, pady=4)
-        self.entry_username = ttk.Entry(frame)
-        self.entry_username.grid(row=1, column=1, padx=2, pady=4, sticky="ew")
-
-        ttk.Label(frame, text="Senha:").grid(row=2, column=0, sticky="e", padx=2, pady=4)
-        self.entry_password = ttk.Entry(frame, show="*")
-        self.entry_password.grid(row=2, column=1, padx=2, pady=4, sticky="ew")
-
-        btn_add = ttk.Button(frame, text="Cadastrar Usuário", command=self.adicionar_usuario)
-        btn_add.grid(row=3, column=0, columnspan=2, pady=8, sticky="ew")
-
-        ttk.Separator(frame).grid(row=4, column=0, columnspan=2, sticky="ew", pady=8)
-
-        ttk.Label(frame, text="Usuários cadastrados:").grid(row=5, column=0, columnspan=2, pady=(0,4))
-        listbox_frame = ttk.Frame(frame)
-        listbox_frame.grid(row=6, column=0, columnspan=2, sticky="ew")
-        self.listbox_usuarios = tk.Listbox(listbox_frame, width=32, height=7, font=("Segoe UI", 10))
-        self.listbox_usuarios.pack(side="left", fill="both", expand=True)
-        scrollbar = ttk.Scrollbar(listbox_frame, orient="vertical", command=self.listbox_usuarios.yview)
-        scrollbar.pack(side="right", fill="y")
-        self.listbox_usuarios.config(yscrollcommand=scrollbar.set)
-
-        btn_del = ttk.Button(frame, text="Excluir Usuário", command=self.excluir_usuario)
-        btn_del.grid(row=7, column=0, columnspan=2, pady=6, sticky="ew")
-
-        btn_alterar = ttk.Button(frame, text="Alterar Senha", command=self.alterar_senha)
-        btn_alterar.grid(row=8, column=0, columnspan=2, pady=6, sticky="ew")
-
-        btn_sair = ttk.Button(frame, text="Sair", command=self.root.quit)
-        btn_sair.grid(row=9, column=0, columnspan=2, pady=(12,0), sticky="ew")
-
-        frame.columnconfigure(0, weight=1)
-        frame.columnconfigure(1, weight=2)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
+    # Monkey patch pack to avoid rewriting logic for margins if I used shorthand above
+    # But better to just clean up the code string before writing.
     root = tk.Tk()
-    app = CadastroUsuariosGUI(root)
+    app = UserCreatorGUI(root)
     root.mainloop()

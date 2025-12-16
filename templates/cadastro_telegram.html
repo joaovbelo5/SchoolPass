@@ -12,71 +12,107 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
-    <!-- Custom CSS -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #059669 0%, #047857 100%);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-custom {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-telegram {
+            background-color: #24A1DE;
+            color: white;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-telegram:hover {
+            background-color: #1b8dbf;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(5, 150, 105, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
         }
     </style>
 </head>
 
-<body>
-    <div class="container py-5">
+<body class="py-5">
+    <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="text-center mb-5">
-                    <h1 class="fw-bold text-white mb-2">
-                        <i class="bi bi-telegram me-2"></i>Vincular Telegram
-                    </h1>
-                    <p class="text-white-50">Receba notificações de entrada e saída diretamente no seu celular</p>
-                </div>
+            <div class="col-md-8 col-lg-5">
 
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-body p-5 text-center">
-                        <div class="mb-4">
-                            <i class="bi bi-phone-vibrate text-success" style="font-size: 4rem;"></i>
+                <div class="card card-custom p-4 p-md-5 text-center">
+
+                    <div class="mb-4">
+                        <div class="icon-circle mb-3">
+                            <i class="bi bi-telegram text-success"
+                                style="font-size: 2.5rem; color: #059669 !important;"></i>
                         </div>
-
-                        <h3 class="fw-bold text-dark mb-3">Como ativar os avisos?</h3>
-
-                        <p class="text-muted mb-4">
-                            O processo agora é automático! Se você já informou seu número de telefone para a escola,
-                            basta clicar no botão abaixo e compartilhar seu contato.
-                        </p>
-
-                        <div class="d-grid gap-3 col-lg-10 mx-auto">
-                            <a href="https://t.me/GISNO_bot" target="_blank"
-                                class="btn btn-primary btn-lg fw-bold py-3">
-                                <i class="bi bi-telegram me-2"></i>Abrir Bot no Telegram
-                            </a>
-                        </div>
-
-                        <div class="mt-4 small text-muted">
-                            <i class="bi bi-info-circle me-1"></i>Ao abrir o bot, clique em <strong>INICIAR</strong> e
-                            depois no botão para compartilhar seu contato.
-                        </div>
-
-                        <div class="mt-3 text-muted" style="font-size: 0.85rem;">
-                            Ao utilizar o sistema de mensagens do SchoolPass, você aceita os
-                            <a href="/termos" target="_blank" class="text-decoration-none text-success fw-bold">Termos
-                                de Serviço</a> e a
-                            <a href="/termos#privacidade" target="_blank"
-                                class="text-decoration-none text-success fw-bold">Política de Privacidade</a>.
-                        </div>
+                        <h2 class="fw-bold text-dark mb-2">Ativar Notificações</h2>
+                        <p class="text-muted">Receba avisos de entrada e saída do aluno diretamente no seu Telegram.</p>
                     </div>
 
-                    <div class="text-center">
-                        <a href="/" class="btn btn-link text-decoration-none text-white-50">
-                            <i class="bi bi-arrow-left me-1"></i>Voltar para Início
+                    <div class="d-grid gap-3 mb-4">
+                        <a href="https://t.me/GISNO_bot" target="_blank"
+                            class="btn btn-telegram btn-lg fw-semibold py-3 d-flex align-items-center justify-content-center shadow-sm">
+                            <i class="bi bi-telegram fs-4 me-2"></i>
+                            Abrir Bot no Telegram
                         </a>
                     </div>
+
+                    <div class="bg-light rounded p-3 mb-4 text-start">
+                        <h6 class="fw-bold text-dark mb-2 small text-uppercase">Como funciona?</h6>
+                        <ol class="ps-3 mb-0 text-muted small">
+                            <li class="mb-1">Clique no botão acima para abrir o bot.</li>
+                            <li class="mb-1">Toque em <strong>/start</strong> ou <strong>Começar</strong>.</li>
+                            <li>Compartilhe seu contato quando solicitado.</li>
+                        </ol>
+                    </div>
+
+                    <div class="border-top pt-4">
+                        <p class="small text-muted mb-0">
+                            Ao prosseguir, você concorda com nossos <br>
+                            <a href="/termos" class="text-decoration-none fw-bold" style="color: #059669;">Termos de Uso
+                                e Política de Privacidade</a>
+                        </p>
+                    </div>
+
                 </div>
+
+                <div class="text-center mt-4">
+                    <a href="/"
+                        class="text-white-50 text-decoration-none hover-white d-inline-flex align-items-center transition-colors">
+                        <i class="bi bi-arrow-left me-2"></i>Voltar para o Início
+                    </a>
+                </div>
+
             </div>
         </div>
-        <!-- Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
