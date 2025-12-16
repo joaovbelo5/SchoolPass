@@ -91,8 +91,7 @@
                         <div class="col-12 col-md-auto">
                             <div class="d-flex gap-2 justify-content-center flex-wrap">
                                 <!-- Register Access (AJAX Form) -->
-                                <button type="button" 
-                                    onclick="registrarAcesso('{{ aluno.Codigo }}', this)"
+                                <button type="button" onclick="registrarAcesso('{{ aluno.Codigo }}', this)"
                                     class="btn btn-success border d-flex align-items-center justify-content-center"
                                     style="width: 42px; height: 42px;" title="Registrar Acesso Agora">
                                     <i class="bi bi-check-lg fs-5 fw-bold"></i>
@@ -158,8 +157,8 @@
 
 <!-- Toast Container -->
 <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 9999">
-    <div id="liveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive"
-        aria-atomic="true" data-bs-delay="3000">
+    <div id="liveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true"
+        data-bs-delay="3000">
         <div class="d-flex p-2">
             <div class="toast-body fs-6 fw-bold text-white d-flex align-items-center gap-2">
                 <!-- Icon & Text injected by JS -->
@@ -206,30 +205,28 @@
         btnElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
         btnElement.disabled = true;
 
-        const formData = new FormData();
-        formData.append('registrar_codigo', codigo);
-
         fetch('/api/registrar_acesso', {
             method: 'POST',
-            body: formData,
+            body: JSON.stringify({ 'registrar_codigo': codigo }),
             headers: {
+                'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            // Reset Button
-            btnElement.innerHTML = originalContent;
-            btnElement.disabled = false;
-            
-            showToast(data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            btnElement.innerHTML = originalContent;
-            btnElement.disabled = false;
-            alert('Erro ao processar solicitação.');
-        });
+            .then(response => response.json())
+            .then(data => {
+                // Reset Button
+                btnElement.innerHTML = originalContent;
+                btnElement.disabled = false;
+
+                showToast(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btnElement.innerHTML = originalContent;
+                btnElement.disabled = false;
+                alert('Erro ao processar solicitação.');
+            });
     }
 
     function showToast(data) {
@@ -252,8 +249,8 @@
             toastBody.innerHTML = `<i class="bi bi-${icon} fs-5"></i><span>${data.msg}</span>`;
             toast.show();
         } else {
-             // Fallback for hard errors
-             alert(data.msg || 'Erro desconhecido');
+            // Fallback for hard errors
+            alert(data.msg || 'Erro desconhecido');
         }
     }
 
@@ -276,15 +273,15 @@
     window.addEventListener('load', initModal);
 
     function openHistoryModal(turma, codigo, nome) {
-        initModal(); 
+        initModal();
         if (!historyModal) {
-             // Try lazy init again
-             try {
+            // Try lazy init again
+            try {
                 historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
-             } catch(e) {
-                 alert("Erro: Bootstrap Modal não inicializado.");
-                 return;
-             }
+            } catch (e) {
+                alert("Erro: Bootstrap Modal não inicializado.");
+                return;
+            }
         }
 
         modalTitle.textContent = nome;
