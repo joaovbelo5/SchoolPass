@@ -66,10 +66,10 @@
                             <!-- Col 1: Photo & ID (Mobile: Top) -->
                             <div class="col-auto mx-auto mx-md-0">
                                 <div class="position-relative">
-                                    <img src="{{ url_for('static', filename='fotos/' ~ aluno['Foto']) }}" alt="Foto"
-                                        class="rounded-circle object-fit-cover border"
+                                    <img src="{{ semfoto_env_uri if (aluno['Foto'] == 'semfoto.jpg' and semfoto_env_uri) else url_for('static', filename='fotos/' ~ aluno['Foto']) }}"
+                                        alt="Foto" class="rounded-circle object-fit-cover border"
                                         style="width: 80px; height: 80px;"
-                                        onerror="this.src='{{ url_for('static', filename='fotos/semfoto.jpg') }}'">
+                                        onerror="this.src='{{ semfoto_env_uri if semfoto_env_uri else url_for('static', filename='fotos/semfoto.jpg') }}'">
                                     <span
                                         class="position-absolute bottom-0 start-50 translate-middle-x badge bg-secondary border text-dark"
                                         style="font-size: 0.75rem;">

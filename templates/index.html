@@ -224,6 +224,8 @@
                                                 {% if log.foto and log.foto != 'semfoto.jpg' %}
                                                 <img src="{{ url_for('static', filename='fotos/' + log.foto) }}" alt=""
                                                     class="img-fluid">
+                                                {% elif semfoto_env_uri %}
+                                                <img src="{{ semfoto_env_uri }}" alt="" class="img-fluid">
                                                 {% else %}
                                                 <i class="bi bi-person text-secondary"></i>
                                                 {% endif %}

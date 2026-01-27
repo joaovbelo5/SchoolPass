@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Usuários{% endblock %}
+
+{% block content %}
+<div class="container fade-in-up">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary mb-0"><i class="bi bi-people me-2"></i>Gerenciar Usuários</h2>
+            <p class="text-muted small mb-0">Adicione ou remova acesso ao sistema</p>
+        </div>
+        <div>
+            <a href="{{ url_for('admin_index') }}" class="btn btn-outline-secondary btn-sm me-2">
+                <i class="bi bi-arrow-left me-1"></i> Voltar
+            </a>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="bi bi-person-plus me-1"></i> Novo Usuário
+            </button>
+        </div>
+    </div>
+
+    <!-- Flash Messages (Reuse logic from admin_index if possible, or simple flash) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Usuário</th>
+                            <th>Função (Role)</th>
+                            <th class="text-end pe-4">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="ps-4 fw-bold">{{ user.username }}</td>
+                            <td>
+                                {% if user.role == 'admin' %}
+                                    <span class="badge bg-danger">Administrador</span>
+                                {% else %}
+                                    <span class="badge bg-info text-dark">Professor</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-sm btn-outline-warning me-1" 
+                                        onclick="openChangePasswordModal('{{ user.username }}')">
+                                    <i class="bi bi-key"></i>
+                                </button>
+                                {% if user.username != current_user.id %}
+                                <form action="{{ url_for('admin_users_delete', username=user.username) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir o usuário {{ user.username }}?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-muted">Nenhum usuário encontrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Novo Usuário</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin_users_add') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Nome de Usuário</label>
+                        <input type="text" class="form-control" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Senha</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Função</label>
+                        <select class="form-select" name="role">
+                            <option value="professor" selected>Professor</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar Usuário</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Alterar Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="changePasswordForm" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" id="cpRole" name="role" value="">
+                    
+                    <p class="text-muted small">Alterando senha para: <strong id="cpUsernameDisplay"></strong></p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Nova Senha</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Salvar Nova Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openChangePasswordModal(username) {
+    document.getElementById('cpUsernameDisplay').textContent = username;
+    // Set the action URL dynamically
+    var form = document.getElementById('changePasswordForm');
+    form.action = "/admin/users/password/" + username;
+    
+    new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
+}
+</script>
+
+<style>
+    .fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}

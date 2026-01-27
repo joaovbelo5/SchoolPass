@@ -1,78 +1,65 @@
 # TERMOS DE USO E CONDIÇÕES GERAIS DE SERVIÇO -- SISTEMA SCHOOLPASS
 
-**Versão do Documento:** 3.0 (Edição Consolidada)
-**Data de Publicação:** 16 de Dezembro de 2025
-**Status:** Vigente
+**Data da Última Atualização:** 03 de Janeiro de 2026
+**Versão:** 4.0 (Consolidada)
 
 ---
 
-### PREÂMBULO
+### 1. DA ACEITAÇÃO DOS TERMOS
 
-O presente instrumento particular de **TERMOS DE USO E CONDIÇÕES GERAIS DE SERVIÇO** ("Termos") constitui um contrato de adesão vinculante e de cumprimento obrigatório celebrado entre, de um lado, a **INSTITUIÇÃO DE ENSINO**, neste ato representada por sua administração escolar ("CONTRATADA" ou "ESCOLA"), e, de outro lado, o corpo discente ("ALUNO"), seus Pais e/ou Responsáveis Legais ("RESPONSÁVEIS" ou "USUÁRIOS"), doravante denominados, individual ou coletivamente, como "PARTES".
+**1.1.** O presente instrumento ("Termos de Uso") regula o acesso, uso e operação do ecossistema tecnológico **SCHOOLPASS** ("PLATAFORMA" ou "SISTEMA"), disponibilizado pela **INSTITUIÇÃO DE ENSINO** ("CONTRATADA" ou "LICENCIANTE") em benefício de seus alunos ("ALUNOS"), pais e responsáveis legais ("RESPONSÁVEIS" ou "USUÁRIOS").
 
-A UTILIZAÇÃO DO SISTEMA "SCHOOLPASS" ESTÁ EXPRESSAMENTE CONDICIONADA À LEITURA COMPLETA, COMPREENSÃO INTEGRAL E ACEITAÇÃO IRRESTRITA DE TODAS AS CLÁUSULAS E CONDIÇÕES DESTE INSTRUMENTO.
+**1.2.** A utilização do SISTEMA, em qualquer de suas modalidades (aplicativo, site, catracas, notificações), implica na **ACEITAÇÃO INTEGRAL, IRRETRATÁVEL E IRREVOGÁVEL** de todos os termos, cláusulas e condições aqui estipulados. Caso não concorde com qualquer disposição, o USUÁRIO deverá abster-se de utilizar a PLATAFORMA e reportar-se imediatamente à administração escolar.
 
----
+### 2. DO OBJETO E FUNCIONALIDADES
 
-## CLÁUSULA PRIMEIRA – DO OBJETO E ABRANGÊNCIA
+**2.1.** O SISTEMA tem por objeto a gestão de segurança, controle de acesso físico e comunicação acadêmica, compreendendo:
+*   **I.** Identificação biométrica (facial/digital) e/ou por radiofrequência (RFID/NFC);
+*   **II.** Monitoramento de fluxo de entrada e saída nas dependências da CONTRATADA;
+*   **III.** Automação de notificações de frequência via aplicativos de mensageria (ex: Telegram);
+*   **IV.** Emissão de credenciais de identificação ("Carteirinha Escolar").
 
-**1.1.** O presente instrumento tem por objeto regulamentar o licenciamento de uso não exclusivo, intransferível e revogável do ecossistema tecnológico denominado **SchoolPass** ("SISTEMA"), bem como estabelecer as diretrizes de segurança, controle de acesso e monitoramento de frequência nas dependências da CONTRATADA.
+### 3. DA CREDENCIAL DE ACESSO E SEGURANÇA
 
-**1.2.** O SISTEMA compreende, mas não se limita a:
-*   (i) Dispositivos de hardware para controle de fluxo (catracas eletrônicas, leitores ópticos, sensores biométricos);
-*   (ii) Plataforma de software para gestão de dados acadêmicos e registros de acesso;
-*   (iii) Interfaces de notificação automatizada via aplicativos de mensageria (ex: Telegram);
-*   (iv) Credenciais de identificação física e digital ("CARTEIRINHA ESTUDANTIL").
+**3.1. Natureza da Credencial:** A carteira de identificação (física ou digital) é documento **pessoal, intransferível e de porte obrigatório**.
 
-## CLÁUSULA SEGUNDA – DA NATUREZA DA CREDENCIAL DE ACESSO
+**3.2. Dever de Custódia:** É de exclusiva responsabilidade do USUÁRIO a guarda, sigilo e boa utilização de sua credencial e senhas de acesso.
+*   **§1º.** O extravio, furto ou roubo da credencial física deve ser comunicado imediatamente à Secretaria Escolar para bloqueio.
+*   **§2º.** A emissão de segunda via por motivo de perda ou dano causado por mau uso ensejará a cobrança de taxa administrativa para custeio operacional, conforme tabela vigente.
 
-**2.1.** A Carteirinha Estudantil, seja em seu formato físico (cartão PVC) ou digital (QR Code/App), constitui documento de identificação pessoal, intransferível e de porte obrigatório e indispensável para a entrada e permanência do ALUNO nas instalações da ESCOLA.
+**3.3. Vedações Expressas:** É terminantemente proibido:
+*   **I.** Emprestar, ceder ou alugar a credencial a terceiros;
+*   **II.** Utilizar credencial de outrem para acesso às dependências;
+*   **III.** Burlar, pular ou transpor barreiras físicas (catracas) sem o devido registro;
+*   **IV.** Tentar engenharia reversa, "hacking" ou exploração de falhas no software do SISTEMA.
+*   **Parágrafo Único:** A violação destas regras constitui **FALTA GRAVÍSSIMA**, sujeita a sanções disciplinares (suspensão/expulsão) e medidas legais cabíveis (civis e criminais).
 
-**2.2.** É terminantemente vedado ao USUÁRIO ceder, emprestar, locar, vender ou transferir, a qualquer título, sua credencial de acesso a terceiros, sob pena de incorrer em falta grave passível de sanções disciplinares, sem prejuízo da responsabilização civil e criminal por falsidade ideológica (Art. 299 do Código Penal Brasileiro).
+### 4. DAS LIMITAÇÕES DE RESPONSABILIDADE
 
-**2.3. Da Política de Emissão e Reposição:**
-*   **Parágrafo Primeiro:** A primeira via da credencial é fornecida pela CONTRATADA em regime de comodato gratuito.
-*   **Parágrafo Segundo:** Na hipótese de perda, extravio, furto, roubo ou danificação que torne a credencial ilegível, a emissão de segunda via será compulsória para a continuidade do acesso ao estabelecimento.
-*   **Parágrafo Terceiro:** A emissão de segunda via estará sujeita ao pagamento de taxa administrativa de **R$ 5,00 (cinco reais)**, destinada ao custeio de insumos tecnológicos e operacionais.
-*   **Parágrafo Quarto:** A isenção da referida taxa poderá ser concedida, em caráter excepcional, mediante requerimento formal de hipossuficiência econômica, devidamente instruído e deferido pela Diretoria da CONTRATADA.
+**4.1. Disponibilidade do Serviço:** A CONTRATADA empenhará seus melhores esforços para manter o SISTEMA disponível 24/7. Contudo, não garante que o serviço será ininterrupto, livre de erros ou imune a ataques cibernéticos externos.
+*   **§1º.** A CONTRATADA não se responsabiliza por falhas de comunicação decorrentes de:
+    *   (a) Indisponibilidade dos serviços de terceiros (ex: Servidores do Telegram, Provedores de Internet, Operadoras de Telefonia);
+    *   (b) Configurações incorretas, falta de bateria ou defeitos no dispositivo do USUÁRIO.
 
-## CLÁUSULA TERCEIRA – DO CONTROLE DE FREQUÊNCIA E CONDUTA
+**4.2.** O serviço de notificação via Telegram é uma **ferramenta auxiliar de conveniência**, não substituindo o dever dos RESPONSÁVEIS de acompanhar a rotina escolar do ALUNO pelos meios oficiais e presenciais.
 
-**3.1.** O registro de frequência é realizado exclusivamente através da interação da credencial do ALUNO com os leitores do SISTEMA nas portarias da ESCOLA.
+### 5. DA PROPRIEDADE INTELECTUAL
 
-**3.2. Da Tentativa de Fraude ou Burlas:**
-Fica estipulado de forma irrevogável que qualquer tentativa, consumada ou não, de burlar, fraudar, manipular ou evadir o sistema de controle de presença – incluindo, mas não se limitando a: pular catracas, utilizar acessos não autorizados, registrar presença e evadir-se em seguida, ou utilizar credencial de outrem – será considerada **FALTA GRAVÍSSIMA**.
+**5.1.** Todo o conteúdo do SISTEMA, incluindo códigos-fonte, algoritmos, designs, logotipos, marcas, bancos de dados e interfaces, é de propriedade exclusiva da CONTRATADA ou de seus licenciadores, estando protegido pela Lei de Direitos Autorais (Lei nº 9.610/98) e Lei de Software (Lei nº 9.609/98).
 
-**3.3. Das Sanções Aplicáveis à Fraude:**
-O ALUNO que incorrer nas condutas descritas na cláusula 3.2 estará sujeito, de imediato e sem prejuízo de outras cominações, a:
-*   (i) **Medidas Administrativas:** Advertência Escrita, Suspensão temporária, ou em casos mais graves, a transferência de Instituição de Ensino, conforme o Regimento Interno vigente da Escola;
-*   (ii) **Medidas Legais:** Acionamento dos órgãos competentes (Conselho Tutelar, Ministério Público) e responsabilização civil dos RESPONSÁVEIS pelos danos causados à segurança do coletivo escolar;
-*   (iii) Registro da ocorrência no histórico disciplinar permanente do discente.
+**5.2.** É vedada a cópia, reprodução, distribuição ou criação de obras derivadas sem autorização expressa e por escrito.
 
-## CLÁUSULA QUARTA – DOS SERVIÇOS DIGITAIS E NOTIFICAÇÕES TLEMÁTICAS
+### 6. DA PROTEÇÃO DE DADOS PESSOAIS
 
-**4.1.** A CONTRATADA faculta aos RESPONSÁVEIS a adesão a serviços de notificação automatizada (ex: "Push Notifications", mensagens via Telegram) para acompanhamento dos horários de entrada e saída.
+**6.1.** O tratamento de dados pessoais realizado pelo SISTEMA rege-se pela **Política de Privacidade** específica, parte integrante e inseparável destes Termos.
 
-**4.2.** A adesão a tais serviços é voluntária, acessória e de conveniência, não constituindo obrigação essencial da prestação de serviços educacionais.
+**6.2.** O USUÁRIO consente e reconhece que a coleta de dados biométricos é medida imprescindível para a garantia da segurança física (tutela da incolumidade física) de todos os frequentadores do ambiente escolar.
 
-**4.3.** A CONTRATADA empregará seus melhores esforços técnicos para garantir a entrega das notificações. Todavia, DECLARA-SE ISENTA DE QUALQUER RESPONSABILIDADE por falhas, atrasos ou não entrega de mensagens decorrentes de:
-*   (i) Indisponibilidade, instabilidade ou bloqueio dos servidores da plataforma de mensageria (ex: Telegram);
-*   (ii) Falta de conectividade, bateria ou configuração incorreta no dispositivo móvel do USUÁRIO;
-*   (iii) Casos fortuitos ou de força maior que afetem a infraestrutura de telecomunicações da CONTRATADA.
+### 7. DISPOSIÇÕES GERAIS
 
-## CLÁUSULA QUINTA – DA PRIVACIDADE E PROTEÇÃO DE DADOS
+**7.1. Alterações:** A CONTRATADA reserva-se o direito de alterar estes Termos a qualquer momento, mediante publicação da nova versão na PLATAFORMA. O uso continuado do SISTEMA após as alterações implica na aceitação tácita dos novos termos.
 
-**5.1.** O tratamento de dados pessoais no âmbito do SISTEMA rege-se integralmente pela **Política de Privacidade e Proteção de Dados** da CONTRATADA, documento apartado que integra estes Termos para todos os fins de direito.
-
-**5.2.** O USUÁRIO declara estar ciente e de acordo que a coleta de dados biométricos (quando aplicável) e de registros de acesso é condição *sine qua non* para a garantia da segurança física de todos os frequentadores do ambiente escolar, amparada nas bases legais da Tutela da Incolumidade Física e do Cumprimento de Obrigação Legal.
-
-## CLÁUSULA SEXTA – DAS DISPOSIÇÕES GERAIS
-
-**6.1.** A tolerância de uma das PARTES quanto ao descumprimento de qualquer cláusula destes Termos não implicará em novação, perdão ou renúncia a direitos, sendo considerada mera liberalidade.
-
-**6.2.** A CONTRATADA reserva-se o direito de alterar, modificar ou atualizar estes Termos a qualquer tempo, visando a adequação a novas legislações ou aprimoramentos técnicos, mediante publicação da nova versão nos canais oficias.
-
-**6.3.** O presente instrumento é regido pelas leis da República Federativa do Brasil. As PARTES elegem, com renúncia expressa a qualquer outro, o Foro da Comarca de localização da sede da CONTRATADA para dirimir quaisquer controvérsias oriundas destes Termos.
+**7.2. Foro:** Fica eleito o Foro da Comarca onde se localiza a sede da CONTRATADA para dirimir quaisquer dúvidas ou litígios oriundos deste instrumento, com renúncia expressa a qualquer outro, por mais privilegiado que seja.
 
 ---
-**Li, compreendi e aceito integralmente os presentes Termos de Uso.**
+**Ao utilizar o SchoolPass, você declara ter lido e compreendido estes Termos, obrigando-se a cumpri-los integralmente.**

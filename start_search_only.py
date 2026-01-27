@@ -76,7 +76,7 @@ def public_consulta():
         
         if action == 'registros':
             registros = get_registros(codigo, turma)
-            print(f"Registros obtidos: {registros[:100]}...")  # Mostra os primeiros 100 caracteres
+            print(f"Registros obtidos: {str(registros)[:100]}...")  # Mostra os primeiros 100 caracteres
             return render_template('public_consulta.html', 
                                 user=user_data,
                                 registros=registros,

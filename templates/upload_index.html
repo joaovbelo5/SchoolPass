@@ -3,236 +3,344 @@
 {% block title %}Gerenciar Cadastros{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="py-4">
     <!-- Header Section -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
-        <div class="text-center text-md-start">
-            <h1 class="fw-bold text-primary mb-1">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-primary">
                 <i class="bi bi-people-fill me-2"></i>Gerenciar Alunos
-            </h1>
-            <p class="text-secondary mb-0 fw-medium">Consulte, edite ou adicione novos alunos</p>
+            </h4>
+            <p class="text-secondary small mb-0">Consulte, edite e gerencie o acesso dos alunos</p>
         </div>
+
         {% if current_user.role == 'admin' %}
-        <a href="{{ url_for('novo') }}" class="btn btn-success btn-lg fw-bold px-4 d-flex align-items-center gap-2">
-            <i class="bi bi-plus-lg fs-5"></i>
-            <span>Novo Aluno</span>
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-secondary d-flex align-items-center gap-2"
+                data-bs-toggle="modal" data-bs-target="#importCsvModal">
+                <i class="bi bi-file-earmark-spreadsheet"></i>
+                <span class="d-none d-sm-inline">Importar CSV</span>
+            </button>
+            <a href="{{ url_for('novo') }}" class="btn btn-success d-flex align-items-center gap-2">
+                <i class="bi bi-plus-lg"></i>
+                <span class="d-none d-sm-inline">Novo Aluno</span>
+            </a>
+        </div>
         {% endif %}
     </div>
 
-    <!-- Search Section -->
-    <div class="card mb-4 overflow-hidden">
+    <!-- Filters & Search Toolbar -->
+    <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-3">
-            <form method="GET" action="{{ url_for('pesquisar') }}" class="d-flex gap-2">
-                <div class="position-relative flex-grow-1">
-                    <i
-                        class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary fs-5"></i>
-                    <input type="text" name="query" class="form-control form-control-lg ps-5"
-                        placeholder="Pesquisar por nome, turma ou código..." required>
+            <form method="GET" action="{{ url_for('pesquisar') }}" class="row g-2 align-items-center">
+                <!-- Search Input -->
+                <div class="col-md">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-secondary">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="query" class="form-control bg-light border-start-0 ps-0"
+                            placeholder="Pesquisar por nome, turma ou código..."
+                            value="{{ request.args.get('query', '') }}">
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary px-4 fw-bold d-none d-md-block">
-                    Pesquisar
-                </button>
-                <button type="submit" class="btn btn-primary px-3 fw-bold d-md-none">
-                    <i class="bi bi-search"></i>
-                </button>
+
+                <!-- Sort Dropdown -->
+                <div class="col-md-auto">
+                    <div class="dropdown">
+                        <button
+                            class="btn btn-light border dropdown-toggle w-100 d-flex align-items-center justify-content-between gap-2"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span><i class="bi bi-sort-alpha-down text-secondary me-2"></i>Classificar</span>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm border-0">
+                            <li>
+                                <h6 class="dropdown-header">Nome</h6>
+                            </li>
+                            <li><a class="dropdown-item"
+                                    href="{{ url_for(request.endpoint, **dict(request.view_args, **dict(request.args, sort='nome', order='asc'))) }}">A-Z</a>
+                            </li>
+                            <li><a class="dropdown-item"
+                                    href="{{ url_for(request.endpoint, **dict(request.view_args, **dict(request.args, sort='nome', order='desc'))) }}">Z-A</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <h6 class="dropdown-header">Turma</h6>
+                            </li>
+                            <li><a class="dropdown-item"
+                                    href="{{ url_for(request.endpoint, **dict(request.view_args, **dict(request.args, sort='turma', order='asc'))) }}">Crescente</a>
+                            </li>
+                            <li><a class="dropdown-item"
+                                    href="{{ url_for(request.endpoint, **dict(request.view_args, **dict(request.args, sort='turma', order='desc'))) }}">Decrescente</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Hidden Submit -->
+                <button type="submit" class="d-none"></button>
             </form>
         </div>
     </div>
 
-    <!-- Students Grid List -->
-    <div class="row g-3">
+    <!-- Students Cards Grid -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
         {% for aluno in alunos %}
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body p-3">
-                    <div class="row align-items-center gy-3">
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm position-relative">
+                <div class="card-body d-flex flex-column align-items-center text-center p-4">
 
-                        <!-- Col 1: Photo & ID (Mobile: Top) -->
-                        <div class="col-auto">
-                            <div class="position-relative">
-                                <img src="{{ url_for('static', filename='fotos/' + aluno.Foto) }}"
-                                    alt="{{ aluno.Nome }}" class="rounded-circle object-fit-cover border"
-                                    style="width: 72px; height: 72px;"
-                                    onerror="this.src='{{ url_for('static', filename='fotos/semfoto.jpg') }}'">
-                                <span
-                                    class="position-absolute bottom-0 start-50 translate-middle-x badge bg-dark border border-white"
-                                    style="font-size: 0.7rem;">
-                                    {{ aluno.Codigo }}
-                                </span>
-                            </div>
+                    <!-- Status Badge (Absolute Top Right) -->
+                    <div class="position-absolute top-0 end-0 mt-3 me-3">
+                        {% if aluno.Permissao == 'Sim' %}
+                        <span
+                            class="badge bg-success-subtle text-success rounded-pill border border-success-subtle px-2 py-1">
+                            <i class="bi bi-check-circle-fill me-1"></i>Permitido
+                        </span>
+                        {% else %}
+                        <span
+                            class="badge bg-danger-subtle text-danger rounded-pill border border-danger-subtle px-2 py-1">
+                            <i class="bi bi-x-circle-fill me-1"></i>Negado
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Avatar -->
+                    <div class="mb-3 mt-2">
+                        <img src="{{ semfoto_env_uri if (aluno.Foto == 'semfoto.jpg' and semfoto_env_uri) else url_for('static', filename='fotos/' + aluno.Foto) }}"
+                            alt="{{ aluno.Nome }}" class="rounded-circle object-fit-cover border p-1"
+                            style="width: 80px; height: 80px;"
+                            onerror="this.src='{{ semfoto_env_uri if semfoto_env_uri else url_for('static', filename='fotos/semfoto.jpg') }}'">
+                    </div>
+
+                    <!-- Info -->
+                    <h6 class="fw-bold text-dark mb-1 text-truncate w-100" title="{{ aluno.Nome }}">{{ aluno.Nome }}
+                    </h6>
+                    <small class="text-secondary font-monospace mb-3">{{ aluno.Codigo }}</small>
+
+                    <div class="d-flex gap-2 mb-4">
+                        <span class="badge bg-light text-dark border fw-normal">{{ aluno.Turma }}</span>
+                        <span class="badge bg-light text-muted border fw-normal">{{ aluno.Turno }}</span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mt-auto w-100">
+                        <div class="d-flex justify-content-center flex-wrap gap-2">
+                            <!-- History (Everyone) -->
+                            <button type="button"
+                                class="btn btn-sm btn-light text-secondary rounded-circle border-0 shadow-sm"
+                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                onclick="openHistoryModal('{{ aluno.Turma }}', '{{ aluno.Codigo }}', '{{ aluno.Nome }}')"
+                                title="Histórico">
+                                <i class="bi bi-clock-history"></i>
+                            </button>
+
+                            <!-- Occurrences (Everyone) -->
+                            <a href="{{ url_for('ocorrencias_aluno', codigo=aluno.Codigo) }}"
+                                class="btn btn-sm btn-light text-warning rounded-circle border-0 shadow-sm"
+                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                title="Ocorrências">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </a>
+
+                            {% if current_user.role == 'admin' %}
+                            <!-- Register Access -->
+                            <button type="button"
+                                class="btn btn-sm btn-light text-success rounded-circle border-0 shadow-sm"
+                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                onclick="registrarAcesso('{{ aluno.Codigo }}', this)" title="Registrar Acesso">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+
+                            <!-- Edit -->
+                            <a href="{{ url_for('editar', codigo=aluno.Codigo) }}"
+                                class="btn btn-sm btn-light text-primary rounded-circle border-0 shadow-sm"
+                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <!-- Delete -->
+                            <a href="{{ url_for('excluir', codigo=aluno.Codigo) }}"
+                                class="btn btn-sm btn-light text-danger rounded-circle border-0 shadow-sm"
+                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                title="Excluir"
+                                onclick="return confirm('Tem certeza que deseja excluir {{ aluno.Nome }}?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+
+                            <!-- Print -->
+                            <button type="button"
+                                class="btn btn-sm btn-light text-secondary rounded-circle border-0 shadow-sm"
+                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                title="Emitir Carteirinha" onclick="submitPrintForm('{{ aluno.Codigo }}')">
+                                <i class="bi bi-printer"></i>
+                            </button>
+                            {% endif %}
                         </div>
-
-                        <!-- Col 2: Info (Name, Class, Status) -->
-                        <div class="col text-center text-md-start">
-                            <h5 class="fw-bold text-dark mb-1 text-break">{{ aluno.Nome }}</h5>
-
-                            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2 mb-2">
-                                <span class="badge bg-light text-secondary border border-secondary-subtle">
-                                    <i class="bi bi-people-fill me-1"></i>{{ aluno.Turma }}
-                                </span>
-                                <span class="badge bg-light text-secondary border border-secondary-subtle">
-                                    <i class="bi bi-clock-fill me-1"></i>{{ aluno.Turno }}
-                                </span>
-                            </div>
-
-                            <div>
-                                {% if aluno.Permissao == 'Sim' %}
-                                <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                    <i class="bi bi-check-circle-fill me-1"></i>Permitido
-                                </span>
-                                {% else %}
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
-                                    <i class="bi bi-x-circle-fill me-1"></i>Negado
-                                </span>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Col 3: Actions -->
-                        <div class="col-12 col-md-auto">
-                            <div class="d-flex gap-2 justify-content-center flex-wrap">
-                                <!-- Register Access (AJAX Form) -->
-                                {% if current_user.role == 'admin' %}
-                                <button type="button" onclick="registrarAcesso('{{ aluno.Codigo }}', this)"
-                                    class="btn btn-success border d-flex align-items-center justify-content-center"
-                                    style="width: 42px; height: 42px;" title="Registrar Acesso Agora">
-                                    <i class="bi bi-check-lg fw-bold"></i>
-                                </button>
-                                {% endif %}
-
-                                <!-- View Access Log -->
-                                <button type="button"
-                                    onclick="openHistoryModal('{{ aluno.Turma }}', '{{ aluno.Codigo }}', '{{ aluno.Nome }}')"
-                                    class="btn btn-light text-primary border d-flex align-items-center justify-content-center"
-                                    style="width: 42px; height: 42px;" title="Ver Histórico">
-                                    <i class="bi bi-file-earmark-text-fill fs-5"></i>
-                                </button>
-
-                                <!-- View Occurrences -->
-                                <a href="{{ url_for('ocorrencias_aluno', codigo=aluno.Codigo) }}"
-                                    class="btn btn-light text-warning border d-flex align-items-center justify-content-center"
-                                    style="width: 42px; height: 42px;" title="Ocorrências">
-                                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-                                </a>
-
-                                {% if current_user.role == 'admin' %}
-                                <div class="vr mx-1 d-none d-md-block"></div>
-
-                                <a href="{{ url_for('editar', codigo=aluno.Codigo) }}"
-                                    class="btn btn-light text-secondary border d-flex align-items-center justify-content-center"
-                                    style="width: 42px; height: 42px;" title="Editar">
-                                    <i class="bi bi-pencil-fill fs-5"></i>
-                                </a>
-
-                                <form method="POST" action="{{ url_for('emitir') }}" class="d-inline">
-                                    <input type="hidden" name="tipo_emissao" value="unitaria">
-                                    <input type="hidden" name="codigo" value="{{ aluno.Codigo }}">
-                                    <button type="submit"
-                                        class="btn btn-light text-info border d-flex align-items-center justify-content-center"
-                                        style="width: 42px; height: 42px;" title="Emitir Carteirinha">
-                                        <i class="bi bi-printer-fill fs-5"></i>
-                                    </button>
-                                </form>
-
-                                <a href="{{ url_for('excluir', codigo=aluno.Codigo) }}"
-                                    class="btn btn-light text-danger border d-flex align-items-center justify-content-center"
-                                    style="width: 42px; height: 42px;" title="Excluir"
-                                    onclick="return confirm('Tem certeza que deseja excluir o aluno {{ aluno.Nome }}?');">
-                                    <i class="bi bi-trash-fill fs-5"></i>
-                                </a>
-                                {% endif %}
-                            </div>
-                        </div>
-
+                        <!-- Hidden form for print -->
+                        <form id="print-form-{{ aluno.Codigo }}" method="POST" action="{{ url_for('emitir') }}"
+                            class="d-none">
+                            <input type="hidden" name="tipo_emissao" value="unitaria">
+                            <input type="hidden" name="codigo" value="{{ aluno.Codigo }}">
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
         {% else %}
-        <div class="col-12 text-center py-5">
-            <div class="text-muted opacity-50 mb-3">
-                <i class="bi bi-inbox-fill" style="font-size: 4rem;"></i>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm py-5">
+                <div class="card-body text-center">
+                    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                        <i class="bi bi-search text-secondary display-4"></i>
+                    </div>
+                    <h5 class="text-dark fw-bold">Nenhum aluno encontrado</h5>
+                    <p class="text-secondary mb-0">Tente ajustar seus filtros de pesquisa.</p>
+                </div>
             </div>
-            <h4 class="fw-bold text-secondary">Nenhum aluno encontrado</h4>
-            <p class="text-muted">Tente buscar por outro termo ou adicione um novo aluno.</p>
         </div>
         {% endfor %}
+    </div>
+
+    <!-- Modals -->
+    <!-- History Modal -->
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold text-primary" id="historyModalTitle">Histórico</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-0">
+                    <p class="text-secondary small mb-3" id="historyModalSubtitle">Carregando...</p>
+                    <div id="historyModalContent">
+                        <!-- Content injected by JS -->
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-outline-secondary" onclick="printHistory()">
+                        <i class="bi bi-printer me-2"></i>Imprimir
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import CSV Modal -->
+    <div class="modal fade" id="importCsvModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-primary">Importar Alunos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Step 1 -->
+                    <div id="importStep1">
+                        <div class="alert alert-light border mb-3">
+                            <p class="text-secondary small mb-0">
+                                <i class="bi bi-info-circle me-2"></i>Selecione um arquivo <strong>.csv</strong> com as
+                                colunas: <b>Nome, Turma, Turno</b>.
+                            </p>
+                        </div>
+                        <input class="form-control" type="file" id="csvFileInput" accept=".csv">
+                        <div class="invalid-feedback" id="csvFileError"></div>
+                        <div class="alert alert-danger d-none mt-3" id="importErrorAlert">
+                            <span id="importErrorMsg">Erro.</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div id="importStep2" class="d-none">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                            <h5 class="fw-bold mt-2">Arquivo Válido!</h5>
+                            <p class="text-secondary small">Novos registros: <strong id="previewTotal">0</strong></p>
+                        </div>
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-2" style="max-height: 200px; overflow-y: auto;">
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tbody id="previewTableBody" class="small text-secondary"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading -->
+                    <div id="importLoading" class="d-none text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="text-secondary mt-2">Processando...</p>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <input type="hidden" id="tempFileId">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnVerify"
+                        onclick="previewCsv()">Verificar</button>
+                    <button type="button" class="btn btn-success d-none" id="btnConfirm"
+                        onclick="confirmImport()">Confirmar Importação</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Toast Container -->
 <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 9999">
-    <div id="liveToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true"
-        data-bs-delay="3000">
+    <div id="liveToast" class="toast align-items-center border-0 shadow-lg" role="alert" aria-live="assertive"
+        aria-atomic="true">
         <div class="d-flex p-2">
-            <div class="toast-body fs-6 fw-bold text-white d-flex align-items-center gap-2">
-                <!-- Icon & Text injected by JS -->
-            </div>
+            <div class="toast-body fs-6 fw-bold text-white d-flex align-items-center gap-2"></div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
                 aria-label="Close"></button>
         </div>
     </div>
 </div>
 
-<!-- History Modal -->
-<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-primary" id="historyModalTitle">Histórico de Acessos</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-2">
-                <p class="text-muted small mb-3" id="historyModalSubtitle">Carregando...</p>
-                <div id="historyModalContent">
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Carregando...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-top-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary" onclick="printHistory()">
-                    <i class="bi bi-printer me-2"></i>Imprimir
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+    .object-fit-cover {
+        object-fit: cover;
+    }
 
+    /* Hover scale for cards */
+    .card:hover {
+        border-color: #dee2e6;
+    }
+</style>
+
+<!-- Scripts -->
 <script>
-    // Access Registration Logic
+    // Access Registration
     function registrarAcesso(codigo, btnElement) {
-        // Add spin effect to button
         const originalContent = btnElement.innerHTML;
-        btnElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+        btnElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
         btnElement.disabled = true;
 
         fetch('/api/registrar_acesso', {
             method: 'POST',
             body: JSON.stringify({ 'registrar_codigo': codigo }),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         })
             .then(response => response.json())
             .then(data => {
-                // Reset Button
                 btnElement.innerHTML = originalContent;
                 btnElement.disabled = false;
-
                 showToast(data);
             })
             .catch(error => {
                 console.error('Error:', error);
                 btnElement.innerHTML = originalContent;
                 btnElement.disabled = false;
-                alert('Erro ao processar solicitação.');
+                alert('Erro ao processar.');
             });
+    }
+
+    // Helper for Print Form
+    function submitPrintForm(codigo) {
+        document.getElementById('print-form-' + codigo).submit();
     }
 
     function showToast(data) {
@@ -240,27 +348,24 @@
         const toastBody = toastEl.querySelector('.toast-body');
         const toast = new bootstrap.Toast(toastEl, { animation: false });
 
+        let bgColor = 'bg-primary';
         if (data.ok) {
-            let bgColor = 'bg-primary';
             if (data.tipo === 'success') bgColor = 'bg-success';
             else if (data.tipo === 'danger' || data.tipo === 'error') bgColor = 'bg-danger';
             else if (data.tipo === 'warning') bgColor = 'bg-warning text-dark';
-
-            toastEl.className = `toast align-items-center border-0 shadow-none ${bgColor}`;
-
-            let icon = 'info-circle-fill';
-            if (data.tipo === 'success') icon = 'check-circle-fill';
-            else if (data.tipo === 'danger' || data.tipo === 'error') icon = 'x-circle-fill';
-
-            toastBody.innerHTML = `<i class="bi bi-${icon} fs-5"></i><span>${data.msg}</span>`;
-            toast.show();
-        } else {
-            // Fallback for hard errors
-            alert(data.msg || 'Erro desconhecido');
         }
+
+        toastEl.className = `toast align-items-center border-0 shadow ${bgColor}`;
+
+        let icon = 'info-circle-fill';
+        if (data.tipo === 'success') icon = 'check-circle-fill';
+        else if (data.tipo === 'danger' || data.tipo === 'error') icon = 'x-circle-fill';
+
+        toastBody.innerHTML = `<i class="bi bi-${icon}"></i><span>${data.msg}</span>`;
+        toast.show();
     }
 
-    // History Modal Logic
+    // Modal Logic (History)
     let historyModal;
     const modalTitle = document.getElementById('historyModalTitle');
     const modalSubtitle = document.getElementById('historyModalSubtitle');
@@ -268,68 +373,43 @@
 
     function initModal() {
         if (!historyModal) {
-            try {
-                historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
-            } catch (e) {
-                console.warn('Bootstrap not loaded yet', e);
-            }
+            try { historyModal = new bootstrap.Modal(document.getElementById('historyModal')); }
+            catch (e) { }
         }
     }
-
     window.addEventListener('load', initModal);
 
     function openHistoryModal(turma, codigo, nome) {
         initModal();
-        if (!historyModal) {
-            // Try lazy init again
-            try {
-                historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
-            } catch (e) {
-                alert("Erro: Bootstrap Modal não inicializado.");
-                return;
-            }
-        }
+        if (!historyModal) return alert("Erro modal");
 
         modalTitle.textContent = nome;
         modalSubtitle.textContent = `Turma: ${turma} | Código: ${codigo}`;
-        modalContent.innerHTML = `
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status"></div>
-            </div>`;
+        modalContent.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>`;
 
         historyModal.show();
 
         fetch(`/api/aluno/${turma}/${codigo}/historico`)
             .then(r => r.json())
             .then(json => {
-                if (json.ok) {
-                    renderModalHistory(json.data);
-                } else {
-                    modalContent.innerHTML = `<div class="alert alert-danger">${json.msg}</div>`;
-                }
+                if (json.ok) renderModalHistory(json.data);
+                else modalContent.innerHTML = `<div class="alert alert-danger m-3">${json.msg}</div>`;
             })
             .catch(e => {
-                modalContent.innerHTML = `<div class="alert alert-danger">Erro de conexão: ${e}</div>`;
+                modalContent.innerHTML = `<div class="alert alert-danger m-3">Erro: ${e}</div>`;
             });
     }
 
     function renderModalHistory(data) {
         if (!data || !data.historico || data.historico.length === 0) {
-            modalContent.innerHTML = `
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-calendar-x fs-1 mb-2 d-block"></i>
-                    Nenhum registro encontrado.
-                </div>`;
+            modalContent.innerHTML = `<div class="text-center py-4 text-muted"><i class="bi bi-calendar-x fs-1 mb-2 d-block"></i>Nenhum registro.</div>`;
             return;
         }
-
         const reversed = [...data.historico].reverse();
         let html = '<ul class="list-group list-group-flush">';
-
         reversed.forEach(reg => {
             const isEntry = reg.tipo.toLowerCase().includes('entrada') || reg.tipo.toLowerCase().includes('acesso');
             const icon = isEntry ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger';
-
             html += `
             <li class="list-group-item px-0 py-3 border-bottom">
                 <div class="d-flex justify-content-between align-items-center">
@@ -340,9 +420,7 @@
                             <small class="text-muted"><i class="bi bi-clock me-1"></i>${reg.data_hora.split(' ')[1]}</small>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <small class="text-muted d-block">${reg.data_hora.split(' ')[0]}</small>
-                    </div>
+                    <small class="text-muted">${reg.data_hora.split(' ')[0]}</small>
                 </div>
             </li>`;
         });
@@ -351,52 +429,119 @@
     }
 
     function printHistory() {
-        const printWindow = window.open('', '_blank');
-        const studentName = modalTitle.textContent;
-        const studentInfo = modalSubtitle.textContent;
-        const historyContent = modalContent.innerHTML;
-
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Histórico - ${studentName}</title>
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
-                <style>
-                    @page { margin: 1cm; size: A4; }
-                    body { padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt; background: white !important; }
-                    h1 { font-size: 14pt; color: #000; margin-bottom: 2px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 2px; }
-                    h2 { font-size: 10pt; color: #555; margin-bottom: 10px; padding-bottom: 5px; font-weight: normal; }
-                    .list-group-item { border-bottom: 1px dotted #ccc !important; padding: 2px 0 !important; }
-                    .spinner-border { display: none; }
-                </style>
-            </head>
-            <body>
-                <h1>${studentName}</h1>
-                <h2>${studentInfo} - Impresso em: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</h2>
-                ${historyContent}
-                <script>
-                    window.onload = function() { 
-                        setTimeout(function() {
-                            window.print(); 
-                            window.close(); 
-                        }, 500);
-                    }
-                <\/script>
-            </body>
-            </html>
+        const pWin = window.open('', '_blank');
+        pWin.document.write(`
+            <html><head><title>Histórico</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>@page{margin:1cm;size:A4}body{font-family:'Segoe UI',sans-serif;font-size:10pt}h1{font-size:14pt;border-bottom:2px solid #000;margin-bottom:2px}h2{font-size:10pt;color:#555;margin-bottom:10px}.list-group-item{border-bottom:1px dotted #ccc!important;padding:2px 0!important}</style>
+            </head><body>
+            <h1>${modalTitle.textContent}</h1>
+            <h2>${modalSubtitle.textContent} - ${new Date().toLocaleString()}</h2>
+            ${modalContent.innerHTML}
+            <script>window.onload=function(){window.print();window.close();}<\/script>
+            </body></html>
         `);
-        printWindow.document.close();
+        pWin.document.close();
     }
 
-    // Expose globally
+    // CSV Import Logic
+    const importModalEl = document.getElementById('importCsvModal');
+    const importStep1 = document.getElementById('importStep1');
+    const importStep2 = document.getElementById('importStep2');
+    const importLoading = document.getElementById('importLoading');
+    const btnVerify = document.getElementById('btnVerify');
+    const btnConfirm = document.getElementById('btnConfirm');
+    const csvFileInput = document.getElementById('csvFileInput');
+
+    if (importModalEl) {
+        importModalEl.addEventListener('hidden.bs.modal', resetImportModal);
+    }
+
+    function resetImportModal() {
+        importStep1.classList.remove('d-none');
+        importStep2.classList.add('d-none');
+        importLoading.classList.add('d-none');
+        btnVerify.classList.remove('d-none');
+        btnConfirm.classList.add('d-none');
+        document.getElementById('importErrorAlert').classList.add('d-none');
+        csvFileInput.value = '';
+        btnVerify.disabled = false;
+    }
+
+    function previewCsv() {
+        const file = csvFileInput.files[0];
+        if (!file) return alert('Selecione um arquivo');
+
+        importStep1.classList.add('d-none');
+        importLoading.classList.remove('d-none');
+        btnVerify.disabled = true;
+
+        const fd = new FormData();
+        fd.append('file', file);
+
+        fetch('/cadastro/importar_csv/preview', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(data => {
+                importLoading.classList.add('d-none');
+                if (data.ok) {
+                    document.getElementById('previewTotal').textContent = data.total;
+                    document.getElementById('tempFileId').value = data.temp_file_id;
+                    const tbody = document.getElementById('previewTableBody');
+                    tbody.innerHTML = '';
+                    data.preview_samples.forEach(r => {
+                        tbody.innerHTML += `<tr><td>${r.nome}</td><td>${r.turma}</td><td>${r.turno}</td></tr>`;
+                    });
+                    importStep2.classList.remove('d-none');
+                    btnVerify.classList.add('d-none');
+                    btnConfirm.classList.remove('d-none');
+                } else {
+                    importStep1.classList.remove('d-none');
+                    const err = document.getElementById('importErrorAlert');
+                    err.classList.remove('d-none');
+                    document.getElementById('importErrorMsg').textContent = data.msg;
+                    btnVerify.disabled = false;
+                }
+            })
+            .catch(e => {
+                importLoading.classList.add('d-none');
+                importStep1.classList.remove('d-none');
+                alert('Erro: ' + e);
+                btnVerify.disabled = false;
+            });
+    }
+
+    function confirmImport() {
+        const tempId = document.getElementById('tempFileId').value;
+        if (!tempId) return;
+        importStep2.classList.add('d-none');
+        importLoading.classList.remove('d-none');
+        btnConfirm.disabled = true;
+
+        fetch('/cadastro/importar_csv/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ temp_file_id: tempId })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) location.reload();
+                else {
+                    importLoading.classList.add('d-none');
+                    importStep2.classList.remove('d-none');
+                    alert(data.msg);
+                    btnConfirm.disabled = false;
+                }
+            })
+            .catch(e => {
+                alert('Erro: ' + e);
+                location.reload();
+            });
+    }
+
     window.openHistoryModal = openHistoryModal;
     window.printHistory = printHistory;
+    window.previewCsv = previewCsv;
+    window.confirmImport = confirmImport;
+    window.submitPrintForm = submitPrintForm;
 </script>
-
-<style>
-    .object-fit-cover {
-        object-fit: cover;
-    }
-</style>
 {% endblock %}

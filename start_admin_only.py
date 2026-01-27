@@ -4,14 +4,18 @@ from flask import flash
 from werkzeug.utils import secure_filename
 
 def register_admin_routes(app):
-    from flask import flash, render_template, request, session, jsonify
-    from flask_login import login_required
-    import os, time, sys
+    from flask import flash, render_template, request, session, jsonify, redirect, url_for
+    from flask_login import login_required, current_user
+    from werkzeug.security import generate_password_hash
+    import os, time, sys, csv, threading, uuid, json, codecs
     try:
         import archive_manager
     except ImportError:
         # Fallback caso o arquivo ainda não esteja no path ou erro de importação
         print("Erro ao importar archive_manager")
+
+    TEMP_UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'temp_uploads')
+    os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
 
 
     @app.route('/admin', methods=['GET', 'POST'])
@@ -543,6 +547,146 @@ def register_admin_routes(app):
         return render_template('legacy_print.html', aluno=aluno, historico=historico, ocorrencias=ocorrencias, year=year)
 
 
+    # --- Rotas de Gerenciamento de Usuários ---
+
+    @app.route('/admin/users', methods=['GET'])
+    @login_required
+    @admin_required
+    def admin_users_list():
+        """Lista usuários do sistema."""
+        users = []
+        users_file = 'usuarios.csv'
+        if os.path.exists(users_file):
+            try:
+                with open(users_file, 'r', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    users = list(reader)
+            except Exception as e:
+                flash(f'Erro ao ler usuários: {e}', 'error')
+        return render_template('admin_users.html', users=users)
+
+    @app.route('/admin/users/add', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_users_add():
+        """Adiciona um novo usuário."""
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        role = request.form.get('role', 'professor')
+        
+        if not username or not password:
+            flash('Usuário e senha são obrigatórios.', 'error')
+            return redirect(url_for('admin_users_list'))
+
+        users_file = 'usuarios.csv'
+        try:
+            # Check duplicates
+            rows = []
+            if os.path.exists(users_file):
+                with open(users_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    rows = list(reader)
+                    for row in rows:
+                        if len(row) > 0 and row[0] == username:
+                            flash(f'Usuário {username} já existe.', 'error')
+                            return redirect(url_for('admin_users_list'))
+            
+            # Add user
+            pwd_hash = generate_password_hash(password)
+            with open(users_file, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                # Ensure header if empty file (edge case)
+                if os.stat(users_file).st_size == 0:
+                    writer.writerow(['username', 'password_hash', 'role'])
+                writer.writerow([username, pwd_hash, role])
+            
+            flash(f'Usuário {username} criado com sucesso!', 'success')
+
+        except Exception as e:
+            flash(f'Erro ao adicionar usuário: {e}', 'error')
+            
+        return redirect(url_for('admin_users_list'))
+
+    @app.route('/admin/users/delete/<username>', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_users_delete(username):
+        """Remove um usuário."""
+        if username == current_user.id:
+            flash('Você não pode excluir a si mesmo.', 'error')
+            return redirect(url_for('admin_users_list'))
+
+        users_file = 'usuarios.csv'
+        try:
+            rows = []
+            if os.path.exists(users_file):
+                with open(users_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    rows = list(reader)
+            
+            new_rows = []
+            header = rows[0] if rows else ['username', 'password_hash', 'role']
+            new_rows.append(header)
+            
+            deleted = False
+            for row in rows[1:]:
+                if row[0] != username:
+                    new_rows.append(row)
+                else:
+                    deleted = True
+            
+            if deleted:
+                with open(users_file, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(new_rows)
+                flash(f'Usuário {username} removido.', 'success')
+            else:
+                flash(f'Usuário {username} não encontrado.', 'error')
+
+        except Exception as e:
+            flash(f'Erro ao excluir usuário: {e}', 'error')
+            
+        return redirect(url_for('admin_users_list'))
+
+    @app.route('/admin/users/password/<username>', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_users_password(username):
+        """Altera a senha de um usuário."""
+        new_password = request.form.get('password', '').strip()
+        if not new_password:
+            flash('Nova senha não pode ser vazia.', 'error')
+            return redirect(url_for('admin_users_list'))
+
+        users_file = 'usuarios.csv'
+        try:
+            rows = []
+            if os.path.exists(users_file):
+                with open(users_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    rows = list(reader)
+            
+            updated = False
+            for row in rows[1:]: # Skip header
+                if row[0] == username:
+                    row[1] = generate_password_hash(new_password)
+                    updated = True
+                    break
+            
+            if updated:
+                with open(users_file, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.writer(f)
+                    writer.writerows(rows)
+                flash(f'Senha de {username} alterada com sucesso.', 'success')
+            else:
+                flash(f'Usuário {username} não encontrado.', 'error')
+
+        except Exception as e:
+            flash(f'Erro ao alterar senha: {e}', 'error')
+            
+        return redirect(url_for('admin_users_list'))
+
+
 
 
 
@@ -565,6 +709,10 @@ import shutil
 import random
 import threading
 import re
+import uuid
+
+TEMP_UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'temp_uploads')
+os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
 
 # Lock global para proteger acesso ao database.csv
 # Lock global para proteger acesso ao database.csv
@@ -597,6 +745,13 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey')
 app.config['TELEGRAM_TOKEN'] = os.getenv('TELEGRAM_TOKEN', 'SEU_TOKEN_AQUI')
 app.config['TELEGRAM_API_URL'] = f'https://api.telegram.org/bot{app.config["TELEGRAM_TOKEN"]}/'
 app.config['COOLDOWN_MINUTES'] = int(os.getenv('COOLDOWN_MINUTES', 5))
+
+@app.context_processor
+def inject_global_vars():
+    """Injeta variáveis globais em todos os templates."""
+    return {
+        'semfoto_env_uri': os.getenv('semfoto.jpg')
+    }
 
 # Cache de updates já processados para evitar mensagens duplicadas
 processed_updates = set()
@@ -863,7 +1018,34 @@ except Exception as e:
 
 
 
+
 # Funções auxiliares
+def aplicar_ordenacao(lista_alunos, criterio, ordem):
+    """
+    Ordena a lista de alunos baseada no critério e ordem.
+    criterio: 'nome', 'turma', 'turno', 'codigo'
+    ordem: 'asc', 'desc'
+    """
+    if not lista_alunos:
+        return lista_alunos
+
+    reverse = (ordem == 'desc')
+
+    if criterio == 'nome':
+        return sorted(lista_alunos, key=lambda x: x['Nome'].lower(), reverse=reverse)
+    elif criterio == 'turma':
+        return sorted(lista_alunos, key=lambda x: x['Turma'].lower(), reverse=reverse)
+    elif criterio == 'turno':
+        # Ordem personalizada para turno
+        ordem_turnos = {'Manhã': 1, 'Tarde': 2, 'Noite': 3}
+        # Para desc, invertemos a lógica depois ou usamos valor negativo? 
+        # Mais simples: ordenar pela chave do map. Se reverse=True, inverte a lista toda.
+        return sorted(lista_alunos, key=lambda x: ordem_turnos.get(x['Turno'], 99), reverse=reverse)
+    elif criterio == 'codigo':
+        return sorted(lista_alunos, key=lambda x: x['Codigo'], reverse=reverse)
+    
+    return lista_alunos
+
 def reset_contadores():
     """Reseta os contadores, limpa marcadores e buffer de registros diários."""
     global contadores, alunos_registrados_hoje, registros_diarios
@@ -1370,6 +1552,19 @@ def get_contadores():
 @login_required
 def cadastro():
     alunos = read_database()
+    
+    # Ordenação
+    sort_by = request.args.get('sort', 'nome') # Default sort by nome if nothing specified? Or keep CSV order?
+    # User asked for specific options, but let's default to no sort (keep csv order) if param not present, 
+    # OR better user experience: default to Name ASC? 
+    # Let's check request args. If present, sort.
+    
+    sort_param = request.args.get('sort')
+    order_param = request.args.get('order', 'asc')
+    
+    if sort_param:
+        alunos = aplicar_ordenacao(alunos, sort_param, order_param)
+        
     return render_template('upload_index.html', alunos=alunos)
 
 @app.route('/cadastro/editar/<codigo>', methods=['GET', 'POST'])
@@ -1495,6 +1690,294 @@ def novo():
         return redirect(url_for('cadastro'))
 
     return render_template('upload_novo.html')
+
+@app.route('/cadastro/importar_csv/preview', methods=['POST'])
+@login_required
+@admin_required
+def importar_csv_preview():
+    if 'file' not in request.files:
+        return jsonify({'ok': False, 'msg': 'Nenhum arquivo enviado.'}), 400
+    
+    file = request.files['file']
+    if file.filename == '' or not file.filename.lower().endswith('.csv'):
+        return jsonify({'ok': False, 'msg': 'Arquivo inválido. Selecione um arquivo .csv'}), 400
+
+    try:
+        # Gerar nome temporário seguro
+        file_id = str(uuid.uuid4())
+        filename = f"{file_id}.csv"
+        filepath = os.path.join(TEMP_UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        
+        # Ler e validar cabeçalhos
+        # Tentar detectar encoding (utf-8-sig para Excel, latin-1 como fallback)
+        encodings = ['utf-8-sig', 'latin-1', 'utf-8']
+        decoded_csv = None
+        
+        # Ler conteúdo para memória para tentar decodificar
+        with open(filepath, 'rb') as f:
+            raw_data = f.read()
+
+        used_encoding = 'utf-8' # default
+        for enc in encodings:
+            try:
+                decoded_csv = raw_data.decode(enc)
+                used_encoding = enc
+                break
+            except UnicodeDecodeError:
+                continue
+        
+        if decoded_csv is None:
+            os.remove(filepath)
+            return jsonify({'ok': False, 'msg': 'Erro de codificação do arquivo. Use UTF-8 ou Latin-1.'}), 400
+
+        # Parse CSV
+        from io import StringIO
+        f_stream = StringIO(decoded_csv)
+        reader = csv.DictReader(f_stream)
+        
+        # Normalizar cabeçalhos para verificação (strip e lowercase)
+        if not reader.fieldnames:
+             os.remove(filepath)
+             return jsonify({'ok': False, 'msg': 'Arquivo CSV vazio ou sem cabeçalhos.'}), 400
+             
+        headers = [h.strip().lower() for h in reader.fieldnames]
+        required = ['nome', 'turma', 'turno']
+        
+        missing = [req for req in required if req not in headers]
+        
+        if missing:
+            os.remove(filepath)
+            msg_missing = ", ".join([m.capitalize() for m in missing])
+            return jsonify({'ok': False, 'msg': f'Colunas ausentes ou incorretas: {msg_missing}. O arquivo DEVE ter: Nome, Turma, Turno.'}), 400
+            
+        # Processar preview
+        preview_samples = []
+        count = 0
+        
+        # Mapeamento de nomes originais para normalizados
+        header_map = {h: h for h in reader.fieldnames} # fallback
+        for h in reader.fieldnames:
+             if h.strip().lower() == 'nome': header_map['nome'] = h
+             if h.strip().lower() == 'turma': header_map['turma'] = h
+             if h.strip().lower() == 'turno': header_map['turno'] = h
+
+        # Resetar ponteiro não é necessário pois DictReader avança, mas já lemos headers
+        # DictReader itera sobre o resto
+        for row in reader:
+            # Pegar valores usando o map para garantir que pegamos a coluna certa mesmo com case diferente
+            nome = row.get(header_map.get('nome', 'Nome'), '').strip()
+            turma = row.get(header_map.get('turma', 'Turma'), '').strip()
+            turno = row.get(header_map.get('turno', 'Turno'), '').strip()
+            
+            if nome and turma and turno:
+                count += 1
+                if count <= 5: # Amostra
+                    preview_samples.append({'nome': nome, 'turma': turma, 'turno': turno})
+                    
+        return jsonify({
+            'ok': True, 
+            'total': count, 
+            'temp_file_id': file_id, 
+            'preview_samples': preview_samples,
+            'encoding': used_encoding
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro no preview do CSV: {e}")
+        return jsonify({'ok': False, 'msg': f'Erro ao processar arquivo: {str(e)}'}), 500
+
+@app.route('/cadastro/importar_csv/confirm', methods=['POST'])
+@login_required
+@admin_required
+def importar_csv_confirm():
+    data = request.get_json()
+    temp_file_id = data.get('temp_file_id')
+    
+    if not temp_file_id:
+        return jsonify({'ok': False, 'msg': 'ID do arquivo não fornecido.'}), 400
+        
+    filepath = os.path.join(TEMP_UPLOAD_FOLDER, f"{temp_file_id}.csv")
+    
+    if not os.path.exists(filepath):
+        return jsonify({'ok': False, 'msg': 'Arquivo temporário expirou ou não existe. Faça o upload novamente.'}), 400
+        
+    try:
+        # Re-detectar encoding ou tentar os mesmos
+        # Simplificação: tentar ler com utf-8-sig e latin-1 sequencialmente até não dar erro ao iterar
+        encodings = ['utf-8-sig', 'latin-1']
+        rows_to_add = []
+        
+        # Ler arquivo e preparar dados
+        sucesso_leitura = False
+        for enc in encodings:
+            try:
+                with open(filepath, 'r', encoding=enc) as f:
+                    reader = csv.DictReader(f)
+                    
+                    # Recriar o mapa de headers
+                    header_map = {}
+                    for h in reader.fieldnames:
+                         if h.strip().lower() == 'nome': header_map['nome'] = h
+                         if h.strip().lower() == 'turma': header_map['turma'] = h
+                         if h.strip().lower() == 'turno': header_map['turno'] = h
+                    
+                    temp_rows = []
+                    for row in reader:
+                        nome = row.get(header_map.get('nome', 'Nome'), '').strip()
+                        turma = row.get(header_map.get('turma', 'Turma'), '').strip()
+                        turno = row.get(header_map.get('turno', 'Turno'), '').strip()
+                        
+                        if nome and turma and turno:
+                            temp_rows.append({'nome': nome, 'turma': turma, 'turno': turno})
+                    
+                    rows_to_add = temp_rows
+                    sucesso_leitura = True
+                    break
+            except Exception:
+                continue
+                
+        if not sucesso_leitura:
+             return jsonify({'ok': False, 'msg': 'Erro ao ler arquivo temporário na fase de confirmação.'}), 500
+
+        # Bloquear banco para escrita
+        with db_lock:
+             alunos_atuais = read_database()
+             validade_ano = extract_validade_year()
+             
+             novos_adicionados = 0
+             
+             # Função local para check otimizado
+             codigos_existentes = set(a['Codigo'] for a in alunos_atuais)
+             
+             def proximo_codigo(turma, turno):
+                  # Gera código basico
+                  # Nota: gerar_codigo_automatico já faz acesso ao `read_database` internamente,
+                  # o que pode ser lento num loop.
+                  # Melhor seria refatorar gerar_codigo para aceitar lista de alunos, mas por segurança
+                  # vamos usar a função existente, porem atenção à performance.
+                  # Para importar centenas, ok. Milhares pode demorar.
+                  return gerar_codigo_automatico(turma, turno, validade_ano)
+
+             for row in rows_to_add:
+                 # Loop para garantir unicidade em lote
+                 while True:
+                     novo_cod = proximo_codigo(row['turma'], row['turno'])
+                     if novo_cod not in codigos_existentes:
+                         codigos_existentes.add(novo_cod)
+                         
+                         novo_aluno = {
+                            'Nome': row['nome'],
+                            'Codigo': novo_cod,
+                            'Turma': row['turma'],
+                            'Turno': row['turno'],
+                            'Permissao': 'Sim',
+                            'Foto': 'semfoto.jpg',
+                            'TelegramID': '',
+                            'TelefoneResponsavel': ''
+                        }
+                         alunos_atuais.append(novo_aluno)
+                         novos_adicionados += 1
+                         break
+                     else:
+                         # Se colidiu (improvável com a lógia atual de count+1, mas possível se count estiver defasado),
+                         # a função gerar_codigo nao incrementa sozinha se baseada apenas no banco.
+                         # O ideal seria injetar o aluno na lista 'alunos' que o gerar_codigo lê, mas ele lê do disco.
+                         # PATCH: Como ele le do disco, ele nao ve os que acabamos de adicionar na memoria!
+                         # Isso vai gerar codigos duplicados para mesma turma no loop.
+                         
+                         # Solução Rápida: Adicionar um sufixo ou forçar incremento manual?
+                         # A função `gerar_codigo_automatico` conta quantos tem na turma lendo do DISCO.
+                         # Precisamos "mockar" ou salvar a cada iteração? Salvar a cada iteração é muito lento.
+                         
+                         # Melhor solução: Implementar lógica de incremento local.
+                         # Recalcular ordem baseado no que já temos em memória `alunos_atuais`
+                         
+                         # Logica manual inline:
+                         year_two = str(validade_ano)[-2:]
+                         turno_map = {'manhã': '1', 'manha': '1', 'tarde': '2', 'noite': '3'}
+                         turno_digit = turno_map.get(row['turno'].lower(), '0')
+                         
+                         # Turmas
+                         todas_turmas_set = sorted(list({a['Turma'] for a in alunos_atuais if a.get('Turma')}))
+                         if row['turma'] not in todas_turmas_set:
+                              todas_turmas_set.append(row['turma'])
+                              todas_turmas_set.sort() # manter ordem para consistencia
+                              
+                         turma_idx = todas_turmas_set.index(row['turma']) + 1
+                         turma_code = f"{turma_idx:02d}"
+                         
+                         # Count na turma (memoria)
+                         count_turma = sum(1 for a in alunos_atuais if a['Turma'].lower() == row['turma'].lower())
+                         # count inclui o que acabamos de adicionar, então para o atual é count + 1?
+                         # Não, count_turma já conta os anteriores. O atual será o próximo.
+                         # Mas já adicionei o anterior na iteração passada.
+                         # Então o codigo deve ser count_turma_antes_desse + 1?
+                         # alunos_atuais cresce.
+                         ordem = count_turma + 1 # count_turma considera inclusive os recem adicionados neste loop
+                         ordem_code = f"{ordem:04d}"
+                         
+                         manually_generated = f"{year_two}{turno_digit}{turma_code}{ordem_code}"
+                         
+                         if manually_generated not in codigos_existentes:
+                              novo_cod = manually_generated
+                              codigos_existentes.add(novo_cod)
+                              
+                              novo_aluno = {
+                                'Nome': row['nome'],
+                                'Codigo': novo_cod,
+                                'Turma': row['turma'],
+                                'Turno': row['turno'],
+                                'Permissao': 'Sim',
+                                'Foto': 'semfoto.jpg',
+                                'TelegramID': '',
+                                'TelefoneResponsavel': ''
+                              }
+                              alunos_atuais.append(novo_aluno)
+                              novos_adicionados += 1
+                              break
+                         else:
+                              # Se ainda colidir (ex: buracos), incrementar ordem até achar
+                              # Mas com append sequential não deve ter buracos no final.
+                              # Fallback loop
+                              found_slot = False
+                              for extra in range(1, 1000):
+                                   ordem_c = f"{(ordem + extra):04d}"
+                                   try_code = f"{year_two}{turno_digit}{turma_code}{ordem_c}"
+                                   if try_code not in codigos_existentes:
+                                        codigos_existentes.add(try_code)
+                                        novo_aluno = {
+                                            'Nome': row['nome'],
+                                            'Codigo': try_code,
+                                            'Turma': row['turma'],
+                                            'Turno': row['turno'],
+                                            'Permissao': 'Sim',
+                                            'Foto': 'semfoto.jpg',
+                                            'TelegramID': '',
+                                            'TelefoneResponsavel': ''
+                                        }
+                                        alunos_atuais.append(novo_aluno)
+                                        novos_adicionados += 1
+                                        found_slot = True
+                                        break
+                              if found_slot:
+                                   break
+                              else:
+                                   # Desistir deste aluno se nao achar codigo (muito improvavel)
+                                   logger.error(f"Falha ao gerar código para {row['nome']}")
+                                   break
+
+             # Salvar tudo de uma vez
+             write_database(alunos_atuais)
+             
+        # Limpar temp
+        os.remove(filepath)
+        return jsonify({'ok': True, 'msg': f'Importação de {novos_adicionados} alunos realizada com sucesso!'})
+
+    except Exception as e:
+        logger.exception(f"Erro na confirmação de importação: {e}")
+        return jsonify({'ok': False, 'msg': f'Erro interno ao salvar: {str(e)}'}), 500
+
 
 # Rotas de emissão de carteirinhas (protegidas)
 @app.route('/emissao')
@@ -1687,7 +2170,21 @@ def pesquisar():
     if query:
         with open(app.config['DATABASE'], 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
-            resultados = [row for row in reader if query in row['Nome'].lower() or query in row['Turma'].lower()]
+            resultados = [
+                row for row in reader 
+                if query in row['Nome'].lower() 
+                or query in row['Turma'].lower() 
+                or query in row['Turno'].lower() 
+                or query in row['Codigo'].lower()
+            ]
+            
+    # Ordenação nos resultados da busca
+    sort_param = request.args.get('sort')
+    order_param = request.args.get('order', 'asc')
+    
+    if sort_param:
+        resultados = aplicar_ordenacao(resultados, sort_param, order_param)
+            
     return render_template('upload_index.html', alunos=resultados)
 
 @app.route('/carometro', methods=['GET', 'POST'])

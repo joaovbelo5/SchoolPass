@@ -30,7 +30,32 @@
                                 </label>
                                 <input type="file" id="foto" name="foto" accept="image/*" class="d-none">
                             </div>
-                            <div class="small text-muted mt-2">Toque na câmera para alterar a foto</div>
+                            <div class="small text-muted mt-2">
+                                <button type="button" class="btn btn-link btn-sm text-decoration-none" id="btnCamera">
+                                    <i class="bi bi-webcam"></i> Usar Câmera
+                                </button>
+                            </div>
+
+                            <!-- Camera Area -->
+                            <div id="cameraArea" class="d-none text-center bg-light p-3 rounded border mt-3 mx-auto"
+                                style="max-width: 360px;">
+                                <div class="position-relative d-inline-block">
+                                    <video id="videoFeed" width="320" height="240" autoplay playsinline
+                                        class="rounded border bg-dark"></video>
+                                    <canvas id="canvas" width="320" height="240" class="d-none rounded border"></canvas>
+                                </div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-success btn-sm" id="btnCapture">
+                                        <i class="bi bi-camera"></i> Tirar Foto
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm d-none" id="btnRetake">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Tirar Outra
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="btnCloseCamera">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row g-3">
@@ -119,6 +144,137 @@
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const fotoInput = document.getElementById('foto');
+        const btnCamera = document.getElementById('btnCamera');
+        const cameraArea = document.getElementById('cameraArea');
+        const videoFeed = document.getElementById('videoFeed');
+        const canvas = document.getElementById('canvas');
+        const btnCapture = document.getElementById('btnCapture');
+        const btnRetake = document.getElementById('btnRetake');
+        const btnCloseCamera = document.getElementById('btnCloseCamera');
+        const mainPreview = document.querySelector('.card-body img'); // Capture the main preview image
+
+        // Fallback input for HTTP/Insecure contexts
+        const fallbackInput = document.createElement('input');
+        fallbackInput.type = 'file';
+        fallbackInput.accept = 'image/*';
+        fallbackInput.capture = 'environment';
+        fallbackInput.style.display = 'none';
+        document.body.appendChild(fallbackInput);
+
+        let stream = null;
+
+        btnCamera.addEventListener('click', async () => {
+            // First try standard getUserMedia
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    videoFeed.srcObject = stream;
+                    cameraArea.classList.remove('d-none');
+                    videoFeed.classList.remove('d-none');
+                    canvas.classList.add('d-none');
+                    btnCapture.classList.remove('d-none');
+                    btnRetake.classList.add('d-none');
+                } catch (err) {
+                    console.warn("Camera access failed, trying fallback:", err);
+                    useFallback();
+                }
+            } else {
+                console.warn("getUserMedia not supported, using fallback.");
+                useFallback();
+            }
+        });
+
+        function useFallback() {
+            fallbackInput.click();
+        }
+
+        fallbackInput.addEventListener('change', (e) => {
+            if (fallbackInput.files && fallbackInput.files[0]) {
+                const file = fallbackInput.files[0];
+                updatePhotoInput(file);
+            }
+        });
+
+        btnCloseCamera.addEventListener('click', () => {
+            stopCamera();
+            cameraArea.classList.add('d-none');
+        });
+
+        btnCapture.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            context.drawImage(videoFeed, 0, 0, 320, 240);
+
+            videoFeed.classList.add('d-none');
+            canvas.classList.remove('d-none');
+
+            btnCapture.classList.add('d-none');
+            btnRetake.classList.remove('d-none');
+
+            // Generate timestamped filename
+            const now = new Date();
+            const pad = (num) => String(num).padStart(2, '0');
+            const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+            const timeStr = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+            const filename = `camera_capture_${dateStr}_${timeStr}.jpg`;
+
+            // Convert canvas to file and update input
+            canvas.toBlob(blob => {
+                const file = new File([blob], filename, { type: "image/jpeg" });
+                updatePhotoInput(file);
+            }, 'image/jpeg');
+        });
+
+        btnRetake.addEventListener('click', () => {
+            // If we were using fallback, just click it again
+            if (!stream) {
+                useFallback();
+            } else {
+                videoFeed.classList.remove('d-none');
+                canvas.classList.add('d-none');
+                btnCapture.classList.remove('d-none');
+                btnRetake.classList.add('d-none');
+            }
+        });
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        function updatePhotoInput(file) {
+            // Update input file
+            const container = new DataTransfer();
+            container.items.add(file);
+            fotoInput.files = container.files;
+
+            // Update main preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                if (mainPreview) {
+                    mainPreview.src = e.target.result;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Handle file selection via standard input (the hidden one or camera label)
+        fotoInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    if (mainPreview) {
+                        mainPreview.src = e.target.result;
+                    }
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    });
+
     function mascaraTelefone(input) {
         let v = input.value.replace(/\D/g, "");
         if (v.length > 11) v = v.slice(0, 11);
