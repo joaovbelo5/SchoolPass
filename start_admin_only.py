@@ -2,6 +2,46 @@ from flask import flash
 
 # --- Rotas administrativas para alterar configurações sensíveis ---
 from werkzeug.utils import secure_filename
+import json
+import os
+
+# --- Configuração de Ações Rápidas ---
+QUICK_ACTIONS_FILE = os.path.join(os.path.dirname(__file__), 'config', 'quick_actions.json')
+
+AVAILABLE_ACTIONS = {
+    'cadastro': {'title': 'Cadastro', 'subtitle': 'Gerenciar Alunos', 'icon': 'bi-person-plus-fill', 'color': 'success', 'route': 'cadastro', 'role': 'all'},
+    'registro': {'title': 'Registro', 'subtitle': 'Entrada/Saída', 'icon': 'bi-qr-code-scan', 'color': 'primary', 'route': 'registro', 'role': 'admin'},
+    'emissao': {'title': 'Carteirinhas', 'subtitle': 'Emitir Crachás', 'icon': 'bi-printer-fill', 'color': 'warning', 'route': 'emissao', 'role': 'admin'},
+    'historico': {'title': 'Histórico', 'subtitle': 'Logs de Acesso', 'icon': 'bi-clock-history', 'color': 'secondary', 'route': 'historico', 'role': 'all'},
+    'carometro': {'title': 'Carômetro', 'subtitle': 'Visualização em Grade', 'icon': 'bi-grid-3x3-gap-fill', 'color': 'dark', 'route': 'carometro', 'role': 'all'},
+    'chamada': {'title': 'Chamada', 'subtitle': 'Relatório Mensal', 'icon': 'bi-calendar-check-fill', 'color': 'info', 'route': 'chamada', 'role': 'all'},
+    'mensagens': {'title': 'Mensagens', 'subtitle': 'Enviar Avisos', 'icon': 'bi-chat-dots-fill', 'color': 'danger', 'route': 'mensagens', 'role': 'admin'},
+    'admin_index': {'title': 'Admin', 'subtitle': 'Configurações', 'icon': 'bi-sliders', 'color': 'dark', 'route': 'admin_index', 'role': 'admin'},
+    'arquivo_morto': {'title': 'Arquivo Morto', 'subtitle': 'Legado', 'icon': 'bi-archive-fill', 'color': 'secondary', 'route': 'admin_legacy_index', 'role': 'admin'}
+}
+
+def load_quick_actions():
+    """Carrega IDs das ações habilitadas. Retorna padrão se falhar."""
+    defaults = ['cadastro', 'chamada', 'registro', 'admin_index']
+    try:
+        if os.path.exists(QUICK_ACTIONS_FILE):
+            with open(QUICK_ACTIONS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return data.get('enabled_actions', defaults)
+    except Exception as e:
+        print(f"Erro ao carregar quick_actions: {e}")
+    return defaults
+
+def save_quick_actions(enabled_ids):
+    """Salva lista de ações habilitadas."""
+    try:
+        os.makedirs(os.path.dirname(QUICK_ACTIONS_FILE), exist_ok=True)
+        with open(QUICK_ACTIONS_FILE, 'w', encoding='utf-8') as f:
+            json.dump({'enabled_actions': enabled_ids}, f, indent=4)
+        return True
+    except Exception as e:
+        print(f"Erro ao salvar quick_actions: {e}")
+        return False
 
 def register_admin_routes(app):
     from flask import flash, render_template, request, session, jsonify, redirect, url_for
@@ -56,6 +96,9 @@ def register_admin_routes(app):
             'validade': os.getenv('CARTEIRINHA_VALIDADE', '')
         }
         token = os.getenv('TELEGRAM_TOKEN', '')
+        
+        # Load Actions Config for Editor
+        enabled_actions = load_quick_actions()
 
         # Gerar token e operação matemática para tripla verificação (serão exibidos no template)
         try:
@@ -84,7 +127,36 @@ def register_admin_routes(app):
             # Se não é POST de config, nada a fazer
             pass
 
-        return render_template('admin_index.html', config=config, token=token, clear_token=clear_token, math_question=math_question)
+        return render_template('admin_index.html', 
+                               config=config, 
+                               token=token, 
+                               clear_token=clear_token, 
+                               math_question=math_question,
+                               available_actions=AVAILABLE_ACTIONS,
+                               enabled_actions=enabled_actions)
+
+    @app.route('/admin/config/actions', methods=['POST'])
+    @login_required
+    @admin_required
+    def admin_config_actions():
+        """Salva a configuração dos botões de acesso rápido."""
+        try:
+            # Checkboxes não marcados não são enviados, então pegamos keys do form
+            # Mas o form envia 'actions' como lista se usarmos name="actions"
+            selected_actions = request.form.getlist('actions')
+            
+            # Validar se IDs existem
+            valid_ids = [aid for aid in selected_actions if aid in AVAILABLE_ACTIONS]
+            
+            if save_quick_actions(valid_ids):
+                flash('Botões de acesso rápido atualizados!', 'success')
+            else:
+                flash('Erro ao salvar configurações.', 'error')
+                
+        except Exception as e:
+             flash(f'Erro interno: {e}', 'error')
+             
+        return redirect(url_for('admin_index'))
 
     @app.route('/admin/clear_data', methods=['POST'])
     @login_required
@@ -1452,6 +1524,13 @@ def index():
     
     # Breakdown por turno (usando contadores globais)
     por_turno = dict(contadores)
+    
+    # Calcular porcentagem de presença
+    total_presentes_pct = (presentes_hoje / total_alunos * 100) if total_alunos > 0 else 0
+    
+    # Contar alunos sem foto (ou com foto padrão)
+    # Considera 'semfoto.jpg' ou string vazia/None como sem foto
+    total_sem_foto = sum(1 for a in alunos if not a.get('Foto') or a.get('Foto') == 'semfoto.jpg')
 
     # Status do Telegram e Alunos Vinculados
     telegram_status = 'Offline'
@@ -1492,16 +1571,32 @@ def index():
     except Exception as e:
         logger.error(f"Erro ao ler logs recentes: {e}")
 
+    # Prepare Quick Actions
+    enabled_ids = load_quick_actions()
+    quick_actions = []
+    for aid in enabled_ids:
+        action = AVAILABLE_ACTIONS.get(aid)
+        if action:
+            # Filter by Role
+            if action['role'] == 'admin' and current_user.role != 'admin':
+                continue
+            quick_actions.append(action)
+
     return render_template('index.html',
                           total_alunos=total_alunos,
                           total_turmas=total_turmas,
                           presentes_hoje=presentes_hoje,
+                          total_presentes_pct=total_presentes_pct,
+                          total_sem_foto=total_sem_foto,
                           por_turno=por_turno,
                           telegram_status=telegram_status,
                           telegram_bot_name=telegram_bot_name,
                           total_linked=total_linked,
                           db_last_update=db_last_update,
-                          recent_logs=recent_logs)
+                          recent_logs=recent_logs,
+                          quick_actions=quick_actions)
+
+
 
 @app.route('/api/registrar_acesso', methods=['POST'])
 @login_required

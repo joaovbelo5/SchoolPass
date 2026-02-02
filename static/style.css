@@ -93,7 +93,7 @@ h3 {
     padding: 0 var(--spacing-md);
 }
 
-/* Navbar - Clean & Minimal */
+/* Navbar - Clean & Responsive */
 .navbar-custom {
     background-color: var(--primary-color);
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
@@ -104,49 +104,69 @@ h3 {
 
 .navbar-brand {
     font-weight: 700;
-    font-size: 1.25rem;
     color: white !important;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .nav-link {
     font-weight: 500;
     color: rgba(255, 255, 255, 0.9) !important;
-    padding: 0.75rem 0.5rem !important;
+    padding: 0.5rem 1rem !important;
     border-radius: var(--border-radius);
     font-size: 0.95rem;
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transition: all 0.2s ease;
 }
 
-.nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+.nav-link:hover, .nav-link:focus {
+    background-color: rgba(255, 255, 255, 0.1);
     color: white !important;
+    transform: translateY(-1px);
 }
 
 .nav-link.active {
-    background-color: white;
-    color: var(--primary-color) !important;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white !important;
     font-weight: 600;
 }
 
-/* Navbar Grid Layout */
-.navbar-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 0.75rem;
-    padding-bottom: 0.5rem;
+/* Dropdown Menu Styles */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
+    overflow: hidden;
 }
 
-.navbar-grid .nav-item {
-    width: 100%;
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: background-color 0.15s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--bg-surface);
+    color: var(--primary-color);
+}
+
+/* Offcanvas Styles */
+.offcanvas {
+    border-left: none;
+}
+
+.offcanvas-body .nav-link {
+    /* Mobile specific adjustments to look like buttons in offcanvas */
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 0.25rem;
+}
+
+@media (min-width: 992px) {
+    .offcanvas-body .nav-link {
+        border: none;
+        margin-bottom: 0;
+    }
 }
 
 /* Cards - Flat & Clean */

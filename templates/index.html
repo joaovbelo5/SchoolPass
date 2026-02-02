@@ -1,261 +1,233 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="row g-4 fade-in-up">
+    <!-- Header: Greeting & Clock -->
+    <div class="col-12 d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
         <div>
-            <h1 class="display-6 fw-bold text-primary mb-1">Dashboard</h1>
-            <p class="text-secondary mb-0">Visão geral e controle do sistema</p>
+            <h2 class="fw-bold mb-0 text-primary">
+                <i class="bi bi-sun-fill me-2"></i><span id="greeting-text">Bem-vindo</span>
+            </h2>
+            <p class="text-muted small mb-0">Sistema SchoolPass</p>
         </div>
-        <div class="text-end d-none d-md-block">
-            <h5 class="fw-bold mb-0 text-dark" id="current-date">--/--/----</h5>
-            <small class="text-muted" id="current-time">--:--</small>
+        <div class="text-md-end mt-3 mt-md-0">
+            <h4 class="fw-bold mb-0 text-dark" id="live-clock">--:--</h4>
+            <small class="text-muted" id="live-date">--/--/----</small>
         </div>
     </div>
 
     <!-- Stats Row -->
-    <div class="row g-4 mb-4">
-        <!-- Presence Card -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary-subtle p-3 rounded-circle me-3">
-                            <i class="bi bi-people-fill fs-4 text-primary"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-secondary mb-0">Presença Hoje</h6>
-                            <h3 class="fw-bold mb-0">{{ presentes_hoje }} <span class="fs-6 text-muted fw-normal">/ {{
-                                    total_alunos }}</span></h3>
-                        </div>
-                    </div>
-                    <!-- ProgressBar -->
-                    {% set presence_pct = (presentes_hoje / total_alunos * 100) if total_alunos > 0 else 0 %}
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ presence_pct }}%">
-                        </div>
-                    </div>
-                    <small class="text-muted mt-2 d-block">{{ "%.1f"|format(presence_pct) }}% dos alunos
-                        presentes</small>
-                </div>
-            </div>
-        </div>
+    <div class="col-12">
+        <div class="row g-4">
+            <!-- Presence & Turnos Card (Larger) -->
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center h-100">
+                            <!-- General Presence -->
+                            <div class="col-md-5 border-end-md mb-3 mb-md-0">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-primary-subtle p-3 rounded-circle me-3">
+                                        <i class="bi bi-people-fill fs-4 text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="text-secondary mb-0">Presença Hoje</h6>
+                                        <h3 class="fw-bold mb-0 text-dark">{{ presentes_hoje }} <span
+                                                class="fs-6 text-muted fw-normal">/ {{ total_alunos }}</span></h3>
+                                    </div>
+                                </div>
+                                {% set presence_pct = (presentes_hoje / total_alunos * 100) if total_alunos > 0 else 0
+                                %}
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" role="progressbar"
+                                        style="width: {{ presence_pct }}%"></div>
+                                </div>
+                                <small class="text-muted mt-2 d-block">{{ "%.1f"|format(presence_pct) }}%
+                                    presente</small>
+                            </div>
 
-        <!-- Telegram Card -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-info-subtle p-3 rounded-circle me-3">
-                            <i class="bi bi-telegram fs-4 text-info"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-secondary mb-0">Telegram Vinculado</h6>
-                            <h3 class="fw-bold mb-0">{{ total_linked }} <span class="fs-6 text-muted fw-normal">/ {{
-                                    total_alunos }}</span></h3>
-                        </div>
-                    </div>
-                    <!-- ProgressBar -->
-                    {% set linked_pct = (total_linked / total_alunos * 100) if total_alunos > 0 else 0 %}
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ linked_pct }}%"></div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small class="text-muted">{{ "%.1f"|format(linked_pct) }}% conectados</small>
-                        {% if telegram_status == 'Online' %}
-                        <span
-                            class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Online</span>
-                        {% else %}
-                        <span
-                            class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Offline</span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- System Status Card -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-warning-subtle p-3 rounded-circle me-3">
-                            <i class="bi bi-database-fill fs-4 text-warning"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-secondary mb-0">Sistema</h6>
-                            <h3 class="fw-bold mb-0">{{ total_turmas }} <span
-                                    class="fs-6 text-muted fw-normal">Turmas</span></h3>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <p class="mb-0 text-muted small"><i class="bi bi-clock-history me-1"></i> Atualizado: <strong>{{
-                                db_last_update }}</strong></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <h5 class="fw-bold text-secondary mb-3">Acesso Rápido</h5>
-    <!-- Grid of 5 columns -->
-    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mb-5">
-        {% if current_user.role == 'admin' %}
-        <div class="col">
-            <a href="{{ url_for('registro') }}"
-                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <i class="bi bi-person-badge fs-1 text-primary"></i>
-                    </div>
-                    <h6 class="fw-bold text-dark">Registro</h6>
-                    <small class="text-muted">Entrada/Saída</small>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="{{ url_for('emissao') }}"
-                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <i class="bi bi-printer-fill fs-1 text-warning"></i>
-                    </div>
-                    <h6 class="fw-bold text-dark">Carteirinhas</h6>
-                    <small class="text-muted">Emitir crachás</small>
-                </div>
-            </a>
-        </div>
-        {% endif %}
-
-        <div class="col">
-            <a href="{{ url_for('cadastro') }}"
-                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <i class="bi bi-person-plus-fill fs-1 text-success"></i>
-                    </div>
-                    <h6 class="fw-bold text-dark">Cadastro</h6>
-                    <small class="text-muted">Gerenciar Alunos</small>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="{{ url_for('chamada') }}"
-                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <i class="bi bi-calendar-check-fill fs-1 text-info"></i>
-                    </div>
-                    <h6 class="fw-bold text-dark">Chamada</h6>
-                    <small class="text-muted">Relatório Mensal</small>
-                </div>
-            </a>
-        </div>
-        {% if current_user.role == 'admin' %}
-        <div class="col">
-            <a href="{{ url_for('mensagens') }}"
-                class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <i class="bi bi-chat-dots-fill fs-1 text-danger"></i>
-                    </div>
-                    <h6 class="fw-bold text-dark">Mensagens</h6>
-                    <small class="text-muted">Enviar avisos</small>
-                </div>
-            </a>
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- Bottom Content Grid -->
-    <div class="row g-4">
-        <!-- Turnos Chart/Data -->
-        <div class="col-lg-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
-                    <h5 class="fw-bold mb-0">Alunos por Turno</h5>
-                </div>
-                <div class="card-body px-4">
-                    {% for turno, count in por_turno.items() %}
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span class="fw-semibold text-secondary">{{ turno }}</span>
-                            <span class="fw-bold">{{ count }}</span>
-                        </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-success" role="progressbar"
-                                style="width: {{ (count / total_alunos * 100) if total_alunos > 0 else 0 }}%"></div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activity Feed -->
-        <div class="col-lg-8">
-            <div class="card h-100 border-0 shadow-sm">
-                <div
-                    class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0">Atividade Recente</h5>
-                    <a href="{{ url_for('historico') }}" class="btn btn-sm btn-light text-muted">Ver Histórico</a>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light text-secondary">
-                                <tr>
-                                    <th class="ps-4 border-0">Aluno</th>
-                                    <th class="border-0">Turma</th>
-                                    <th class="border-0">Horário</th>
-                                    <th class="border-0 text-end pe-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% if recent_logs %}
-                                {% for log in recent_logs %}
-                                <tr>
-                                    <td class="ps-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center"
-                                                style="width: 32px; height: 32px; overflow: hidden;">
-                                                {% if log.foto and log.foto != 'semfoto.jpg' %}
-                                                <img src="{{ url_for('static', filename='fotos/' + log.foto) }}" alt=""
-                                                    class="img-fluid">
-                                                {% elif semfoto_env_uri %}
-                                                <img src="{{ semfoto_env_uri }}" alt="" class="img-fluid">
-                                                {% else %}
-                                                <i class="bi bi-person text-secondary"></i>
-                                                {% endif %}
-                                            </div>
-                                            <span class="fw-medium">{{ log.nome }}</span>
+                            <!-- Turnos Breakdown (Integrated) -->
+                            <div class="col-md-7 ps-md-4">
+                                <h6 class="fw-bold text-secondary small text-uppercase mb-3 d-flex align-items-center">
+                                    <i class="bi bi-pie-chart-fill me-2"></i>Por Turno
+                                </h6>
+                                <div class="d-flex justify-content-between gap-2 text-center">
+                                    {% for turno, count in por_turno.items() %}
+                                    <div class="flex-fill p-2 rounded bg-light border">
+                                        {% set t_pct = (count / total_alunos * 100) if total_alunos > 0 else 0 %}
+                                        <span class="d-block text-secondary small mb-1">{{ turno }}</span>
+                                        <h5 class="d-block fw-bold text-dark mb-0">{{ count }}</h5>
+                                        <div class="progress mt-2" style="height: 4px;">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                style="width: {{ t_pct }}%; opacity: 0.5"></div>
                                         </div>
-                                    </td>
-                                    <td><span class="badge bg-light text-dark border">{{ log.turma }}</span></td>
-                                    <td class="text-muted small">{{ log.data_hora.split(' ')[1] }}</td>
-                                    <td class="text-end pe-4">
-                                        {% if 'Acesso' in log.tipo_acesso %}
-                                        <span class="badge bg-success-subtle text-success rounded-pill">Entrada</span>
-                                        {% else %}
-                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill">{{
-                                            log.tipo_acesso }}</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                                {% else %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">
-                                        <i class="bi bi-inbox fs-4 d-block mb-2"></i>
-                                        Nenhuma atividade registrada hoje.
-                                    </td>
-                                </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Telegram Card -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-info-subtle p-3 rounded-circle me-3">
+                                <i class="bi bi-telegram fs-4 text-info"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-secondary mb-0">Telegram</h6>
+                                <h3 class="fw-bold mb-0 text-dark">{{ total_linked }} <span
+                                        class="fs-6 text-muted fw-normal">vip</span></h3>
+                            </div>
+                        </div>
+                        {% set linked_pct = (total_linked / total_alunos * 100) if total_alunos > 0 else 0 %}
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ linked_pct }}%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <small class="text-muted">{{ "%.1f"|format(linked_pct) }}%</small>
+                            {% if telegram_status == 'Online' %}
+                            <span
+                                class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Bot
+                                On</span>
+                            {% else %}
+                            <span
+                                class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Bot
+                                Off</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-muted small mt-2 text-truncate">
+                            {{ telegram_bot_name if telegram_status == 'Online' else 'Token inválido' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pendencies/System Card -->
+            <div class="col-lg-3 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-warning-subtle p-3 rounded-circle me-3">
+                                <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-secondary mb-0">Pendências</h6>
+                                <h3 class="fw-bold mb-0 text-dark">{{ total_sem_foto }} <span
+                                        class="fs-6 text-muted fw-normal">alunos</span></h3>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="badge bg-light text-secondary border fw-normal">Sem Foto</span>
+                                <small class="text-warning fw-bold">{{ "%.1f"|format((total_sem_foto/total_alunos*100)
+                                    if total_alunos > 0 else 0) }}%</small>
+                            </div>
+                            <hr class="my-2 border-secondary-subtle">
+                            <div class="text-muted small d-flex align-items-center">
+                                <i class="bi bi-database me-2"></i> {{ total_turmas }} Turmas
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions (Centered Grid) -->
+    <div class="col-12">
+        <h5 class="fw-bold text-secondary mb-3 ms-1">Acesso Rápido</h5>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 justify-content-center">
+            {% for action in quick_actions %}
+            <div class="col">
+                <a href="{{ url_for(action.route) }}"
+                    class="card h-100 border-0 shadow-sm hover-scale text-decoration-none text-center py-4">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <i class="bi {{ action.icon }} fs-1 text-{{ action.color }}"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark">{{ action.title }}</h6>
+                        <small class="text-muted">{{ action.subtitle }}</small>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+
+            {% if not quick_actions %}
+            <div class="col-12 text-center text-muted">
+                <p>Nenhum atalho configurado.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Activity Feed (Full Width) -->
+    <div class="col-12">
+        <div class="card h-100 border-0 shadow-sm">
+            <div
+                class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">Atividade Recente</h5>
+                <a href="{{ url_for('historico') }}" class="btn btn-sm btn-light text-muted">Ver Histórico</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-secondary">
+                            <tr>
+                                <th class="ps-4 border-0">Aluno</th>
+                                <th class="border-0">Turma</th>
+                                <th class="border-0">Horário</th>
+                                <th class="border-0 text-end pe-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_logs %}
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center"
+                                            style="width: 35px; height: 35px; overflow: hidden;">
+                                            {% if log.foto and log.foto != 'semfoto.jpg' %}
+                                            <img src="{{ url_for('static', filename='fotos/' + log.foto) }}" alt=""
+                                                class="img-fluid">
+                                            {% elif semfoto_env_uri %}
+                                            <img src="{{ semfoto_env_uri }}" alt="" class="img-fluid">
+                                            {% else %}
+                                            <i class="bi bi-person text-secondary"></i>
+                                            {% endif %}
+                                        </div>
+                                        <span class="fw-medium text-dark">{{ log.nome }}</span>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">{{ log.turma }}</span></td>
+                                <td class="text-muted small font-monospace">{{ log.data_hora.split(' ')[1] }}</td>
+                                <td class="text-end pe-4">
+                                    {% if 'Acesso' in log.tipo_acesso or 'Entrada' in log.tipo_acesso %}
+                                    <span
+                                        class="badge bg-success-subtle text-success rounded-pill border border-success-subtle px-3">Acesso</span>
+                                    {% else %}
+                                    <span
+                                        class="badge bg-secondary-subtle text-secondary rounded-pill border border-secondary-subtle px-3">{{
+                                        log.tipo_acesso }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                                    Nenhuma atividade registrada hoje.
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -263,24 +235,32 @@
 </div>
 
 <style>
-    .bg-primary-subtle {
-        background-color: #e0f2f1;
-    }
-
-    .bg-info-subtle {
-        background-color: #e0f7fa;
-    }
-
-    .bg-warning-subtle {
-        background-color: #fff8e1;
-    }
-
     .bg-success-subtle {
-        background-color: #e8f5e9;
+        background-color: #d1e7dd !important;
     }
 
     .bg-danger-subtle {
-        background-color: #ffebee;
+        background-color: #f8d7da !important;
+    }
+
+    .bg-secondary-subtle {
+        background-color: #e2e3e5 !important;
+    }
+
+    .bg-primary-subtle {
+        background-color: #e0f2f1 !important;
+    }
+
+    .bg-info-subtle {
+        background-color: #e0f7fa !important;
+    }
+
+    .bg-warning-subtle {
+        background-color: #fff8e1 !important;
+    }
+
+    .object-fit-cover {
+        object-fit: cover;
     }
 
     .hover-scale {
@@ -292,31 +272,45 @@
         box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
     }
 
-    .avatar-sm img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    .fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
 <script>
-    function updateDateTime() {
+    function updateClock() {
         const now = new Date();
-        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const timeOptions = { hour: '2-digit', minute: '2-digit' };
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
-        // Format PT-BR
-        const dateStr = now.toLocaleDateString('pt-BR', dateOptions);
-        const timeStr = now.toLocaleTimeString('pt-BR', timeOptions);
+        document.getElementById('live-clock').textContent = now.toLocaleTimeString('pt-BR', timeOptions);
 
-        // Capitalize first letter of date
-        const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        let dateStr = now.toLocaleDateString('pt-BR', dateOptions);
+        dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+        document.getElementById('live-date').textContent = dateStr;
 
-        document.getElementById('current-date').textContent = formattedDate;
-        document.getElementById('current-time').textContent = timeStr;
+        const hour = now.getHours();
+        let greeting = 'Bem-vindo';
+        if (hour >= 5 && hour < 12) greeting = 'Bom dia';
+        else if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
+        else greeting = 'Boa noite';
+
+        document.getElementById('greeting-text').textContent = `${greeting}, {% if current_user.is_authenticated %}{{ current_user.id|capitalize }}{% else %}Visitante{% endif %}.`;
     }
 
-    setInterval(updateDateTime, 1000);
-    updateDateTime();
+    setInterval(updateClock, 1000);
+    updateClock();
 </script>
 {% endblock %}

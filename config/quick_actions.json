@@ -1,0 +1,9 @@
+{
+    "enabled_actions": [
+        "cadastro",
+        "registro",
+        "carometro",
+        "chamada",
+        "arquivo_morto"
+    ]
+}

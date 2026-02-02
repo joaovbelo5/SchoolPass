@@ -18,40 +18,79 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-    <!-- Navbar -->
+    <!-- Navbar (Responsive with Offcanvas) -->
     <nav class="navbar navbar-custom no-print" data-bs-theme="dark">
-        <div class="container position-relative">
-            <!-- Clock Brand (No Text) -->
-            <a class="navbar-brand d-flex align-items-center" href="/">
-                <span id="brasilia-clock" class="fw-bold fs-4 text-white">--:--</span>
+        <div class="container">
+            <!-- Brand: Digital Clock (Left) -->
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <i class="bi bi-clock-history fs-4 text-white-50"></i>
+                <div class="d-flex flex-column">
+                    <span id="brasilia-clock" class="fw-bold fs-5 text-white lh-1">--:--</span>
+                    <span id="brasilia-date" class="small text-white-50" style="font-size: 0.7rem;">--/--</span>
+                </div>
             </a>
 
-            <!-- Hamburger Toggler (Always Visible) -->
-            <button class="navbar-toggler border-0 text-white ms-auto" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+            <!-- Toggler for Mobile (Right) -->
+            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
                 aria-label="Toggle navigation">
                 <i class="bi bi-list fs-1"></i>
             </button>
 
-            <!-- Collapsible Menu -->
-            <div class="collapse navbar-collapse w-100 mt-3" id="navbarNav">
-                <ul class="navbar-nav navbar-grid">
-                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/cadastro">Cadastro</a></li>
-                    {% if current_user.role == 'admin' %}
-                    <li class="nav-item"><a class="nav-link" href="/registro">Registro</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/emissao">Carteirinhas</a></li>
-                    {% endif %}
-                    <li class="nav-item"><a class="nav-link" href="/historico">Histórico</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/carometro">Carômetro</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/chamada">Chamada</a></li>
+            <!-- Navbar Content (Collapse on Mobile, Float Right on Desktop) -->
+            <div class="collapse navbar-collapse mt-3 mt-lg-0" id="navbarContent">
+                <ul class="navbar-nav ms-auto gap-2 align-items-lg-center flex-lg-row justify-content-lg-end">
+
+                    <!-- Main Links -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-grid-fill me-2"></i>Dashboard</a>
+                    </li>
 
                     {% if current_user.role == 'admin' %}
-                    <li class="nav-item"><a class="nav-link" href="/mensagens">Mensagens</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/admin">Admin</a></li>
-                    {% endif %}
                     <li class="nav-item">
-                        <a class="btn btn-danger btn-sm text-white w-100" href="/logout">Sair</a>
+                        <a class="nav-link" href="/registro"><i class="bi bi-qr-code-scan me-2"></i>Registro</a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cadastro"><i class="bi bi-person-plus-fill me-2"></i>Cadastro</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chamada"><i class="bi bi-calendar-check-fill me-2"></i>Chamada</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/historico"><i class="bi bi-clock-history me-2"></i>Histórico</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/carometro"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Carômetro</a>
+                    </li>
+
+                    <!-- Admin Dropdown -->
+                    {% if current_user.role == 'admin' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="bi bi-shield-lock-fill me-2"></i>Admin
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2">
+                            <li><a class="dropdown-item rounded mb-1" href="/emissao"><i
+                                        class="bi bi-printer me-2 text-warning"></i>Carteirinhas</a></li>
+                            <li><a class="dropdown-item rounded mb-1" href="/mensagens"><i
+                                        class="bi bi-chat-dots me-2 text-primary"></i>Mensagens</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item rounded" href="/admin"><i
+                                        class="bi bi-sliders me-2 text-dark"></i>Configurações</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- Logout -->
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-light text-primary fw-bold w-100" href="/logout">
+                            <i class="bi bi-box-arrow-right me-2"></i>Sair
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -81,8 +120,15 @@
             const h = String(brasilia.getHours()).padStart(2, '0');
             const m = String(brasilia.getMinutes()).padStart(2, '0');
             const clockElement = document.getElementById('brasilia-clock');
+            const dateElement = document.getElementById('brasilia-date');
+
             if (clockElement) {
                 clockElement.textContent = `${h}:${m}`;
+            }
+            if (dateElement) {
+                const day = String(brasilia.getDate()).padStart(2, '0');
+                const month = String(brasilia.getMonth() + 1).padStart(2, '0');
+                dateElement.textContent = `${day}/${month}`;
             }
         }
         setInterval(updateBrasiliaClock, 1000);
