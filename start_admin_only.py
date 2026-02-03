@@ -58,6 +58,11 @@ def register_admin_routes(app):
     os.makedirs(TEMP_UPLOAD_FOLDER, exist_ok=True)
 
 
+
+    @app.context_processor
+    def inject_school_info():
+        return dict(school_name=os.getenv('CARTEIRINHA_ESCOLA', 'SchoolPass'))
+
     @app.route('/admin', methods=['GET', 'POST'])
     @login_required
     @admin_required

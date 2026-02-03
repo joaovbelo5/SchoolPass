@@ -18,9 +18,9 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-    <!-- Navbar (Responsive with Offcanvas) -->
+    <!-- Navbar (Universal Offcanvas) -->
     <nav class="navbar navbar-custom no-print" data-bs-theme="dark">
-        <div class="container">
+        <div class="container position-relative">
             <!-- Brand: Digital Clock (Left) -->
             <a class="navbar-brand d-flex align-items-center gap-2" href="/">
                 <i class="bi bi-clock-history fs-4 text-white-50"></i>
@@ -30,69 +30,86 @@
                 </div>
             </a>
 
+            <!-- School Name (Center Absolute) -->
+            <div class="position-absolute top-50 start-50 translate-middle text-white fw-bold d-none d-md-block"
+                style="font-size: 1.25rem;">
+                {{ school_name | default("SchoolPass") }}
+            </div>
+
             <!-- Toggler for Mobile (Right) -->
-            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false"
-                aria-label="Toggle navigation">
+            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                 <i class="bi bi-list fs-1"></i>
             </button>
 
-            <!-- Navbar Content (Collapse on Mobile, Float Right on Desktop) -->
-            <div class="collapse navbar-collapse mt-3 mt-lg-0" id="navbarContent">
-                <ul class="navbar-nav ms-auto gap-2 align-items-lg-center flex-lg-row justify-content-lg-end">
+            <!-- Offcanvas Menu (Right Slide) -->
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
+                aria-labelledby="offcanvasNavbarLabel" style="background-color: var(--primary-color);">
 
-                    <!-- Main Links -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="bi bi-grid-fill me-2"></i>Dashboard</a>
-                    </li>
+                <div class="offcanvas-header border-bottom border-white-50">
+                    <h5 class="offcanvas-title text-white fw-bold" id="offcanvasNavbarLabel">Menu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+                        aria-label="Close"></button>
+                </div>
 
-                    {% if current_user.role == 'admin' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/registro"><i class="bi bi-qr-code-scan me-2"></i>Registro</a>
-                    </li>
-                    {% endif %}
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav justify-content-end flex-grow-1 pe-3 gap-2">
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="/cadastro"><i class="bi bi-person-plus-fill me-2"></i>Cadastro</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/chamada"><i class="bi bi-calendar-check-fill me-2"></i>Chamada</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/historico"><i class="bi bi-clock-history me-2"></i>Histórico</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/carometro"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Carômetro</a>
-                    </li>
+                        <!-- Main Links -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="/"><i class="bi bi-grid-fill me-2"></i>Dashboard</a>
+                        </li>
 
-                    <!-- Admin Dropdown -->
-                    {% if current_user.role == 'admin' %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="bi bi-shield-lock-fill me-2"></i>Admin
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2">
-                            <li><a class="dropdown-item rounded mb-1" href="/emissao"><i
-                                        class="bi bi-printer me-2 text-warning"></i>Carteirinhas</a></li>
-                            <li><a class="dropdown-item rounded mb-1" href="/mensagens"><i
-                                        class="bi bi-chat-dots me-2 text-primary"></i>Mensagens</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item rounded" href="/admin"><i
-                                        class="bi bi-sliders me-2 text-dark"></i>Configurações</a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
+                        {% if current_user.role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/registro"><i class="bi bi-qr-code-scan me-2"></i>Registro</a>
+                        </li>
+                        {% endif %}
 
-                    <!-- Logout -->
-                    <li class="nav-item ms-lg-3">
-                        <a class="btn btn-light text-primary fw-bold w-100" href="/logout">
-                            <i class="bi bi-box-arrow-right me-2"></i>Sair
-                        </a>
-                    </li>
-                </ul>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/cadastro"><i class="bi bi-person-plus-fill me-2"></i>Cadastro</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/chamada"><i
+                                    class="bi bi-calendar-check-fill me-2"></i>Chamada</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/historico"><i class="bi bi-clock-history me-2"></i>Histórico</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/carometro"><i
+                                    class="bi bi-grid-3x3-gap-fill me-2"></i>Carômetro</a>
+                        </li>
+
+                        <!-- Admin Dropdown -->
+                        {% if current_user.role == 'admin' %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                <i class="bi bi-shield-lock-fill me-2"></i>Admin
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" data-bs-theme="light">
+                                <li><a class="dropdown-item rounded mb-1" href="/emissao"><i
+                                            class="bi bi-printer me-2 text-warning"></i>Carteirinhas</a></li>
+                                <li><a class="dropdown-item rounded mb-1" href="/mensagens"><i
+                                            class="bi bi-chat-dots me-2 text-primary"></i>Mensagens</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item rounded" href="/admin"><i
+                                            class="bi bi-sliders me-2 text-dark"></i>Configurações</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+
+                        <!-- Logout (Mobile only separator / Desktop button styled) -->
+                        <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                            <a class="btn btn-light text-primary fw-bold w-100" href="/logout">
+                                <i class="bi bi-box-arrow-right me-2"></i>Sair
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
