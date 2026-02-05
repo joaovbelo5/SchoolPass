@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação Técnica - SchoolPass</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Highlight.js Theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+    <style>
+        /* Custom Sidebar Styles */
+        .sidebar {
+            height: 100vh;
+            overflow-y: auto;
+            top: 0;
+            padding-top: 1rem;
+            border-right: 1px solid var(--bs-border-color);
+        }
+
+        /* Typography & Spacing */
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        main {
+            padding-top: 2rem;
+            padding-bottom: 4rem;
+        }
+
+        h1 {
+            margin-bottom: 1.5rem;
+            color: var(--bs-primary);
+            font-weight: 700;
+        }
+
+        h2 {
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--bs-border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--bs-emphasis-color);
+        }
+
+        h4 {
+            margin-top: 1.5rem;
+            color: var(--bs-secondary-text-emphasis);
+        }
+
+        /* Code Blocks */
+        pre {
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Tables */
+        .table th {
+            background-color: var(--bs-tertiary-bg);
+        }
+
+        /* Mermaid Diagram Container */
+        .mermaid {
+            background: var(--bs-tertiary-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Navigation Links */
+        .nav-link {
+            color: var(--bs-secondary);
+            font-size: 0.9rem;
+            padding: 0.25rem 1rem;
+        }
+
+        .nav-link:hover {
+            color: var(--bs-primary);
+        }
+
+        .nav-link.active {
+            color: var(--bs-primary);
+            font-weight: 600;
+            border-left: 2px solid var(--bs-primary);
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar {
+                display: none;
+            }
+
+            main {
+                width: 100% !important;
+                padding: 0;
+            }
+
+            .col-lg-10 {
+                width: 100% !important;
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            a[href]:after {
+                content: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <h5 class="px-3 pb-2 border-bottom fw-bold"><i class="bi bi-book-half me-2"></i>SchoolPass Docs</h5>
+                    <ul class="nav flex-column" id="doc-nav">
+                        <li class="nav-item"><a class="nav-link" href="#intro">1. Introdução</a></li>
+                        <li class="nav-item ms-3"><a class="nav-link" href="#arch">Visão Geral</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#install">2. Instalação</a></li>
+                        <li class="nav-item ms-3"><a class="nav-link" href="#install-manual">Manual (Python)</a></li>
+                        <li class="nav-item ms-3"><a class="nav-link" href="#install-docker">Docker</a></li>
+                        <li class="nav-item ms-3"><a class="nav-link" href="#config-env">Configuração .env</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#data">3. Arquitetura de Dados</a></li>
+                        <li class="nav-item ms-3"><a class="nav-link" href="#lifecycle">Ciclo de Vida</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#admin">4. Painel Admin</a></li>
+                        <li class="nav-item ms-3"><a class="nav-link" href="#dashboard">Dashboard</a></li>
+                        <li class="nav-item ms-3"><a class="nav-link" href="#admin-features">Funcionalidades</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#backup">5. Backup e Segurança</a></li>
+                        <li class="nav-item ms-3"><a class="nav-link" href="#wipe">Limpeza de Dados</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#public">6. Busca Pública</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="#dev">7. Desenvolvedores</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-5" data-bs-spy="scroll" data-bs-target="#doc-nav"
+                tabindex="0">
+
+                <!-- 1. Introdução -->
+                <section id="intro">
+                    <h1>1. Introdução</h1>
+                    <p>O <strong>SchoolPass</strong> é um sistema completo de gestão de acesso escolar e emissão de
+                        identidade digital (carteirinhas). Ele foi projetado para operar com infraestrutura leve, sem
+                        necessidade de bancos de dados complexos (SQL), utilizando um sistema híbrido de arquivos CSV e
+                        JSON para persistência de dados.</p>
+
+                    <div id="arch">
+                        <h3>Visão Geral da Arquitetura</h3>
+                        <p>O sistema opera em uma arquitetura de <strong>Processo Duplo (Dual-Process Monolith)</strong>
+                            gerenciada por um orquestrador central.</p>
+                        <ul>
+                            <li><strong>Orquestrador (<code>start_server.py</code>)</strong>: Script responsável por
+                                iniciar e monitorar os sub-processos.</li>
+                            <li><strong>Serviço Admin (Porta 5000)</strong>: Aplicação Flask protegida por login, onde a
+                                administração escolar gerencia alunos, emite carteirinhas e visualiza relatórios.</li>
+                            <li><strong>Serviço de Busca Pública (Porta 5010)</strong>: Aplicação Flask leve e otimizada
+                                para leitura, permitindo que alunos e pais consultem a validade da carteirinha e o
+                                histórico de acesso via Código de Barras.</li>
+                        </ul>
+
+                        <!-- Mermaid Diagram -->
+                        <div class="mermaid">
+                            graph TD
+                            User[Administrador] -->|Acessa :5000| P1[Processo Admin Flask]
+                            Public[Aluno/Pais] -->|Acessa :5010| P2[Processo Busca Flask]
+
+                            subgraph Orquestrador
+                            Orq[start_server.py] -->|Monitora/Renicia| P1
+                            Orq[start_server.py] -->|Monitora/Renicia| P2
+                            end
+
+                            subgraph Dados Compartilhados
+                            DB[(database.csv)]
+                            Logs[(registros/)]
+                            IMG[static/fotos]
+                            end
+
+                            P1 <--> DB
+                                P1 <--> Logs
+                                    P2 ..->|Leitura| DB
+                                    P2 ..->|Leitura| Logs
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Instalação -->
+                <section id="install">
+                    <h2>2. Instalação e Configuração</h2>
+
+                    <div id="install-manual">
+                        <h3>Opção A: Instalação Manual (Python)</h3>
+                        <h4>Pré-requisitos</h4>
+                        <ul>
+                            <li><strong>Python 3.12+</strong> instalado e adicionado ao PATH.</li>
+                            <li>Sistemas Operacionais: Linux (recomendado), Windows ou macOS (não testado).</li>
+                        </ul>
+
+                        <h4>Passos</h4>
+                        <p>1. <strong>Clone o Repositório:</strong></p>
+                        <pre><code class="language-bash">git clone https://github.com/joaovbelo5/schoolpass.git
+cd schoolpass</code></pre>
+
+                        <p>2. <strong>Instale as Dependências:</strong></p>
+                        <pre><code class="language-bash">python -m venv venv
+# Linux/Mac
+source venv/bin/activate
+# Windows
+venv\Scripts\activate
+
+pip install -r requirements.txt</code></pre>
+
+                        <p>3. <strong>Inicialização:</strong></p>
+                        <pre><code class="language-bash">python start_server.py</code></pre>
+                    </div>
+
+                    <div id="install-docker" class="mt-4">
+                        <h3>Opção B: Instalação via Docker (Recomendado)</h3>
+                        <p>O projeto já inclui configuração completa para Docker (<code>Dockerfile</code> e
+                            <code>docker-compose.yml</code>).</p>
+
+                        <p>1. <strong>Subir o Container:</strong></p>
+                        <pre><code class="language-bash">docker-compose up -d</code></pre>
+                        <p>Isso irá construir a imagem e iniciar os serviços nas portas <code>5000</code> (Admin) e
+                            <code>5010</code> (Busca).</p>
+
+                        <p>2. <strong>Persistência:</strong></p>
+                        <p>O volume <code>./:/app</code> garante que os dados (<code>database.csv</code>,
+                            <code>registros/</code>, etc.) sejam salvos diretamente na sua pasta local, facilitando
+                            backups manuais.</p>
+                    </div>
+
+                    <div id="config-env" class="mt-4">
+                        <h3>Configuração do Ambiente (.env)</h3>
+                        <p>O arquivo <code>.env</code> controla variáveis críticas como chaves de segurança e tokens.
+                        </p>
+
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+                            <div>
+                                <strong>Não edite o arquivo .env manualmente</strong> a menos que saiba exatamente o que
+                                está fazendo. A maioria das configurações (Nome da Escola, Token do Telegram, etc.) pode
+                                e deve ser alterada diretamente pelo painel administrativo em <code>/admin</code>.
+                            </div>
+                        </div>
+
+                        <p>Exemplo de variáveis geridas pelo sistema:</p>
+                        <pre><code class="language-ini">CARTEIRINHA_ESCOLA="Nome da Escola"
+TELEGRAM_TOKEN="seu_token"
+SECRET_KEY="chave_interna"</code></pre>
+                    </div>
+                </section>
+
+                <!-- 3. Arquitetura de Dados -->
+                <section id="data">
+                    <h2>3. Arquitetura de Dados (File-DB) Detalhada</h2>
+                    <p>O SchoolPass utiliza arquivos locais para garantir portabilidade total. Entenda a função de cada
+                        componente:</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Arquivo / Diretório</th>
+                                    <th>Função Específica</th>
+                                    <th>Importância</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>database.csv</code></td>
+                                    <td><strong>Cadastro Mestre</strong>. Armazena a lista de todos os alunos ativos com
+                                        seus dados (Nome, Código, Turma, Turno, Foto, TelegramID).</td>
+                                    <td>Crítica</td>
+                                </tr>
+                                <tr>
+                                    <td><code>registros/{TURMA}/{CODIGO}.json</code></td>
+                                    <td><strong>Histórico Individual</strong>. Contém o log detalhado de todas as
+                                        entradas e saídas de <em>um único aluno</em>.</td>
+                                    <td>Alta</td>
+                                </tr>
+                                <tr>
+                                    <td><code>registros_diarios/YYYY-MM-DD.json</code></td>
+                                    <td><strong>Log Cronológico</strong>. Um espelho de todos os acessos do dia. Útil
+                                        para auditoria.</td>
+                                    <td>Média</td>
+                                </tr>
+                                <tr>
+                                    <td><code>chamadas/</code></td>
+                                    <td><strong>Frequência Mensal</strong>. Arquivos JSON que consolidam a presença
+                                        diária de uma turma inteira.</td>
+                                    <td>Alta</td>
+                                </tr>
+                                <tr>
+                                    <td><code>ocorrencias/*.json</code></td>
+                                    <td><strong>Disciplinar</strong>. Armazena observações comportamentais, advertências
+                                        e suspensões.</td>
+                                    <td>Alta</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="lifecycle">
+                        <h3>Ciclo de Vida e Arquivamento</h3>
+                        <p>Ao final do ano letivo, o sistema permite mover dados antigos para uma pasta
+                            <code>legacy/</code>.</p>
+
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="bi bi-shield-fill-exclamation flex-shrink-0 me-2"></i>
+                            <div>
+                                <strong>NUNCA execute o script <code>archive_manager.py</code> manualmente.</strong>
+                                Utilize sempre a função <strong>"Arquivo Morto" no Painel Admin</strong>. O sistema
+                                realiza verificações de segurança e integridade que o script manual pode pular se usado
+                                incorretamente.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. Painel Admin -->
+                <section id="admin">
+                    <h2>4. Manual do Painel Administrativo</h2>
+                    <p>O painel administrativo (<code>/admin</code>) é o centro de controle.</p>
+
+                    <div id="dashboard">
+                        <h3>Dashboard Principal</h3>
+                        <p>Ao entrar, você verá métricas em tempo real:</p>
+                        <ul>
+                            <li><strong>Total de Alunos e Turmas.</strong></li>
+                            <li><strong>Presenças Hoje:</strong> Contagem em tempo real de entradas únicas.</li>
+                            <li><strong>Status do Telegram:</strong> Indica se o bot de notificações está online.</li>
+                            <li><strong>Atalhos Rápidos:</strong> Botões configuráveis para as funções que você mais
+                                usa.</li>
+                            <li><strong>Atividade Recente:</strong> Mostra os últimos 10 registros de acesso.</li>
+                        </ul>
+                    </div>
+
+                    <div id="admin-features">
+                        <h3>Funcionalidades por Aba</h3>
+
+                        <div class="card mb-3 border-start border-4 border-primary">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">1. Registro (Totem)</h5>
+                                <p class="card-text">Esta tela foi desenhada para ficar exposta em um tablet ou
+                                    computador na portaria (Totem).</p>
+                                <ul>
+                                    <li>Mostra feedback visual grande (Verde/Vermelho) para os alunos que passam a
+                                        carteirinha.</li>
+                                    <li>Emite alertas sonoros em caso de erro.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3 border-start border-4 border-success">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">2. Cadastro de Alunos</h5>
+                                <p>O gerenciador completo de estudantes. Aqui você pode:</p>
+                                <ul>
+                                    <li><strong>Editar:</strong> Alterar foto, nome ou turma.</li>
+                                    <li><strong>Histórico:</strong> Visualizar a lista completa de acessos daquele aluno
+                                        específico.</li>
+                                    <li><strong>Ocorrências:</strong> Registrar advertências (que podem notificar os
+                                        pais via Telegram).</li>
+                                    <li><strong>Correção de Presença:</strong> Inserir manualmente uma entrada/saída.
+                                    </li>
+                                    <li><strong>Importação em Lote:</strong> Envie uma lista CSV para cadastrar centenas
+                                        de alunos de uma vez.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3 border-start border-4 border-info">
+                            <div class="card-body">
+                                <h5 class="card-title text-info">3. Mensagens em Massa</h5>
+                                <p>Ferramenta para comunicação institucional.</p>
+                                <ul>
+                                    <li>Permite enviar mensagens de texto para <strong>todos os alunos</strong> de uma
+                                        determinada turma (ou turno) que tenham Telegram vinculado.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3 border-start border-4 border-warning">
+                            <div class="card-body">
+                                <h5 class="card-title text-warning">4. Relatórios</h5>
+                                <ul>
+                                    <li><strong>Carômetro:</strong> Visualização das fotos da turma toda em grade.</li>
+                                    <li><strong>Chamada Mensal:</strong> Tabela cruzada (Aluno x Dias do Mês) para
+                                        visualizar faltas.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Backup -->
+                <section id="backup">
+                    <h2>5. Backup e Recuperação</h2>
+                    <p>O sistema possui proteção contra perda de dados.</p>
+                    <ul>
+                        <li><strong>Backup (Download):</strong> O botão "Backup" no menu lateral gera um arquivo
+                            <code>.zip</code> contendo TUDO (banco de dados, fotos, configurações e logs).</li>
+                        <li><strong>Restauração:</strong> Se o servidor der problema, você pode subir esse mesmo
+                            <code>.zip</code> na opção "Restauração".</li>
+                    </ul>
+
+                    <div id="wipe" class="mt-4">
+                        <h3>Limpeza de Dados (Wipe)</h3>
+                        <p>A opção "Zerar Dados" é irreversível e exige tripla verificação (Token + Matemática + Frase
+                            de Segurança). Use apenas para resetar o sistema para um novo ano limpo.</p>
+                    </div>
+                </section>
+
+                <!-- 6. Busca Publica -->
+                <section id="public">
+                    <h2>6. Busca Pública</h2>
+                    <p>A rota <code>/</code> é a interface leve para validação.</p>
+                    <ol>
+                        <li><strong>Escaneamento:</strong> O aluno passa o código de barras.</li>
+                        <li><strong>Validação:</strong> O sistema mostra Foto, Nome, Turma e a <strong>Permissão de
+                                Entrada</strong> (Sim/Não).</li>
+                    </ol>
+
+                    <div class="mt-3">
+                        <h4>Feedback Sonoro</h4>
+                        <p>O sistema dispara um alerta sonoro (<code>alert.mp3</code>) especificamente quando a
+                            <strong>permissão de entrada é negada</strong> ou o aluno não é encontrado.</p>
+                    </div>
+                </section>
+
+                <!-- 7. Dev Tools -->
+                <section id="dev">
+                    <h2>7. Ferramentas de Manutenção (Desenvolvedores)</h2>
+
+                    <h3>Kit de Emergência</h3>
+                    <p>Se você perder o acesso ao painel web (esqueceu a senha admin), acesse o servidor via terminal e
+                        use:</p>
+                    <ul>
+                        <li><code>user_creator_gui.py</code>: Interface gráfica para resetar senhas ou criar novos
+                            admins.</li>
+                        <li><code>user_creator.py</code>: Versão em linha de comando (CLI).</li>
+                    </ul>
+                    <p><em>Nota: Estes scripts só rodam localmente no servidor por segurança.</em></p>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+</body>
+
+</html>

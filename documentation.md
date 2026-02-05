@@ -1,148 +1,160 @@
-# 📘 Documentação Oficial - SchoolPass
+# Documentação Técnica - SchoolPass
 
-Bem-vindo à documentação completa do **SchoolPass**, o sistema moderno de controle de acesso escolar, carteirinhas digitais e comunicação via Telegram.
+## 1. Introdução
 
----
+O **SchoolPass** é um sistema completo de gestão de acesso escolar e emissão de identidade digital (carteirinhas). Ele foi projetado para operar com infraestrutura leve, sem necessidade de bancos de dados complexos (SQL), utilizando um sistema híbrido de arquivos CSV e JSON para persistência de dados.
 
-## 📑 Índice
+### Visão Geral da Arquitetura
+O sistema opera em uma arquitetura de **Processo Duplo (Dual-Process Monolith)** gerenciada por um orquestrador central.
 
-1. [Visão Geral](#visão-geral)
-2. [Instalação e Deploy](#instalação-e-deploy)
-3. [Manual do Usuário Detalhado](#manual-do-usuário-detalhado)
-    - [Painel Administrativo](#painel-administrativo)
-        - [Dashboard (Início)](#dashboard-início)
-        - [Gestão de Alunos](#gestão-de-alunos)
-        - [Carteirinhas](#carteirinhas)
-        - [Ocorrências](#ocorrências)
-        - [Comunicação (Mensagens)](#comunicação-mensagens)
-        - [Relatórios (Histórico, Carômetro, Chamada)](#relatórios-histórico-carômetro-chamada)
-    - [Área Pública / Totem](#área-pública--totem)
-4. [Documentação Técnica](#documentação-técnica)
-5. [Solução de Problemas](#solução-de-problemas)
+*   **Orquestrador (`start_server.py`)**: Script responsável por iniciar e monitorar os sub-processos.
+*   **Serviço Admin (Porta 5000)**: Aplicação Flask protegida por login, onde a administração escolar gerencia alunos, emite carteirinhas e visualiza relatórios.
+*   **Serviço de Busca Pública (Porta 5010)**: Aplicação Flask leve e otimizada para leitura, permitindo que alunos e pais consultem a validade da carteirinha e o histórico de acesso via Código de Barras.
 
 ---
 
-## 🔭 Visão Geral
+## 2. Instalação e Configuração
 
-O **SchoolPass** simplifica a segurança escolar. Ele monitora entradas e saídas, notifica os pais via Telegram em tempo real, gerencia a disciplina dos alunos e envia notificações de alertas da escola para os pais, tudo em uma interface web moderna e responsiva.
+### Opção A: Instalação Manual (Python)
 
----
+#### Pré-requisitos
+*   **Python 3.12+** instalado e adicionado ao PATH.
+*   Sistemas Operacionais: Linux (recomendado), Windows ou macOS (não testado).
 
-## 🚀 Instalação e Deploy
+#### Passos
+1.  **Clone o Repositório:**
+    ```bash
+    git clone https://github.com/joaovbelo5/schoolpass.git
+    cd schoolpass
+    ```
 
-### Opção 1: Docker (Recomendada)
-1.  **Clone o repositório:** `git clone https://github.com/joaovbelo5/SchoolPass.git`
-2.  **Execute:** `docker-compose up -d --build`
-3.  **Acesse:**
-    *   **Admin:** [http://localhost:5000](http://localhost:5000)
-    *   **Público:** [http://localhost:5010](http://localhost:5010)
+2.  **Instale as Dependências:**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # Linux/Mac
+    venv\Scripts\activate     # Windows
+    pip install -r requirements.txt
+    ```
 
-### Opção 2: Manual
-1.  **Instale:** `pip install -r requirements.txt`
-2.  **Execute:** `python start_server.py`
+3.  **Inicialização:**
+    ```bash
+    python start_server.py
+    ```
 
----
+### Opção B: Instalação via Docker (Recomendado)
 
-## 📖 Manual do Usuário Detalhado
+O projeto já inclui configuração completa para Docker (`Dockerfile` e `docker-compose.yml`).
 
-Esta seção explica a função de cada página do sistema.
+1.  **Subir o Container:**
+    Na raiz do projeto, execute:
+    ```bash
+    docker-compose up -d
+    ```
+    Isso irá construir a imagem e iniciar os serviços nas portas `5000` (Admin) e `5010` (Busca).
 
-### 🔐 Painel Administrativo
+2.  **Persistência:**
+    O volume `./:/app` garante que os dados (`database.csv`, `registros/`, etc.) sejam salvos diretamente na sua pasta local, facilitando backups manuais.
 
-Acesse via porta `5000`. Login necessário (usuário padrão deve ser criado via script `user_creator_gui.py`).
+### Configuração do Ambiente (.env)
 
-#### Dashboard (Início)
-*   **Arquivo:** `index.html`
-*   **Função:** É o centro de comando.
-*   **Recursos:**
-    *   **Indicadores:** Mostra quantos alunos estão na escola e quantos saíram hoje.
-    *   **Feed em Tempo Real:** Lista as últimas entradas e saídas com fotos.
-    *   **Botões de Ação:** Registro manual de entrada/saída (caso o aluno esqueça a carteirinha).
-    *   **Configurações Rápidas:** No rodapé, permite alterar Logo, Assinatura e Token do Telegram.
-    *   **Manutenção:** Botões para criar Backup (baixa um ZIP) e Restaurar dados.
-    *   **Limpeza de Dados:** Área crítica para zerar o banco de dados na virada de ano (exige "senha matemática" para evitar acidentes).
+O arquivo `.env` controla variáveis críticas como chaves de segurança e tokens.
+> [!WARNING]
+> **Não edite o arquivo .env manualmente** a menos que saiba exatamente o que está fazendo. A maioria das configurações (Nome da Escola, Token do Telegram, etc.) pode e deve ser alterada diretamente pelo painel administrativo em `/admin`.
 
-#### Gestão de Alunos
-*   **Arquivos:** `upload_novo.html`, `upload_editar.html`, `upload_index.html`
-*   **Novo Aluno:**
-    *   Preencha Nome, Turma, Turno e Telefone do Responsável.
-    *   **Foto:** Você pode fazer upload de um arquivo ou usar a **Webcam** integrada para tirar a foto na hora. O sistema recorta e ajusta automaticamente.
-*   **Pesquisar/Editar:**
-    *   Lista todos os alunos. Use a barra de busca para filtrar por nome ou turma.
-    *   Permite alterar dados cadastro ou atualizar a foto.
-    *   Botão **Excluir**: Remove o aluno do sistema.
-
-#### Carteirinhas
-*   **Arquivos:** `carteirinha_index.html`, `carteirinha_template.html`
-*   **Função:** Gerar documentos de identificação para impressão.
-*   **Emissão por Turma:** Selecione uma turma e o sistema gera um "folhetão" com todas as carteirinhas prontas para recortar.
-*   **Emissão Individual:** Digite o código do aluno para gerar apenas uma via.
-*   **Design:** As carteirinhas incluem Foto, Nome, Turma, Código de Barras (Code128), Logo da escola e Assinatura do diretor.
-
-#### Ocorrências
-*   **Arquivos:** `ocorrencia_nova.html`, `ocorrencias_aluno.html`
-*   **Função:** Livro digital de disciplina.
-*   **Registro:** Busque um aluno e adicione uma ocorrência (ex: "Sem uniforme", "Atraso", "Indisciplina").
-*   **Notificação:** Se a ocorrência for grave (Advertência/Suspensão), o sistema envia um alerta imediato para o Telegram dos pais com os detalhes.
-
-#### Comunicação (Mensagens)
-*   **Arquivo:** `mensagens.html`
-*   **Função:** Canal oficial de avisos.
-*   **Envio em Massa:** Escreva uma mensagem (use `{nome}` para personalizar com o nome do aluno) e envie para **Todos** ou uma **Turma** específica.
-*   **Histórico:** Uma tabela mostra todas as mensagens já enviadas, data e quantos pais receberam.
-
-#### Relatórios (Histórico, Carômetro, Chamada)
-*   **Histórico (`historico.html`):** Visualize os logs de acesso de dias anteriores.
-*   **Carômetro (`carometro.html`):** Uma grade com as fotos de todos os alunos de uma turma. Útil para professores novos ou inspetores identificarem alunos visualmente.
-*   **Chamada Mensal (`lista_mensal_turma.html`):** Uma grade estilo "diário de classe" que mostra a presença de cada aluno ao longo do mês. Dias com presença ficam marcados em verde.
+Exemplo de variáveis geridas pelo sistema:
+```ini
+CARTEIRINHA_ESCOLA="Nome da Escola"
+TELEGRAM_TOKEN="seu_token"
+SECRET_KEY="chave_interna"
+```
 
 ---
 
-### 🌍 Área Pública / Totem
+## 3. Arquitetura de Dados (File-DB) Detalhada
 
-Acesse via porta `5010`. Interface simplificada para alunos e pais, sem necessidade de login administrativo.
+O SchoolPass utiliza arquivos locais para garantir portabilidade total. Entenda a função de cada componente:
 
-#### Tela Inicial (Totem)
-*   **Arquivo:** `index.html`
-*   **Função:** Landing page moderna.
-*   **Botões:** Acesso rápido à Consulta de Presença e ao Vínculo do Telegram.
+| Arquivo / Diretório | Função Específica | Importância |
+| :--- | :--- | :--- |
+| **`database.csv`** | **Cadastro Mestre**. Armazena a lista de todos os alunos ativos com seus dados (Nome, Código, Turma, Turno, Foto, TelegramID). | Crítica. Se perdido, perde-se o cadastro dos alunos. |
+| **`registros/{TURMA}/{CODIGO}.json`** | **Histórico Individual**. Contém o log detalhado de todas as entradas e saídas de *um único aluno*. | Alta. Garante que o acesso simultâneo não trave o sistema todo (sharding por arquivo). |
+| **`registros_diarios/YYYY-MM-DD.json`** | **Log Cronológico**. Um espelho de todos os acessos do dia, em ordem de acontecimento. Útil para auditoria ("Quem entrou na escola entre 13:00 e 13:10?"). | Média. Redundância de segurança. |
+| **`chamadas/`** | **Frequência Mensal**. Arquivos JSON que consolidam a presença diária de uma turma inteira para gerar relatórios de grade. | Alta. Alimenta a tela de "Chamada Mensal". |
+| **`ocorrencias/*.json`** | **Disciplinar**. Armazena observações comportamentais, advertências e suspensões vinculadas ao aluno. | Alta. Dados sensíveis do aluno. |
 
-#### Consulta de Presença
-*   **Arquivo:** `public_consulta.html`
-*   **Uso:** Pais podem receber o histórico de entrada e saída do aluno.
-*   **Privacidade:** Exige saber o código exato do aluno para exibir os dados.
-
-#### Cadastro Telegram
-*   **Arquivo:** `cadastro_telegram.html`
-*   **Finalidade:** Vincular o contato do pai ao sistema para receber notificações.
-*   **Como funciona:** Após o pai fornecer o número de telefone, para a escola, ele deve clicar no botão "Vincular ao Telegram", ele receberá um link para autorizar o bot no Telegram.
+### Ciclo de Vida e Arquivamento
+Ao final do ano letivo, o sistema permite mover dados antigos para uma pasta `legacy/`.
+> [!IMPORTANT]
+> **NUNCA execute o script `archive_manager.py` manualmente.** Utilize sempre a função **"Arquivo Morto" no Painel Admin**. O sistema realiza verificações de segurança e integridade que o script manual pode pular se usado incorretamente.
 
 ---
 
-## ⚙️ Documentação Técnica
+## 4. Manual do Painel Administrativo
 
-### Arquitetura de Arquivos
-*   `database.csv`: O "banco de dados". Contém: `Nome,Codigo,Turma,Turno,TelefoneResponsavel,TelegramID,Foto`.
-*   `usuarios.csv`: Contém usuários admin e senhas (hash SHA-256).
-*   `registros/{TURMA}/{CODIGO}.txt`: Log individual de cada aluno.
-*   `static/fotos/`: Armazena imagens (JPG/PNG). O nome do arquivo é salvo no CSV.
+O painel administrativo (`/admin`) é o centro de controle.
 
-### Fluxo de Dados
-1.  **Leitura do Código de Barras:** O scanner age como teclado, digita o código e aperta Enter.
-2.  **Processamento:** O backend recebe o código, busca no CSV, registra a data/hora no TXT do aluno.
-3.  **Notificação:** Uma thread separada verifica se o aluno tem `TelegramID` e dispara a mensagem via API do Telegram.
+### Dashboard Principal
+Ao entrar, você verá métricas em tempo real:
+*   **Total de Alunos e Turmas.**
+*   **Presenças Hoje:** Contagem em tempo real de entradas únicas.
+*   **Status do Telegram:** Indica se o bot de notificações está online.
+*   **Atalhos Rápidos:** Botões configuráveis para as funções que você mais usa.
+*   **Atividade Recente:** Mostra os últimos 10 registros de acesso.
+
+### Funcionalidades por Aba
+
+#### 1. Registro (Totem)
+Esta tela foi desenhada para ficar exposta em um tablet ou computador na portaria (Totem).
+*   Mostra feedback visual grande (Verde/Vermelho) para os alunos que passam a carteirinha.
+*   Emite alertas sonoros em caso de erro.
+
+#### 2. Cadastro de Alunos
+O gerenciador completo de estudantes. Aqui você pode:
+*   **Editar:** Alterar foto, nome ou turma.
+*   **Histórico:** Visualizar a lista completa de acessos daquele aluno específico.
+*   **Ocorrências:** Registrar advertências (que podem notificar os pais via Telegram).
+*   **Correção de Presença:** Inserir manualmente uma entrada/saída caso o aluno tenha esquecido a carteirinha.
+*   **Importação em Lote:** Envie uma lista CSV (`Nome, Turma, Turno`) para cadastrar centenas de alunos de uma vez. O sistema gera os códigos automaticamente.
+
+#### 3. Mensagens em Massa
+Ferramenta para comunicação institucional.
+*   Permite enviar mensagens de texto para **todos os alunos** de uma determinada turma (ou turno) que tenham Telegram vinculado.
+*   Útil para avisos de provas, passeios ou emergências.
+
+#### 4. Relatórios
+*   **Carômetro:** Visualização das fotos da turma toda em grade.
+*   **Chamada Mensal:** Tabela cruzada (Aluno x Dias do Mês) para visualizar faltas.
 
 ---
 
-## 🛠️ Solução de Problemas Comuns
+## 5. Backup e Recuperação
 
-*   **Fotos não aparecem na carteirinha:**
-    *   Verifique se o arquivo existe em `static/fotos`. O nome no CSV deve bater exatamente com o nome do arquivo.
-*   **Mensagens do Telegram não chegam:**
-    *   O pai iniciou a conversa com o bot? O bot não pode mandar mensagem primeiro (regra anti-spam do Telegram).
-    *   O token no `.env` está atualizado?
-*   **Sistema lento:**
-    *   Se o `database.csv` tiver milhares de linhas, operações de escrita podem demorar milissegundos a mais. O sistema usa "Lock" para evitar corrupção de dados ao salvar acessos simultâneos.
+O sistema possui proteção contra perda de dados.
+
+*   **Backup (Download):** O botão "Backup" no menu lateral gera um arquivo `.zip` contendo TUDO (banco de dados, fotos, configurações e logs). Baixe-o periodicamente.
+*   **Restauração:** Se o servidor der problema, você pode subir esse mesmo `.zip` na opção "Restauração". O sistema irá descomprimir e restaurar todos os arquivos para o estado exato do backup.
+
+### Limpeza de Dados (Wipe)
+A opção "Zerar Dados" é irreversível e exige tripla verificação (Token + Matemática + Frase de Segurança). Use apenas para resetar o sistema para um novo ano limpo (após fazer backup/arquivamento).
 
 ---
-**SchoolPass** - Desenvolvido para agilidade e segurança.
+
+## 6. Busca Pública
+
+A rota `/` é a interface leve para validação.
+1.  **Escaneamento:** O aluno passa o código de barras.
+2.  **Validação:** O sistema mostra Foto, Nome, Turma e, mais importante, a **Permissão de Entrada** (Sim/Não).
+
+### Feedback Sonoro
+O sistema dispara um alerta sonoro (`alert.mp3`) especificamente quando a **permissão de entrada é negada** ou o aluno não é encontrado, alertando o inspetor sem que ele precise olhar para a tela o tempo todo.
+
+---
+
+## 7. Ferramentas de Manutenção (Desenvolvedores)
+
+### Kit de Emergência
+Se você perder o acesso ao painel web (esqueceu a senha admin), acesse o servidor via terminal e use:
+
+*   **`user_creator_gui.py`**: Interface gráfica para resetar senhas ou criar novos admins.
+*   **`user_creator.py`**: Versão em linha de comando (CLI) para a mesma função.
+    *   *Nota:* Estes scripts só rodam localmente no servidor por segurança.

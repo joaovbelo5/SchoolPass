@@ -1,119 +1,151 @@
-# SchoolPass - Sistema de Controle de Acesso Escolar
+# SchoolPass - Sistema de Controle de Acesso e Notificação Escolar
 
-O **SchoolPass** é um sistema completo para gerenciamento de acesso escolar, emissão de carteirinhas digitais e comunicação automática com responsáveis via Telegram. Desenvolvido para ser robusto, independente e fácil de implantar.
+O **SchoolPass** é uma solução completa para gestão de segurança escolar que une controle de acesso físico, comunicação com responsáveis e emissão de identidade estudantil. Desenvolvido para rodar localmente com alta performance, o sistema elimina a necessidade de infraestruturas complexas de nuvem e oferece total privacidade aos dados da escola.
+
+Buscando simplicidade e eficiência, o SchoolPass opera com **dois servidores simultâneos**: um painel administrativo seguro para a gestão escolar e um portal público leve para pais e alunos consultarem históricos e carteirinhas digitais.
+
+---
 
 ## 🚀 Funcionalidades Principais
 
-*   **Arquitetura Dual-Server**: O sistema opera com dois servidores simultâneos para maior segurança e organização:
-    *   **Servidor Admin (Porta 5000)**: Acesso restrito para gestão, configurações e controle.
-    *   **Servidor Público (Porta 5010)**: Portal de consulta para alunos e pais verem históricos e carteirinhas.
-*   **Controle de Acesso**: Registro de entrada e saída de alunos, com suporte a leitura de códigos de barras.
-*   **Carteirinhas Digitais**: Geração automática de carteirinhas estudantis (PDF/Impressão) com código de barras integrado.
-*   **Integração com Telegram**: O sistema envia notificações em tempo real para os pais quando o aluno entra ou sai da escola (requer configuração do Bot).
-*   **Gestão de Ocorrências**: Registro de ocorrências disciplinares ou observações no histórico do aluno.
-*   **Modo Legado (Arquivamento)**: Capacidade de arquivar anos letivos anteriores (Ex: 2024, 2023) e consultá-los em modo somente-leitura.
-*   **Painel Administrativo Completo**:
-    *   Configuração visual (Logo, Assinatura) via upload.
-    *   Backups instantâneos e restauração de dados.
-    *   Limpeza segura de dados para iniciar novos períodos.
+*   **Portaria Inteligente**: Registro rápido de entrada e saída por código de barras ou busca manual.
+*   **Dual-Server Architecture**:
+    *   🔒 **Admin (:5000)**: Área protegida para secretaria e direção (Gestão de alunos, Relatórios, Configurações).
+    *   🌍 **Público (:5010)**: Portal para pais acompanharem a presença em tempo real e alunos gerarem suas credenciais.
+*   **Notificações via Telegram**: O sistema envia uma mensagem automática para o responsável assim que o aluno passa pela catraca/portaria.
+*   **Gestão de Arquivo Morto (Legado)**: Um sistema de arquivamento que congela o ano letivo anterior, mantendo históricos antigos consultáveis sem misturar com os dados atuais.
+*   **Carteirinhas Automáticas**: Geração instantânea de carteirinhas em PDF prontos para impressão.
+*   **Controle de Usuários (RBAC)**: Níveis de acesso distintos para Administradores (Total) e Professores (Apenas registros e chamadas).
+
+---
+
+## 📋 Pré-requisitos
+
+Para executar o SchoolPass, seu ambiente precisa de:
+
+*   **Sistema Operacional**: Windows, Linux ou macOS.
+*   **Python**: Versão 3.10 ou superior.
+*   **Bibliotecas**: O sistema depende de pacotes como `Flask`, `Pillow` e `python-barcode` (instalados via `requirements.txt`).
+*   *(Opcional)*: Leitor de código de barras USB para agilizar a operação na portaria.
+
+---
 
 ## 🛠️ Instalação e Configuração
 
-### Pré-requisitos
+### 1. Clonando o Repositório
+Baixe os arquivos para sua máquina:
+```bash
+git clone https://github.com/joaovbelo5/SchoolPass.git
+cd SchoolPass
+```
 
-*   **Python 3.12+** (para execução local)
-*   Ou **Docker** e **Docker Compose** (para execução em container)
+### 2. Configurando o Ambiente (Recomendado)
+Crie um ambiente virtual para manter as dependências organizadas:
+```bash
+# Windows
+python -m venv venv
+.\venv\Scripts\activate
 
-### Configuração Inicial (.env)
+# Linux / Mac
+python3 -m venv venv
+source venv/bin/activate
+```
 
-O projeto já contém um arquivo `.env` na raiz. Este arquivo armazena configurações sensíveis iniciais.
+### 3. Instalando Dependências
+```bash
+pip install -r requirements.txt
+```
 
-> [!IMPORTANT]
-> A maioria das configurações do dia a dia (Nome da Escola, Telefone, Validade da Carteirinha, Tokens) pode e deve ser alterada diretamente pelo **Painel Administrativo** (`/admin`) após o sistema estar rodando. Evite editar o `.env` manualmente a menos que seja necessário alterar chaves de criptografia ou configurações de boot.
+### 4. Configuração Inicial
+O sistema já vem com um arquivo `.env` padrão. **Não é necessário editá-lo manualmente agora.**
+Ao iniciar o sistema pela primeira vez, acesse o painel Admin e use o menu **Configurações** para definir visualmente:
+*   Nome da Escola
+*   Tokens do Telegram
+*   Logo e Assinatura da Carteirinha
 
 ---
 
-## 💻 Como Rodar (Localmente)
+## � Como Rodar com Docker (Avançado)
 
-Siga os passos abaixo para rodar o projeto diretamente em sua máquina Windows, Linux ou Mac.
+Se preferir manter seu ambiente limpo ou facilitar o deploy em servidores, use o Docker. O projeto já inclui `Dockerfile` e `docker-compose.yml` otimizados.
 
-1.  **Crie um Ambiente Virtual (Recomendado)**:
-    Isso isola as dependências do projeto do seu sistema principal.
+1.  **Tenha o Docker Instalado**: Certifique-se de ter o Docker Desktop (Windows/Mac) ou Docker Engine (Linux).
+2.  **Suba os Containers**:
+    Na pasta do projeto, rode:
     ```bash
-    # Criação do venv
-    python -m venv venv
-
-    # Ativação (Windows)
-    venv\Scripts\activate
-
-    # Ativação (Linux/Mac)
-    source venv/bin/activate
+    docker-compose up -d --build
     ```
+3.  **Acesse**:
+    O sistema estará disponível nas mesmas portas:
+    *   Admin: `http://localhost:5000`
+    *   Público: `http://localhost:5010`
 
-2.  **Instale as Dependências**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+> **Nota**: O volume está configurado para salvar os dados na própria pasta do projeto (`.:/app`). Isso garante que seus bancos de dados e fotos não se percam se o container for deletado.
 
-3.  **Inicie o Servidor**:
-    Execute o script gerenciador que iniciará tanto o servidor Admin quanto o Público/Busca.
+---
+
+## �💡 Tutoriais de Uso
+
+Abaixo estão os guias para as tarefas mais comuns do dia a dia.
+
+### 🟢 Como Rodar o Sistema (Diariamente)
+Para colocar a escola "no ar", você só precisa de um comando. O script gerenciador cuidará de subir tanto o servidor administrativo quanto o público.
+
+1.  Com o `venv` ativado, execute:
     ```bash
     python start_server.py
     ```
+2.  Aguarde o banner de confirmação "Sistema Iniciado e Pronto para Uso".
+3.  Acesse nos navegadores:
+    *   **Gestão**: `http://localhost:5000`
+    *   **Pais/Alunos**: `http://localhost:5010`
 
-4.  **Acesse o Sistema**:
-    *   **Admin**: Abra `http://localhost:5000` (ou use o IP da sua máquina, ex: `http://192.168.1.X:5000`).
-    *   **Público**: Abra `http://localhost:5010` (ou use o IP da sua máquina).
+### 👥 Como Gerenciar Usuários (Adm e Professores)
+O SchoolPass possui uma ferramenta visual dedicada para criar logins.
 
----
-
-## 🐳 Como Rodar (Via Docker)
-
-Se preferir usar containers para uma infraestrutura mais limpa e reprodutível.
-
-1.  Certifique-se de ter o Docker e Docker Compose instalados.
-2.  Na raiz do projeto, execute:
+1.  Abra um novo terminal (ou execute antes de iniciar o servidor):
     ```bash
-    docker-compose up --build -d
+    python user_creator_gui.py
     ```
-3.  O sistema estará acessível nas mesmas portas:
-    *   **Admin**: Porta `5000`
-    *   **Público**: Porta `5010`
+2.  Uma janela se abrirá. Preencha **Usuário** e **Senha**.
+3.  Escolha a permissão:
+    *   **Administrador**: Pode limpar dados, restaurar backups e alterar configurações globais.
+    *   **Professor**: Acesso focado em chamadas, carômetro e registro de ocorrências.
+4.  Clique em **Adicionar Usuário**.
 
----
+### 🗓️ Virada de Ano: Arquivamento (Legado)
+No final do ano letivo, você não perde nada. Use a função de *Legado* para limpar o sistema para o próximo ano.
 
-## 👥 Gerenciamento de Usuários
-
-O sistema possui um controle de usuários (RBAC) com níveis de acesso (Admin e Professor). Para criar ou gerenciar usuários, utilize as ferramentas inclusas:
-
-### Opção 1: Interface Gráfica (Recomendado)
-Execute a ferramenta visual de gerenciamento de usuários:
-```bash
-python user_creator_gui.py
-```
-*   Permite criar, deletar e alterar senhas de forma fácil.
-*   Defina se o usuário é "Admin" (acesso total) ou "Professor" (acesso restrito apenas a registros).
-
-### Opção 2: Linha de Comando
-Se você estiver em um servidor sem interface gráfica:
-```bash
-python user_creator.py
-```
-Siga as instruções no terminal para adicionar ou remover usuários.
+1.  Acesse o Admin (`:5000`) e vá em **Arquivo Morto**.
+2.  Digite o ano que se encerrou (ex: `2024`) e clique em **Arquivar**.
+    *   *O que acontece nos bastidores:* O sistema move os históricos json, logs diários e ocorrências para a pasta `legacy/2024`, separando inteligentemente o que é antigo do que é novo.
+3.  Após arquivar, vá em **Configurações** -> **Limpar Tudo**.
+4.  Confirme a operação de segurança (Token + Cálculo).
+5.  O sistema agora está vazio e pronto para receber a lista de alunos de 2025, mas os dados de 2024 continuam acessíveis para consulta no menu "Arquivo Morto".
 
 ---
 
 ## 📂 Estrutura do Projeto
 
-*   `start_server.py`: Script principal que gerencia os processos `start_admin_only.py` e `start_search_only.py`.
-*   `templates/`: Arquivos HTML do frontend (Jinja2).
-*   `static/`: Arquivos CSS, JS, imagens e uploads (fotos de alunos).
-*   `legacy/`: Armazena dados de anos anteriores arquivados.
-*   `backups/`: Local onde os backups gerados pelo painel admin são salvos temporariamente.
-*   `registros/`: Banco de dados de registros de entrada/saída (JSON organizados por turma).
+Para desenvolvedores ou curiosos, aqui está como o projeto se organiza:
+
+*   **`start_server.py`**: O "maestro". Inicia e monitora os subprocessos Admin e Search.
+*   **`start_admin_only.py`**: A lógica pesada. Contém todas as rotas administrativas, gestão de arquivos e lógica de backup.
+*   **`start_search_only.py`**: O portal leve. Focado em leitura rápida e exibição pública sem expor ferramentas de gestão.
+*   **`archive_manager.py`**: O cérebro do arquivamento. Contém a lógica para separar históricos ativos de históricos passados.
+*   **`registros/`**: Onde a mágica acontece. Cada turma tem uma pasta, e cada aluno tem um arquivo `.json` com todo seu histórico.
+*   **`templates/` & `static/`**: Frontend (HTML/CSS) e arquivos de media (fotos dos alunos).
 
 ---
 
-## 📝 Licença
+## 🤝 Contribuindo
 
-Este projeto usa licença MIT.
+O SchoolPass é Open Source! Se você quer ajudar a melhorá-lo:
+
+1.  Faça um Fork do projeto.
+2.  Crie uma branch para sua melhoria (`git checkout -b feature/nova-funcionalidade`).
+3.  Submeta um Pull Request.
+
+---
+
+**Licença MIT** | Desenvolvido com ❤️ e Python.
