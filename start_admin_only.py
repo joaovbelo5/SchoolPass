@@ -1367,14 +1367,14 @@ def extract_validade_year():
     return datetime.now().year
 
 
-def gerar_codigo_automatico(turma, turno, validade_ano=None):
-    """Gera um código para a carteirinha seguindo a lógica requisitada:
+def gerar_codigo_automatico(turma, turno, validade_ano=None, alunos=None):
+    """Gera um código para a carteirinha de forma determinística:
     - 2 primeiros: ano de validade (ex: 2025 -> '25')
     - 3o dígito: turno (Manhã=1, Tarde=2, Noite=3)
-    - 2 dígitos seguintes: código da turma (baseado na ordenação alfabética/numérica das turmas existentes)
-    - últimos 4 dígitos: ordem do aluno na turma (contagem atual + 1) — garantido para totalizar 9 dígitos
-
-    Retorna string do código (sem espaços)."""
+    - 2 dígitos seguintes: código da turma
+    - últimos 4 dígitos: ordem do aluno na turma (maior ordem local + 1)
+    
+    Aceita lista 'alunos' em memória para poupar repetição de leituras do disco em batch."""
     # ano
     if validade_ano is None:
         validade_ano = extract_validade_year()
@@ -1385,7 +1385,9 @@ def gerar_codigo_automatico(turma, turno, validade_ano=None):
     turno_digit = turno_map.get(turno.lower(), '0')
 
     # obter turmas ordenadas existentes para mapear código da turma
-    alunos = read_database() if os.path.exists(app.config['DATABASE']) else []
+    if alunos is None:
+        alunos = read_database() if os.path.exists(app.config['DATABASE']) else []
+        
     turmas = sorted(list({a['Turma'] for a in alunos if a.get('Turma')}))
     # se a turma não existir ainda na lista, adiciona ao final
     if turma not in turmas:
@@ -1393,10 +1395,24 @@ def gerar_codigo_automatico(turma, turno, validade_ano=None):
     turma_index = turmas.index(turma) + 1
     turma_code = f"{turma_index:02d}"
 
-    # ordem: contar alunos atuais na turma
-    ordem = sum(1 for a in alunos if a.get('Turma', '').lower() == turma.lower()) + 1
-    # usar 4 dígitos para a ordem para garantir 9 dígitos totais no código
-    ordem_code = f"{ordem:04d}"
+    # ordem: encontrar a maior identificação (ID) atualmente em uso para esta turma
+    maior_ordem = 0
+    prefixo_esperado = f"{year_two}{turno_digit}{turma_code}"
+    
+    for a in alunos:
+        if a.get('Turma', '').lower() == turma.lower() and a.get('Codigo'):
+            codigo_atual = str(a['Codigo'])
+            # Filtra códigos compatíveis (9 digitos contendo o mesmo ano/turno/turma)
+            if len(codigo_atual) == 9 and codigo_atual.startswith(prefixo_esperado):
+                try:
+                    ordem_atual = int(codigo_atual[-4:])
+                    if ordem_atual > maior_ordem:
+                        maior_ordem = ordem_atual
+                except ValueError:
+                    pass
+
+    # A próxima ordem da turma é seguramente (maior_ordem + 1)
+    ordem_code = f"{(maior_ordem + 1):04d}"
 
     codigo = f"{year_two}{turno_digit}{turma_code}{ordem_code}"
     return codigo
@@ -1729,43 +1745,50 @@ def novo():
         # telegramid = request.form.get('telegramid', '').strip() # Removido
         codigo_fornecido = request.form.get('codigo', '').strip()
 
-        # Lê alunos atuais
+        # Lê alunos atuais em memória
         alunos = read_database() if os.path.exists(app.config['DATABASE']) else []
 
-        # Função auxiliar para verificar existência de código
-        def codigo_existe(cod):
-            return any(a for a in alunos if a.get('Codigo') == cod)
+        # Usar Set() (O(1)) na busca de existência, evitando scans O(N) lineares toda vez
+        codigos_existentes = {a.get('Codigo') for a in alunos if a.get('Codigo')}
 
-        # Se o usuário informou um código e ele não existe, usa-o.
+        def codigo_existe(cod):
+            return cod in codigos_existentes
+
+        # Se o usuário informou um código manual e ele não existe, usa-o.
         if codigo_fornecido and not codigo_existe(codigo_fornecido):
             codigo_final = codigo_fornecido
         else:
-            # Caso contrário, gera automaticamente e garante unicidade
+            # Caso contrário, calcula O ÚNICO id determinístico de forma rápida usando a lista pré-carregada
             validade_ano = extract_validade_year()
-            tentativa = 0
-            while True:
-                tentativa += 1
-                codigo_candidate = gerar_codigo_automatico(turma, turno, validade_ano)
-                # Se por algum motivo já existir, incrementa ordem buscando próximo número disponível
-                if not codigo_existe(codigo_candidate):
-                    codigo_final = codigo_candidate
-                    break
-                else:
-                    # Ajusta: incrementa o contador de alunos ficticiamente e tenta novamente
-                    # Para evitar recalcular sempre o mesmo, aumentamos manualmente a ordem no final do código
-                    # extrai os últimos 3 dígitos como número e incrementa
-                    try:
-                        # agora usamos 4 dígitos para a ordem (últimos 4 caracteres)
-                        base = codigo_candidate[:-4]
-                        num = int(codigo_candidate[-4:]) + 1
-                        codigo_candidate = f"{base}{num:04d}"
-                        if not codigo_existe(codigo_candidate):
-                            codigo_final = codigo_candidate
-                            break
-                    except Exception:
-                        # fallback: acrescenta o timestamp
-                        codigo_final = codigo_candidate + str(tentativa)
+            codigo_candidate = gerar_codigo_automatico(turma, turno, validade_ano, alunos=alunos)
+            
+            # Como gerar_codigo_automatico() agora resolve o max() de forma real,
+            # colisões são tecnicamente impossíveis. Mas, por garantia:
+            if not codigo_existe(codigo_candidate):
+                codigo_final = codigo_candidate
+            else:
+                # Otimização extrema de fallback (ex: se usuários corromperam IDs via injeção manual paralela)
+                try:
+                    num = int(codigo_candidate[-4:])
+                except ValueError:
+                    num = 0
+                
+                base = codigo_candidate[:-4]
+                encontrou = False
+                
+                # Apenas 1000 tentativas em Set == instantâneo na CPU
+                for _ in range(1000):
+                    num += 1
+                    tentativa_str = f"{base}{num:04d}"
+                    if not codigo_existe(tentativa_str):
+                        codigo_final = tentativa_str
+                        encontrou = True
                         break
+                        
+                if not encontrou:
+                    # Fallback final sem travar o processador
+                    import time
+                    codigo_final = codigo_candidate + str(int(time.time()))
 
         novo_aluno = {
             'Nome': nome,
